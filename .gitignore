@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
+.venv/
+venv/
+
+# Intermediate window chunks from extract.py; the merged cache is committed.
+power_analysis/data/win_*.parquet
+
+# Derived from windows_dc3.parquet in seconds by power.build(); not worth versioning.
+power_analysis/data/features_cap*.npz
+power_analysis/data/meta_cap*.parquet
