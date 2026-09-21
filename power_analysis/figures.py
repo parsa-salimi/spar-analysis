@@ -173,8 +173,8 @@ fig.tight_layout(rect=[0, .045, 1, 1])
 for e in ("png", "pdf"): fig.savefig(OUT/f"figures/f4_lofo_families.{e}", bbox_inches="tight")
 plt.close(fig)
 
-S.to_csv(OUT/"summary_levels.csv", index=False)
-json.dump(dict(lofo=lofo, phi=phi, selection=sel), open(OUT/"headline_numbers.json", "w"), indent=1)
+S.to_csv(PA/"summary_levels.csv", index=False)
+json.dump(dict(lofo=lofo, phi=phi, selection=sel), open(PA/"headline_numbers.json", "w"), indent=1)
 print(S[["level","n_groups","mean","sd","baseline","beats_baseline","phi","n_eff_test",
          "spearman_val_test"]].to_string(index=False, float_format=lambda v: f"{v:.4f}"))
 print("figures ->", OUT/"figures")
