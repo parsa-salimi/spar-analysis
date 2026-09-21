@@ -5,6 +5,10 @@ training from interconnect telemetry**.
 
 Parsa Salimi. Mentor: Will Fowler. Co-mentee: Long Yi.
 
+**Start with [`STATUS.md`](STATUS.md)** — what exists, what it found, what is
+blocked on whom. Two minutes. [`GLOSSARY.md`](GLOSSARY.md) defines every term
+either file assumes.
+
 This is my working repository, not the team's record. The shared repo is
 `williamfowler/GPU-monitoring`; this one holds analysis that reads from it and
 is kept separate so it can move fast without touching a repo three people
@@ -84,6 +88,16 @@ configurations:
 
 This settles the collection-agent design: record **tx and rx separately, per
 link**. A schema that sums them throws away the only feature that works.
+`comm_model/METHOD.md` walks through how this was computed, including the two
+things I got wrong on the way.
+
+### `trace/` — the format the collector will write
+
+Defines the trace schema and generates synthetic traces in it, so the detector
+can be built and tested before the hardware collects anything. Found along the
+way that a 32-bit InfiniBand counter wraps in 0.34 s at line rate — the existing
+collector samples at 1 Hz — and that the obvious guard against that does not
+work. See `trace/README.md`.
 
 ---
 

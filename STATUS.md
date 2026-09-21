@@ -2,6 +2,21 @@
 
 **Read this first. Two minutes.** Updated as things land; changelog at the bottom.
 
+**Where to read what**
+
+| you want | read |
+|---|---|
+| what any of the jargon means | `GLOSSARY.md` |
+| how the power analysis works, from scratch | `power_analysis/METHOD.md` |
+| what it found | `power_analysis/README.md` |
+| how the comm model works, from scratch | `comm_model/METHOD.md` |
+| what it found | `comm_model/README.md` |
+| why the trace schema exists and what it pins down | `trace/README.md` |
+| the schema itself, for whoever writes the agent | `trace/schema/comm_trace_v1.md` |
+
+Every `METHOD.md` is written assuming no background. Every `README.md` states
+results and assumes you have read the corresponding METHOD.
+
 ---
 
 ## The question
@@ -111,8 +126,21 @@ assuming.
 
 ---
 
+## How this repo is kept current
+
+This file is updated in the same commit as the work it describes — piece state,
+findings, forced decisions, open questions, changelog. If STATUS disagrees with
+the code, STATUS is the bug.
+
+Findings that took explaining go into a `METHOD.md` rather than into a
+conversation, so the explanation outlives the chat it was written in.
+
+---
+
 ## Changelog
 
+- **2026-09-21** — Explanatory docs: root `GLOSSARY.md`, `comm_model/METHOD.md`
+  (how the separability analysis actually works), `trace/README.md`.
 - **2026-09-21** — Trace schema v1, synthetic generator, reader, 13 tests.
   Found that the counter-wrap safety check does not work; replaced with a
   preflight configuration check.

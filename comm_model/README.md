@@ -3,8 +3,8 @@
 **The Week-4 gate, answered analytically in week 1.**
 Parsa Salimi, SPAR F26. September 2026.
 
-Written assuming no background. If a term isn't defined here, that's a bug —
-tell me.
+Results. For how these were computed, see [`METHOD.md`](METHOD.md); for any
+unfamiliar term, [`../GLOSSARY.md`](../GLOSSARY.md).
 
 ---
 
@@ -309,79 +309,9 @@ continuous batching.
 
 ---
 
-## Appendix: glossary
+## Appendix
 
-Every term this document uses, in the order it becomes relevant.
-
-**Parameter (Ψ)** — a single learned number in the model. "7B" means 7 billion of
-them. **bf16 / fp16 / fp8** — how many bytes each one occupies: 2, 2 and 1.
-
-**Step** — one pass of forward computation, backward computation and a weight
-update, over one batch of data. Training is millions of these.
-
-**Collective** — an operation every GPU in a group takes part in together.
-- **all-reduce**: everyone contributes a buffer, everyone ends up with the sum.
-  This is how gradients get averaged. Symmetric: each GPU sends about what it
-  receives.
-- **all-gather**: everyone contributes a slice, everyone ends up with all slices.
-- **reduce-scatter**: everyone contributes a full buffer, each ends up with the
-  summed version of only their own slice. all-reduce = reduce-scatter + all-gather.
-- **all-to-all**: every GPU sends a different piece to every other GPU. Used to
-  route tokens to experts in a mixture-of-experts model.
-- **point-to-point (p2p)**: one GPU sends to one other. One-directional.
-
-**DDP — Distributed Data Parallel.** Every GPU holds a complete copy of the model;
-the batch is split between them; one all-reduce per step averages the gradients.
-Cheap in bytes (2Ψb per GPU per step), but every GPU needs room for the whole
-model plus its optimizer state — about 16 bytes per parameter under mixed-precision
-Adam, which is 1.1 TB for a 70B model. So DDP alone cannot train large models.
-
-**FSDP — Fully Sharded Data Parallel** (PyTorch's name for ZeRO-3). Same idea, but
-parameters, gradients and optimizer state are each split across the GPUs, so no
-GPU holds the whole model. The price is fetching what you don't own: all-gather
-the parameters in the forward pass, all-gather them again in the backward pass,
-reduce-scatter the gradients. Three passes rather than two — **exactly 1.5× DDP's
-bytes** — and, importantly for detection, delivered as many small per-layer bursts
-rather than one large spike per step.
-
-**Tensor parallel (TP)** — split each individual weight matrix across GPUs, so
-every GPU does part of every layer. Needs 4 all-reduces per layer per step, each
-the size of an activation tensor. Bandwidth-hungry, so it is kept inside one node.
-
-**Pipeline parallel (PP)** — put different layers on different GPUs and pass
-activations along the chain. Cheap and point-to-point, therefore directional.
-
-**MoE — mixture of experts.** Only a fraction of the parameters is used for any
-given token. Cheap to compute, expensive to communicate: two all-to-alls per
-expert layer.
-
-**MFU — model FLOP utilisation.** What fraction of the hardware's peak arithmetic
-rate a real run achieves. 0.4–0.5 is normal for well-tuned training.
-
-**Activation checkpointing** — discard intermediate activations in the forward
-pass and recompute them in the backward pass. Trades ~33% more compute for much
-less memory.
-
-**KV cache** — the per-token key/value state a language model keeps so that
-generating token *n+1* doesn't require reprocessing tokens 1…*n*. Its size per
-token is the dominant term in inference memory and inter-node traffic.
-
-**GQA — grouped-query attention.** Several attention heads share one key/value
-head, shrinking the KV cache several-fold. Llama-2-7B (no GQA): 512 KiB per token.
-Llama-3-8B (8-way GQA): 128 KiB.
-
-**Prefill / decode** — prefill processes the whole prompt at once (compute-bound);
-decode generates one token at a time (memory-bandwidth-bound). **Disaggregated
-serving** runs them on separate GPUs, which means the prompt's KV cache must be
-pushed across the network once per request.
-
-**DiLoCo** — a low-communication training method: each worker takes H local steps
-and the workers synchronise only once per H. Cuts data-parallel traffic by a
-factor of H.
-
-**AUC** — the probability that a randomly chosen positive example scores higher
-than a randomly chosen negative one. 1.0 is perfect, 0.5 is a coin flip, and below
-0.5 means the score points the wrong way.
+Terms are defined in [`../GLOSSARY.md`](../GLOSSARY.md).
 
 ---
 
