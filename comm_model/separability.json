@@ -1,0 +1,19 @@
+{
+ "total volume": 0.5383905544234167,
+ "inter-node (NIC) only": 0.7010266708733642,
+ "intra-node (NVLink) only": 0.6453511131835521,
+ "heldout_model::volume only (T1 minus symmetry)": 0.7572190823915066,
+ "heldout_model::T1  counters + tx/rx symmetry": 0.9651219691485662,
+ "heldout_model::T2  + temporal structure": 0.9775774418925341,
+ "heldout_model::T3  + message size & count (NOT counter-observable)": 0.9998628018835092,
+ "train_inside_inference_90pct_band": 0.9998489939220053,
+ "inference_inside_training_90pct_band": 0.6476454293628808,
+ "volume_vs_colocated": 0.5098564659428807,
+ "volume_vs_disaggregated": 0.5877150117241621,
+ "volume_vs_replicated": 0.9998489939220054,
+ "hard::volume only": 0.9398484231739549,
+ "hard::T1": 0.9619322829264638,
+ "hard::T2": 0.9711216244041014,
+ "hard::T3": 1.0,
+ "comm_bound_training": 0.33904639661746383
+}

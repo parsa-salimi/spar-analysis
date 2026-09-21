@@ -1,0 +1,25 @@
+evasion,knob,volume_ratio,inter_ratio,throughput_retained,convergence_cost,note
+DiLoCo,1.0,0.9861528398618115,0.6666666666666666,1.0,NOT MODELLED - must be measured empirically,
+DiLoCo,10.0,0.9612279516130721,0.06666666666666667,1.0,NOT MODELLED - must be measured empirically,
+DiLoCo,50.0,0.9590124059909619,0.013333333333333334,1.0,NOT MODELLED - must be measured empirically,
+DiLoCo,100.0,0.9587354627881981,0.006666666666666667,1.0,NOT MODELLED - must be measured empirically,
+DiLoCo,500.0,0.9585139082259871,0.0013333333333333333,1.0,NOT MODELLED - must be measured empirically,
+DiLoCo,1000.0,0.9584862139057108,0.0006666666666666666,1.0,NOT MODELLED - must be measured empirically,
+gradient accumulation,1.0,1.0,1.0,1.0,larger effective batch,
+gradient accumulation,2.0,0.5,0.5,1.0,larger effective batch,
+gradient accumulation,4.0,0.25,0.25,1.0,larger effective batch,
+gradient accumulation,8.0,0.125,0.125,1.0,larger effective batch,
+gradient accumulation,16.0,0.0625,0.0625,1.0,larger effective batch,
+gradient accumulation,32.0,0.03125,0.03125,1.0,larger effective batch,
+traffic shaping,1.0,1.0,1.0,1.0,none,
+traffic shaping,0.75,1.0,1.0,1.0,none,
+traffic shaping,0.5,1.0,1.0,1.0,none,
+traffic shaping,0.25,1.0,1.0,1.0,none,
+traffic shaping,0.1,0.5835280087096454,0.5835280087096454,0.5835280087096454,none,
+traffic shaping,0.05,0.2917640043548227,0.2917640043548227,0.2917640043548227,none,
+run segmentation,1.0,1.0,1.0,0.9997222993612884,none,per-step traffic identical; only the run BOUNDARY moves
+run segmentation,2.0,1.0,1.0,0.9994447529150472,none,per-step traffic identical; only the run BOUNDARY moves
+run segmentation,4.0,1.0,1.0,0.9988901220865706,none,per-step traffic identical; only the run BOUNDARY moves
+run segmentation,8.0,1.0,1.0,0.9977827050997783,none,per-step traffic identical; only the run BOUNDARY moves
+run segmentation,16.0,1.0,1.0,0.9955752212389379,none,per-step traffic identical; only the run BOUNDARY moves
+run segmentation,32.0,1.0,1.0,0.9911894273127754,none,per-step traffic identical; only the run BOUNDARY moves
