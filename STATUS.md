@@ -12,6 +12,7 @@
 | how the comm model works, from scratch | `comm_model/METHOD.md` |
 | what it found | `comm_model/README.md` |
 | why the trace schema exists and what it pins down | `trace/README.md` |
+| how the artifact study works and what the agent's settings must be | `trace/METHOD.md` |
 | the schema itself, for whoever writes the agent | `trace/schema/comm_trace_v1.md` |
 
 Every `METHOD.md` is written assuming no background. Every `README.md` states
@@ -34,7 +35,8 @@ it isn't, or if hiding is cheap, those proposals need rewriting.
 |---|---|---|---|---|
 | 1 | **Power analysis** | How much can any claim from this corpus be trusted? | ✅ done | `power_analysis/` |
 | 2 | **Comm model** | Is there a signal at all, and in which quantity? | ✅ done | `comm_model/` |
-| 3 | **Trace schema + generator** | What does the collector write, and how do we build a detector before the hardware works? | 🔨 in progress | `trace/` |
+| 3 | **Trace schema + generator** | What does the collector write, and how do we build a detector before the hardware works? | ✅ done | `trace/` |
+| 3b | **Measurement-artifact study** | What does the *instrument* cost us, and what must the agent's settings be? | ✅ done | `trace/METHOD.md` |
 | 4 | Aggregator + features + classifier | The detector itself | ⬜ not started | — |
 | 5 | Evasion evaluation | What does hiding cost the adversary? | 🟡 modelled, not measured | `comm_model/evasions.py` |
 
@@ -79,6 +81,17 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
   has to be a configuration check made *before* collection (`preflight()`), not a
   check on the values.
 
+**From the measurement-artifact study (3b):**
+
+- **Spec line for the agent: sample at ≥ 2 Hz, use 64-bit counters, ordinary NTP
+  is fine.** Counter width matters more than sample rate across the whole range.
+- Below 1 Hz detection degrades sharply; at 0.2 Hz with 32-bit counters it is
+  *worse than chance*.
+- **Clock skew kills the cross-node synchrony feature (0.94 → 0.03) without
+  hurting detection** — the other features carry the signal redundantly.
+- The study resolves one workload family = 0.083 AUC. Most knobs therefore read
+  "no measurable effect", not "no effect".
+
 ---
 
 ## Decisions this has already forced
@@ -96,10 +109,10 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 
 ## Next
 
-- Measurement-artifact study: how slowly can we sample, and how badly can the
-  clocks disagree, before detection degrades? Answers what Long's agent needs
-  **before** he builds it.
-- Then the aggregator and the detector.
+- The detector itself: aggregator, full feature extractor, and a two-stage
+  classifier whose second stage is blind to absolute byte volume.
+- Oct 12 midterm outline. The threat model, methods and evaluation sections are
+  largely written across the three METHOD documents.
 
 ---
 
@@ -139,6 +152,12 @@ conversation, so the explanation outlives the chat it was written in.
 
 ## Changelog
 
+- **2026-09-21** — Measurement-artifact study: sample rate, counter width, clock
+  skew and read skew over 12 workload families. Produced the agent spec line.
+  Three self-inflicted problems caught by controls along the way (population
+  trivially easy; metric nearly binary; ceiling measuring the generator's own
+  bundling approximation), plus a window-alignment bug that had the cross-node
+  feature reading 0.25 instead of 1.00.
 - **2026-09-21** — Explanatory docs: root `GLOSSARY.md`, `comm_model/METHOD.md`
   (how the separability analysis actually works), `trace/README.md`.
 - **2026-09-21** — Trace schema v1, synthetic generator, reader, 13 tests.

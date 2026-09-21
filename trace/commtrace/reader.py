@@ -94,13 +94,23 @@ def _fft_peak(x: np.ndarray) -> tuple[float, float]:
 
 
 def window_features(r: pd.DataFrame, window_s: float = 30.0,
-                    stride_s: float = 15.0) -> pd.DataFrame:
+                    stride_s: float = 15.0, t_origin: float | None = None
+                    ) -> pd.DataFrame:
     """Per (node, fabric, window) features. Nothing here uses anything a
-    cumulative byte counter cannot provide."""
+    cumulative byte counter cannot provide.
+
+    `t_origin` fixes a SHARED window grid across nodes. Without it each node
+    gets windows starting at its own first sample, the float `w_start` values
+    never line up, and anything that joins or averages across nodes silently
+    drops rows. (That bug made the cross-node correlation feature read 0.25
+    when its true per-window value was 1.00.)
+    """
     rows = []
+    origin = r.t_mono_s.min() if t_origin is None else t_origin
     for (node, ltype), g in r.groupby(["node_id", "link_type"], sort=False):
         g = g.sort_values("t_mono_s")
-        t0, t1 = g.t_mono_s.min(), g.t_mono_s.max()
+        t1 = g.t_mono_s.max()
+        t0 = origin + np.floor((g.t_mono_s.min() - origin) / stride_s) * stride_s
         w = t0
         while w + window_s <= t1 + 1e-9:
             c = g[(g.t_mono_s >= w) & (g.t_mono_s < w + window_s)]
@@ -112,6 +122,7 @@ def window_features(r: pd.DataFrame, window_s: float = 30.0,
                 per, pw = _fft_peak(tot)
                 rows.append(dict(
                     node_id=node, link_type=ltype, w_start=w,
+                    w_idx=int(round((w - origin) / stride_s)),
                     tx_Bps=float(tx.mean()), rx_Bps=float(rx.mean()),
                     total_Bps=float(tot.mean()),
                     symmetry=sym,
@@ -131,9 +142,89 @@ def node_window_features(r: pd.DataFrame, **kw) -> pd.DataFrame:
     wf = window_features(r, **kw)
     if wf.empty:
         return wf
-    idx = ["node_id", "w_start"]
+    idx = ["node_id", "w_idx"]
     wide = wf.pivot_table(index=idx, columns="link_type",
                           values=["total_Bps", "symmetry", "cv", "acf1", "fft_peak_frac",
                                   "utilisation", "wrap_suspect_frac"])
     wide.columns = [f"{a}_{b}" for a, b in wide.columns]
     return wide.reset_index()
+
+
+def cross_node_features(r: pd.DataFrame, window_s: float = 30.0,
+                        stride_s: float = 15.0, fabric: str = "ib",
+                        t_origin: float | None = None) -> pd.DataFrame:
+    """How synchronised are the nodes?
+
+    An all-reduce makes every participating node transmit at the same instant,
+    so their transmit-rate series should be strongly correlated. Serving has no
+    reason to make four nodes burst in lockstep. This is the one feature that
+    depends on cross-node clock alignment, and therefore the one that clock skew
+    can destroy -- which is exactly why it has to be in the artifact study.
+
+    Nodes are resampled onto a common WALL-clock grid first, because that is
+    what an aggregator receiving reports from several machines must do.
+    """
+    g = r[r.link_type == fabric]
+    nodes = sorted(g.node_id.unique())
+    if len(nodes) < 2:
+        return pd.DataFrame(columns=["w_idx", "xnode_corr", "n_pairs"])
+    step = float(np.median(g.dt)) if len(g) else 1.0
+    t0 = g.t_wall_s.min() if t_origin is None else t_origin
+    t1 = g.t_wall_s.max()
+    grid = np.arange(t0, t1, max(step, 1e-6))
+    series = {}
+    for n in nodes:
+        gn = g[g.node_id == n].sort_values("t_wall_s")
+        series[n] = np.interp(grid, gn.t_wall_s.values, gn.tx_Bps.values,
+                              left=np.nan, right=np.nan)
+    rows = []
+    w = t0
+    while w + window_s <= t1 + 1e-9:
+        m = (grid >= w) & (grid < w + window_s)
+        cors = []
+        if m.sum() >= 8:
+            for i in range(len(nodes)):
+                for j in range(i + 1, len(nodes)):
+                    a, b = series[nodes[i]][m], series[nodes[j]][m]
+                    ok = np.isfinite(a) & np.isfinite(b)
+                    if ok.sum() >= 8 and a[ok].std() > 1e-9 and b[ok].std() > 1e-9:
+                        cors.append(float(np.corrcoef(a[ok], b[ok])[0, 1]))
+        rows.append(dict(w_idx=int(round((w - t0) / stride_s)),
+                         xnode_corr=float(np.mean(cors)) if cors else np.nan,
+                         n_pairs=len(cors)))
+        w += stride_s
+    return pd.DataFrame(rows)
+
+
+# Features a counter-based verifier may legitimately use. Message size and
+# collective counts are absent by design -- see schema/comm_trace_v1.md sec 6.
+FEATURE_COLS = [
+    "total_Bps_ib", "total_Bps_nvlink",
+    "symmetry_ib", "symmetry_nvlink",
+    "cv_ib", "cv_nvlink",
+    "acf1_ib", "acf1_nvlink",
+    "fft_peak_frac_ib", "fft_peak_frac_nvlink",
+    "utilisation_ib", "utilisation_nvlink",
+    "xnode_corr",
+]
+
+
+def trace_features(trace_dir, window_s: float = 30.0, stride_s: float = 15.0
+                   ) -> pd.DataFrame:
+    """One row per window: node-aggregated per-fabric features plus the
+    cross-node synchronisation feature. This is what the classifier sees."""
+    r = rates(trace_dir)
+    nw = node_window_features(r, window_s=window_s, stride_s=stride_s)
+    if nw.empty:
+        return nw
+    agg = nw.groupby("w_idx").mean(numeric_only=True).reset_index()
+    xn = cross_node_features(r, window_s=window_s, stride_s=stride_s,
+                             t_origin=r.t_wall_s.min())
+    out = agg.merge(xn[["w_idx", "xnode_corr"]], on="w_idx", how="left")
+    # NaN means the window had no measurable variance to correlate -- that is
+    # information (nothing was bursting), not a missing value. 0 is correct here.
+    out["xnode_corr"] = out.xnode_corr.fillna(0.0)
+    for c in FEATURE_COLS:
+        if c not in out.columns:
+            out[c] = 0.0
+    return out

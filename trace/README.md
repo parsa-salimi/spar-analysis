@@ -166,9 +166,22 @@ tests, fixed in `_cumulative_at`.
 
 ---
 
+## The measurement-artifact study
+
+Done — see [`METHOD.md`](METHOD.md). Sweeping sample rate, counter width, clock
+skew and tx/rx read skew over 12 workload families gives the spec line:
+
+> **Sample at ≥ 2 Hz, use the 64-bit counters, ordinary NTP is fine.**
+
+Counter width matters more than sample rate. Clock skew destroys the cross-node
+synchrony feature (0.94 → 0.03 from perfect sync to 1 s) without hurting
+detection, because the other features carry the signal redundantly.
+
+The study's resolution is one workload family = 0.083 AUC, so most knobs come
+back "no measurable effect" rather than "no effect" — the same
+precision-is-bought-with-families arithmetic as the power analysis.
+
 ## Next
 
-The measurement-artifact study: sweep sample rate, clock skew and counter width,
-and measure how much separability each one costs. That produces a number Long can
-build against — *"the agent must sample at least X Hz and keep clocks within
-Y ms"* — instead of a guess.
+Build the detector: aggregator, the full feature extractor, and the two-stage
+classifier whose second stage is blind to absolute byte volume.

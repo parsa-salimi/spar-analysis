@@ -1,0 +1,9 @@
+{
+ "floor_shuffled_auc": 0.47081956592160673,
+ "hardness_volume_only_auc": 0.45714285714285713,
+ "ceiling_auc": 0.9020408163265308,
+ "n_families": 12,
+ "n_seeds": 3,
+ "duration_s": 240.0,
+ "window_s": 30.0
+}
