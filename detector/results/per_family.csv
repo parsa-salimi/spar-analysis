@@ -1,0 +1,61 @@
+family,cls,clean,padded,feature_set
+coloc_70b,serving,0.7262938711215552,,reader (D0)
+ddp_7b,training,8.16552229214946e-05,0.00029976787659747103,reader (D0)
+diloco_13b,training,0.6431863223354878,0.34044816211331946,reader (D0)
+disagg_70b,serving,0.0,,reader (D0)
+fsdp_tp_32b,training,0.9998478809806163,0.962882763579859,reader (D0)
+fsdp_tp_70b,training,0.99999483427109,0.9991344057228495,reader (D0)
+gradacc_32b,training,0.9999999998920082,0.9999999993888624,reader (D0)
+moe_serve,serving,0.9963407180825333,,reader (D0)
+moe_train,training,0.3451032073208466,0.998252061914316,reader (D0)
+pp_serve_32b,serving,0.0005903330159440818,,reader (D0)
+pp_serve_70b,serving,0.06315905917021936,,reader (D0)
+pp_train_70b,training,0.99981294691641,0.9887762657245022,reader (D0)
+coloc_70b,serving,0.700131677127506,,raw symmetry only (D0)
+ddp_7b,training,0.5995420385600052,0.01612397620976639,raw symmetry only (D0)
+diloco_13b,training,0.5990250426620448,0.016571022373403202,raw symmetry only (D0)
+disagg_70b,serving,1.3970258862613587e-152,,raw symmetry only (D0)
+fsdp_tp_32b,training,0.5987634614680544,0.015877790349319885,raw symmetry only (D0)
+fsdp_tp_70b,training,0.5995330444743795,0.01614490576243443,raw symmetry only (D0)
+gradacc_32b,training,0.5988388281647816,0.01587514152944843,raw symmetry only (D0)
+moe_serve,serving,0.6992906450266235,,raw symmetry only (D0)
+moe_train,training,0.5992883955617285,0.016065620080643266,raw symmetry only (D0)
+pp_serve_32b,serving,0.698070579514506,,raw symmetry only (D0)
+pp_serve_70b,serving,0.6980794929809019,,raw symmetry only (D0)
+pp_train_70b,training,0.5986815329011518,0.01585062179538984,raw symmetry only (D0)
+coloc_70b,serving,0.7176200340570917,,burst symmetry only (D1)
+ddp_7b,training,0.6140018743573149,0.6052849572454834,burst symmetry only (D1)
+diloco_13b,training,0.6165061377643138,0.5844587177641424,burst symmetry only (D1)
+disagg_70b,serving,3.769472013605414e-228,,burst symmetry only (D1)
+fsdp_tp_32b,training,0.616637931702779,0.6056775407053568,burst symmetry only (D1)
+fsdp_tp_70b,training,0.6166392379765797,0.6054971583937613,burst symmetry only (D1)
+gradacc_32b,training,0.6165988774838105,0.5798353094897671,burst symmetry only (D1)
+moe_serve,serving,0.6967352358880544,,burst symmetry only (D1)
+moe_train,training,0.6152657761033675,0.6105053073282685,burst symmetry only (D1)
+pp_serve_32b,serving,0.6623750035437335,,burst symmetry only (D1)
+pp_serve_70b,serving,0.6611993461965431,,burst symmetry only (D1)
+pp_train_70b,training,0.61663616045366,0.6058907335367576,burst symmetry only (D1)
+coloc_70b,serving,0.11844847631305899,,attack-robust (D1)
+ddp_7b,training,3.2501837123279335e-06,5.625018588933428e-07,attack-robust (D1)
+diloco_13b,training,0.22410219620024013,0.22141002493596593,attack-robust (D1)
+disagg_70b,serving,6.728511102581396e-109,,attack-robust (D1)
+fsdp_tp_32b,training,0.9982110674346101,0.9473526119604595,attack-robust (D1)
+fsdp_tp_70b,training,0.9999468226660365,0.9997801173054254,attack-robust (D1)
+gradacc_32b,training,0.9999999731106665,0.9999999729158108,attack-robust (D1)
+moe_serve,serving,0.40360982986381494,,attack-robust (D1)
+moe_train,training,0.8560765982074959,0.9999193599318124,attack-robust (D1)
+pp_serve_32b,serving,0.0001346177450936911,,attack-robust (D1)
+pp_serve_70b,serving,0.00908025416334465,,attack-robust (D1)
+pp_train_70b,training,0.9970094400478366,0.990896114198329,attack-robust (D1)
+coloc_70b,serving,0.15605979057240382,,timing only
+ddp_7b,training,1.3913486375721155e-05,0.0001657931254732058,timing only
+diloco_13b,training,0.5542476586295587,0.5530432952267071,timing only
+disagg_70b,serving,0.17566413534393957,,timing only
+fsdp_tp_32b,training,0.9882901535207664,0.9976858435612063,timing only
+fsdp_tp_70b,training,0.9998474402408465,0.9998522886936068,timing only
+gradacc_32b,training,0.9872275213431297,0.9872263101099912,timing only
+moe_serve,serving,0.15416331245567852,,timing only
+moe_train,training,0.9904434919563431,0.9988584899634034,timing only
+pp_serve_32b,serving,0.009189149551338737,,timing only
+pp_serve_70b,serving,0.009164180700130331,,timing only
+pp_train_70b,training,0.9893365884886355,0.9970736450435379,timing only

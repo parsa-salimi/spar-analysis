@@ -108,38 +108,51 @@ def _sizes(n: int, mean_bytes: float, size_cv: float, rng) -> np.ndarray:
 
 def _cumulative_at(sample_t: np.ndarray, ev_t: np.ndarray, ev_b: np.ndarray,
                    link_bps: float, duration: float) -> np.ndarray:
-    """Cumulative bytes at each sample time.
+    """Cumulative bytes at each sample time, integrated exactly.
 
-    A transfer is a RAMP, not an impulse: moving B bytes over a link of
-    capacity R takes B/R seconds, during which the counter rises steadily.
-    Modelling transfers as instantaneous produces sample intervals with an
-    implied rate far above line rate -- physically impossible, and it fires the
-    reader's wrap heuristic as a false positive: with impulse transfers, 0.67% of
-    intervals report 2.9 TB/s on a 400 GB/s link.
+    A transfer is a RAMP, not an impulse: moving B bytes over a link of capacity
+    R occupies B/R seconds, during which the counter rises steadily at R. An
+    impulse model implies rates far above line rate within a sample interval.
 
-    Built on a fine grid by adding +rate at each transfer's start bin and -rate
-    at its end bin, then cumsum-ing twice: O(n_transfers + n_bins).
+    For a sample at time s, each transfer contributes
+        0                      if it has not started (t >= s)
+        r * (s - t)            if it is in progress  (t < s < t + d)
+        b                      if it has finished    (t + d <= s)
+    which, summed over transfers, is
+
+        C(s) = E_b(s) + s * (S_r(s) - E_r(s)) - (S_rt(s) - E_rt(s))
+
+    where S_x(s) sums x over transfers STARTED before s and E_x(s) over
+    transfers ENDED by s. Both are prefix sums over sorted start and end times,
+    so the whole thing is O((n + m) log n) and exact for every transfer size.
+
+    Exactness matters at small sizes. Integrating on any fixed grid mishandles a
+    transfer shorter than one grid cell: it either vanishes or is spread over a
+    whole cell at line rate. That is unbiased in total bytes but renders
+    small-message traffic as rare, oversized spikes -- corrupting precisely the
+    burstiness and cadence features the detector reads, and aliasing a
+    regularly-spaced stream against the grid so that it can vanish entirely.
     """
     if ev_t.size == 0:
-        return np.zeros_like(sample_t)
-    dur = np.maximum(ev_b / max(link_bps, 1.0), 1e-6)
-    # Resolution of the integration grid. Capped at MAX_BINS: without a cap a
-    # 300 s trace with sub-millisecond transfers allocates millions of bins per
-    # direction per fabric per node and exhausts memory. 0.75 ms at 300 s is
-    # still ~90x finer than the fastest sampling we study.
-    MAX_BINS = 400_000
-    fine = max(min(dur.min() / 4.0, 1e-3), duration / MAX_BINS)
-    nb = int(np.ceil(duration / fine)) + 2
-    acc = np.zeros(nb + 2)
+        return np.zeros_like(sample_t, dtype=np.float64)
+    ld = np.longdouble                      # prefix sums reach ~1e19; keep precision
+    dur = np.maximum(ev_b / max(link_bps, 1.0), 1e-9)
     r = ev_b / dur
-    i0 = np.clip((ev_t / fine).astype(int), 0, nb)
-    i1 = np.clip(((ev_t + dur) / fine).astype(int), 0, nb)
-    np.add.at(acc, i0, r)
-    np.add.at(acc, i1, -r)
-    rate = np.cumsum(acc)[:nb]
-    cum = np.cumsum(rate) * fine
-    idx = np.clip((sample_t / fine).astype(int), 0, nb - 1)
-    return cum[idx]
+    t_end = ev_t + dur
+    so = np.argsort(ev_t, kind="stable")
+    eo = np.argsort(t_end, kind="stable")
+    ts, te = ev_t[so], t_end[eo]
+    S_r  = np.concatenate([[0], np.cumsum(r[so].astype(ld))])
+    S_rt = np.concatenate([[0], np.cumsum((r[so] * ev_t[so]).astype(ld))])
+    E_r  = np.concatenate([[0], np.cumsum(r[eo].astype(ld))])
+    E_rt = np.concatenate([[0], np.cumsum((r[eo] * ev_t[eo]).astype(ld))])
+    E_b  = np.concatenate([[0], np.cumsum(ev_b[eo].astype(ld))])
+    s = sample_t.astype(ld)
+    i_s = np.searchsorted(ts, sample_t, side="left")    # started strictly before s
+    i_e = np.searchsorted(te, sample_t, side="right")   # ended at or before s
+    c = E_b[i_e] + s * (S_r[i_s] - E_r[i_e]) - (S_rt[i_s] - E_rt[i_e])
+    # monotone by construction; clip the last-ulp wobble of the subtraction
+    return np.maximum.accumulate(np.maximum(c, 0)).astype(np.float64)
 
 
 @dataclass

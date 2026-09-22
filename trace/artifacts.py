@@ -15,15 +15,16 @@ Design
 ------
 * The traffic is built ONCE per (family, seed) and every condition observes the
   same events -- so a difference between conditions cannot be a different draw.
-* Evaluation is leave-one-family-out, the protocol from the power analysis: one
-  TRAINING family and one SERVING family are held out together (a single family
-  would give a one-class test set and an undefined AUC). 7 x 4 = 28 pairs.
-* Comparisons are PAIRED: same families, same seeds, same held-out pair, only
-  the knob differs. With this few families an unpaired comparison of AUCs would
-  be swamped by between-family variance -- the lesson from the power analysis.
-* Controls: a CEILING (200 Hz, 64-bit, perfect clocks) that everything is
-  expressed as a fraction of, and a FLOOR (labels shuffled) that must land at
-  0.5 or the study leaks.
+* Evaluation is leave-one-family-out, the protocol from the power analysis:
+  each family is held out once, its out-of-fold scores are pooled, and one AUC
+  is computed over all of them (see evaluate()).
+* Comparisons are PAIRED: same families, same seeds, only the knob differs.
+  With this few families an unpaired comparison of AUCs would be swamped by
+  between-family variance -- the lesson from the power analysis.
+* Controls: a CEILING (50 Hz, 64-bit, perfect clocks), a NULL duplicate of the
+  ceiling that measures the experiment's own noise floor, a FLOOR (labels
+  shuffled) that must land at 0.5, and a HARDNESS control (volume features
+  only) showing the population is not trivially separable.
 
 Usage:  python3 artifacts.py features <a> <b>   # cache features for conditions [a,b)
         python3 artifacts.py eval               # evaluate + write results
@@ -35,7 +36,7 @@ from pathlib import Path
 
 import numpy as np, pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, "/home/claude/commvol")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "comm_model"))
 import commvol as C
 from commtrace.gen import build_events, sample_events, Topology, Collection
 from commtrace.reader import trace_features, FEATURE_COLS

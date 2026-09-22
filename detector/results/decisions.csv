@@ -1,0 +1,51 @@
+family,cls,called_training_clean,called_training_padded,feature_set
+ddp_7b,training,1.0,0.0,raw symmetry only (D0)
+fsdp_tp_70b,training,1.0,0.0,raw symmetry only (D0)
+fsdp_tp_32b,training,1.0,0.0,raw symmetry only (D0)
+pp_train_70b,training,1.0,0.0,raw symmetry only (D0)
+moe_train,training,1.0,0.0,raw symmetry only (D0)
+diloco_13b,training,1.0,0.0,raw symmetry only (D0)
+gradacc_32b,training,1.0,0.0,raw symmetry only (D0)
+ddp_7b,training,1.0,1.0,burst symmetry only (D1)
+fsdp_tp_70b,training,1.0,1.0,burst symmetry only (D1)
+fsdp_tp_32b,training,1.0,1.0,burst symmetry only (D1)
+pp_train_70b,training,1.0,1.0,burst symmetry only (D1)
+moe_train,training,1.0,1.0,burst symmetry only (D1)
+diloco_13b,training,1.0,1.0,burst symmetry only (D1)
+gradacc_32b,training,1.0,1.0,burst symmetry only (D1)
+ddp_7b,training,0.0,0.0,reader (D0)
+fsdp_tp_70b,training,1.0,1.0,reader (D0)
+fsdp_tp_32b,training,1.0,1.0,reader (D0)
+pp_train_70b,training,1.0,1.0,reader (D0)
+moe_train,training,0.16666666666666666,1.0,reader (D0)
+diloco_13b,training,0.6428571428571429,0.19047619047619047,reader (D0)
+gradacc_32b,training,1.0,1.0,reader (D0)
+pp_serve_70b,serving,0.0,,reader (D0)
+pp_serve_32b,serving,0.0,,reader (D0)
+moe_serve,serving,1.0,,reader (D0)
+disagg_70b,serving,0.0,,reader (D0)
+coloc_70b,serving,1.0,,reader (D0)
+ddp_7b,training,0.0,0.0,attack-robust (D1)
+fsdp_tp_70b,training,1.0,1.0,attack-robust (D1)
+fsdp_tp_32b,training,1.0,1.0,attack-robust (D1)
+pp_train_70b,training,1.0,1.0,attack-robust (D1)
+moe_train,training,1.0,1.0,attack-robust (D1)
+diloco_13b,training,0.14285714285714285,0.14285714285714285,attack-robust (D1)
+gradacc_32b,training,1.0,1.0,attack-robust (D1)
+pp_serve_70b,serving,0.0,,attack-robust (D1)
+pp_serve_32b,serving,0.0,,attack-robust (D1)
+moe_serve,serving,0.11904761904761904,,attack-robust (D1)
+disagg_70b,serving,0.0,,attack-robust (D1)
+coloc_70b,serving,0.0,,attack-robust (D1)
+ddp_7b,training,0.0,0.0,timing only
+fsdp_tp_70b,training,1.0,1.0,timing only
+fsdp_tp_32b,training,1.0,1.0,timing only
+pp_train_70b,training,1.0,1.0,timing only
+moe_train,training,1.0,1.0,timing only
+diloco_13b,training,0.6428571428571429,0.6428571428571429,timing only
+gradacc_32b,training,1.0,1.0,timing only
+pp_serve_70b,serving,0.0,,timing only
+pp_serve_32b,serving,0.0,,timing only
+moe_serve,serving,0.0,,timing only
+disagg_70b,serving,0.0,,timing only
+coloc_70b,serving,0.0,,timing only
