@@ -7,6 +7,7 @@
 | you want | read |
 |---|---|
 | how these numbers relate to the paper's — **read before quoting one against the other** | `RELATION_TO_PRIOR_WORK.md` |
+| what to collect in November and what it buys | `COLLECTION_PLAN.md` |
 | what any of the jargon means | `GLOSSARY.md` |
 | how the power analysis works, from scratch | `power_analysis/METHOD.md` |
 | what it found | `power_analysis/README.md` |
@@ -38,6 +39,7 @@ it isn't, or if hiding is cheap, those proposals need rewriting.
 | 2 | **Comm model** | Is there a signal at all, and in which quantity? | ✅ done | `comm_model/` |
 | 3 | **Trace schema + generator** | What does the collector write, and how do we build a detector before the hardware works? | ✅ done | `trace/` |
 | 3b | **Measurement-artifact study** | What does the *instrument* cost us, and what must the agent's settings be? | ✅ done | `trace/METHOD.md` |
+| 3c | **Collection plan** | What do we collect in November, and what precision does it buy? | ✅ done | `COLLECTION_PLAN.md` |
 | 4 | Aggregator + features + classifier | The detector itself | ⬜ not started | — |
 | 5 | Evasion evaluation | What does hiding cost the adversary? | 🟡 modelled, not measured | `comm_model/evasions.py` |
 
@@ -109,6 +111,19 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 
 ---
 
+**From the collection plan (3c):**
+
+- **Three H200 nodes can produce 14 distinct inter-node communication
+  mechanisms.** With evasion strategies as a second axis, ~28 families total.
+- **±0.20 needs 35 families; ±0.10 needs 138.** So this allocation supports
+  about **±0.22**, and no amount of extra cluster time changes that.
+- **Cluster time is not the constraint**: ~21 node-hours for the whole corpus.
+  Mechanism diversity is, and it is bounded by GPU count.
+- The family definition is fixed in advance — (communication signature, evasion
+  strategy) — and recorded per trace so grouping stays auditable.
+
+---
+
 ## Next
 
 - The detector itself: aggregator, full feature extractor, and a two-stage
@@ -125,6 +140,7 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 | InfiniBand or Ethernet between the two current nodes? | Will / Long | Changes line rate 4×, and the counter-wrap floor with it |
 | Is my compute restriction the hardware class or me personally? | Will | Decides whether the CPU-only split is a phase or permanent |
 | Ownership tasks written into the plan | Will | Still `[TODO]`; will default if left |
+| Accept ±0.22, or seek more than three nodes? | Will | Bounds every claim in the December report |
 | Do DCGM fields 1011/1012 return bytes or a rate, at what width? | Long | Has never returned a real value in our data |
 | vLLM with paged KV in the benign suite | Long | Without it the corpus contains no KV traffic at all |
 
@@ -153,6 +169,10 @@ conversation, so the explanation outlives the chat it was written in.
 ---
 
 ## Changelog
+
+- **2026-09-21** — `COLLECTION_PLAN.md`: 14 inter-node mechanisms reachable on
+  three nodes against 35 needed for ±0.20; the family definition fixed in
+  advance; collection ordered so a partial corpus stays analysable.
 
 - **2026-09-21** — Added `RELATION_TO_PRIOR_WORK.md`: what the paper
   establishes, what prior analysis of the corpus establishes, and what is new
