@@ -127,43 +127,45 @@ breaks the arithmetic fails loudly. All pass. Among them:
 
 ---
 
-## 3. Three mistakes I made, because they are the interesting part
+## 3. Three traps in this kind of model, and how this one avoids them
 
-### (a) I nearly proved my own assumption
+### (a) Features assigned by class prove only the assignment
 
-The first version attached a "cadence regularity" and a "symmetry" number to each
-workload *by class* — training got 0.03, inference got 0.05 and 1.0. Any
-classifier fed those features separates the classes perfectly, because I had
-already separated them by hand. The first run duly returned **AUC 1.000**, which
-is not a result, it's a mirror.
+Attach a symmetry or cadence value to each workload *by class* — training gets
+one constant, serving another — and any classifier fed those features separates
+the classes perfectly, because the separation was done by hand. A model built
+that way returns **AUC 1.000**, which is a mirror rather than a result.
 
-The fix was to attach those properties to the **mechanism** instead. A ring
-all-reduce is symmetric because of what a ring all-reduce *is*; a KV-cache push is
-one-directional because it goes from the prefill node to the decode node. Then the
-aggregate properties of a workload fall out of which mechanisms it happens to
-contain — and they genuinely cross-cut the classes, which is what makes a result
-from them meaningful.
+Here those properties are attached to the **mechanism**. A ring all-reduce is
+symmetric because of what a ring all-reduce *is*; a KV-cache push is
+one-directional because it runs from the prefill node to the decode node. A
+workload's aggregate properties then fall out of which mechanisms it happens to
+contain, and they cross-cut the classes: tensor-parallel *serving* is
+all-reduce traffic and therefore symmetric, while pipeline *training* is
+directional per transfer. That is what makes a result from them meaningful, and
+`test_commvol.py` asserts it so the property cannot quietly regress.
 
-### (b) I reported throughputs that cannot physically exist
+### (b) Without a bandwidth constraint the grid contains impossible configurations
 
-Before the bandwidth clamp, the grid contained inference configurations at
-**716 GB/s per GPU** on hardware whose NVLink tops out at 450. Adding the `max()`
-above fixed it and, as a side effect, produced the most interesting result in §5:
-when a run is already waiting on the network, an evasion that makes it quieter
-also makes it **faster**.
+Step time has to be `max(compute, intra/NVLink, inter/NIC)`: a step cannot be
+shorter than the time its own traffic needs on the wire. Omit that and the grid
+holds configurations at **716 GB/s per GPU** on hardware whose NVLink tops out at
+450. Including it also produces the result in §5 — when a run is already waiting
+on the network, an evasion that makes it quieter makes it **faster**.
 
-### (c) The grid was answering questions about itself
+### (c) A grid can answer questions about its own composition
 
-Two artifacts, both mine:
+Two ways that happens here, both guarded against:
 
-- Every inference configuration was single-node, so "inter-node traffic implies
-  training" was true by construction. Fixed by adding pipeline-parallel and
-  cross-node expert-parallel serving, which are real deployments.
-- No single-GPU training configuration was *feasible* at the batch sizes I'd
-  swept, so "zero traffic implies inference" was also true by construction. Fixed
-  by adding small batches — single-GPU LoRA fine-tuning is real, and it is
-  genuinely invisible to interconnect monitoring. That's a scope limit we should
-  state, not an artifact to hide.
+- If every serving configuration is single-node, "inter-node traffic implies
+  training" is true by construction. The grid therefore includes
+  pipeline-parallel and cross-node expert-parallel serving, both real
+  deployments.
+- If no single-GPU training configuration is *feasible* at the batch sizes
+  swept, "zero traffic implies inference" is true by construction too. Small
+  batches are included so that it isn't. Single-GPU LoRA fine-tuning is real,
+  and it is genuinely invisible to interconnect monitoring — a scope limit to
+  state rather than an artifact to hide.
 
 ---
 

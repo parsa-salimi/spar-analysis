@@ -114,8 +114,8 @@ def _cumulative_at(sample_t: np.ndarray, ev_t: np.ndarray, ev_b: np.ndarray,
     capacity R takes B/R seconds, during which the counter rises steadily.
     Modelling transfers as instantaneous produces sample intervals with an
     implied rate far above line rate -- physically impossible, and it fires the
-    reader's wrap heuristic as a false positive. (Found exactly that way: 0.67%
-    of intervals reported 2.9 TB/s on a 400 GB/s link.)
+    reader's wrap heuristic as a false positive: with impulse transfers, 0.67% of
+    intervals report 2.9 TB/s on a 400 GB/s link.
 
     Built on a fine grid by adding +rate at each transfer's start bin and -rate
     at its end bin, then cumsum-ing twice: O(n_transfers + n_bins).

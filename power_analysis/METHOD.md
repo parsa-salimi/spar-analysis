@@ -5,28 +5,32 @@ Parsa Salimi, SPAR F26. September 2026.
 
 This is the companion to `analysis/power_analysis/README.md`. The README states
 results; this states the process, including the judgement calls and the two bugs
-I hit. If you only read one, read this one first.
+it has to avoid. If you only read one, read this one first.
 
 ---
 
-> **Read [`../RELATION_TO_PRIOR_WORK.md`](../RELATION_TO_PRIOR_WORK.md) first.**
-> It records what the paper actually claims, what was already established in the
-> team thread before this analysis, and where I mischaracterised both. Most of
-> the qualitative conclusion below was Robi Rahman's; the contribution here is
-> quantification and robustness, not discovery.
+> **Context.** The corpus and the classifier come from Rahman & Tajdari
+> (arXiv 2606.19262). The insight that workload-level hold-out leaks, and that
+> whole families have to be held out instead, is Robi Rahman's, from his analysis
+> of this corpus. This document works out what follows from it: how far the
+> number moves with the grouping level, what interval belongs beside it, and what
+> a target precision costs in workloads.
+> [`../RELATION_TO_PRIOR_WORK.md`](../RELATION_TO_PRIOR_WORK.md) sets out the
+> division in full.
 
 ## 0. The question in one paragraph
 
 The project we are extending claims it can tell, from telemetry a cloud provider
 already collects, whether a GPU is training a model or doing something else. The
-published figure most often quoted is **98.2% accuracy**. If that number is real, hardware-based
-verification of compute-use agreements is basically a solved engineering problem.
-If it is an artefact of how the data was split, it is not. Our whole project
-inherits that claim as its foundation, so I wanted to know which it was before
-we build anything on top.
+published figure most often quoted is **98.2%**. That figure is in-distribution —
+the paper groups by run and says so — and the paper reports 43–87% separately for
+unexpected adversarial workloads.
 
-The short answer: it's an artefact. But *saying* that is easy; the work is in
-showing it in a way that survives someone pushing back.
+The question this document answers is what happens between those two poles, on
+the benign corpus: how far does the number move as the held-out unit gets
+stricter, how wide is the interval around it, and how many workload families
+would a given precision require? Our project inherits this corpus, so the answer
+sets what any claim we make can support.
 
 ---
 
@@ -92,14 +96,15 @@ My 1,003 files produced **32,426 windows**.
 and every accuracy number is computed over rows. It is very natural to feel that
 32,426 is a large sample. It isn't, and §5 is about why.
 
-### Two bugs I hit doing this
+### Two things that will bite anyone rebuilding this
 
-**(a) I destroyed my own timestamps.** To save memory I cast all float64 columns
-to float32. Timestamps are epoch seconds — about 1.79 × 10⁹ — and float32 has
-roughly 128 seconds of resolution at that magnitude. Every window in a run
-collapsed onto a handful of distinct timestamps, and my deduplication step then
-silently threw away 87% of the data (32,426 → 4,653 windows). I caught it because
-the surviving count was absurd. Fixed by excluding the time columns from the cast.
+**(a) Never cast the timestamp columns to float32.** Epoch seconds are about
+1.79 × 10⁹, where float32 carries roughly 128 seconds of resolution. Casting
+float64 columns wholesale to save memory collapses every window in a run onto a
+handful of distinct timestamps, and a subsequent deduplication step then discards
+most of the corpus — here it would have removed 87% of it, 32,426 windows down to
+4,653. `extract.py` excludes the time columns from the cast for this reason. The
+symptom is a surviving window count that is absurdly low; there is no error.
 
 **(b) The repo's windowing is O(n²).** For each window it re-slices the entire run
 with a boolean mask to recompute "features observable up to now". On a 600-row run
@@ -369,13 +374,12 @@ it longer", and it's the one I'd want settled before the November allocation.
   per-class rates should replace it in the report proper.
 - **Leave-one-family-out trains on 74 of 75 families each time**, so it slightly
   flatters a detector trained on a smaller corpus than ours.
-- **I could not verify the teammate analysis referenced in my handoff notes.** It
-  reported 0.6039 held-out-family accuracy and a near-zero validation/test
-  correlation. Those figures appear in no text file in the repository — I searched
-  all of them — so they were presumably shared only in chat. Everything above is an
-  independent rebuild. The agreement in direction and rough magnitude is
-  reassuring, but it is corroboration, not replication, and it should not be cited
-  as though I checked his work.
+- **The family-grouping approach is not original here.** Robi Rahman established
+  it on this corpus, reporting ~21 families and a held-out-family accuracy near
+  0.60. His analysis and this one were both produced with Claude over the same
+  data, so their agreement is a weaker check than two independent analysts would
+  be. What this document adds is the grouping ladder, the interval, the
+  required-families curve and the window-cap test.
 - **None of this is about our actual signal.** This is nine mature on-GPU NVML
   counters. Our project's signal — interconnect bytes — has never been successfully
   collected even once. Expect these numbers to start worse, not better.

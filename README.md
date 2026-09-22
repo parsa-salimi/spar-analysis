@@ -5,9 +5,10 @@ training from interconnect telemetry**.
 
 Parsa Salimi. Mentor: Will Fowler. Co-mentee: Long Yi.
 
-**Start with [`STATUS.md`](STATUS.md)**, and read
-[`RELATION_TO_PRIOR_WORK.md`](RELATION_TO_PRIOR_WORK.md) before quoting any
-number here against the paper's. — what exists, what it found, what is
+**Start with [`STATUS.md`](STATUS.md)** — what exists, what it found, what is
+blocked on whom. [`RELATION_TO_PRIOR_WORK.md`](RELATION_TO_PRIOR_WORK.md) sets
+out how these numbers relate to the paper's and to earlier analysis of the
+corpus; read it before quoting one against the other. — what exists, what it found, what is
 blocked on whom. Two minutes. [`GLOSSARY.md`](GLOSSARY.md) defines every term
 either file assumes.
 
@@ -46,10 +47,8 @@ Two pieces of work, each self-contained with its own write-up.
 ### `power_analysis/` — how much can this corpus actually support?
 
 Accuracy depends strongly on what is held out. The paper's protocol groups by
-run; the first row below reproduces its result. The lower rows ask a stricter
-question it does not claim to answer — see
-[`RELATION_TO_PRIOR_WORK.md`](RELATION_TO_PRIOR_WORK.md), which also records what
-was already established in the team thread.
+run, and the row below marked as such reproduces its result. The lower rows ask a
+stricter question — generalisation to a kind of workload never seen before.
 
 | held out | groups | accuracy |
 |---|---:|---:|
@@ -95,8 +94,8 @@ configurations:
 
 This settles the collection-agent design: record **tx and rx separately, per
 link**. A schema that sums them throws away the only feature that works.
-`comm_model/METHOD.md` walks through how this was computed, including the two
-things I got wrong on the way.
+`comm_model/METHOD.md` walks through how this was computed, including the traps
+this kind of model has to be built around.
 
 ### `trace/` — the format the collector will write
 
@@ -165,8 +164,8 @@ python3 lofo.py family 0 75
   upstreaming.
 - **Never cast the window timestamp columns to float32.** Epoch seconds are
   ~1.79 × 10⁹, where float32 has about 128 seconds of resolution; the cast
-  silently collapses distinct windows onto the same timestamp. I lost 87% of my
-  own data to this before noticing.
+  silently collapses distinct windows onto the same timestamp; a later
+  deduplication step then discards most of the corpus, with no error raised.
 - **The ring all-reduce factor is 2(N−1)/N, not 2.** At world_size 2 it is
   exactly 1.0, so the common shorthand over-counts two-GPU runs by 2×.
 - **`families.py` encodes a judgement call.** The full 179-label mapping is

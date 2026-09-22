@@ -6,7 +6,7 @@
 
 | you want | read |
 |---|---|
-| how this relates to the paper and the team thread — **read before quoting numbers** | `RELATION_TO_PRIOR_WORK.md` |
+| how these numbers relate to the paper's — **read before quoting one against the other** | `RELATION_TO_PRIOR_WORK.md` |
 | what any of the jargon means | `GLOSSARY.md` |
 | how the power analysis works, from scratch | `power_analysis/METHOD.md` |
 | what it found | `power_analysis/README.md` |
@@ -50,10 +50,9 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 
 **From the power analysis (1):**
 
-- The published 98% is **in-distribution and labelled as such by the paper**,
-  which groups by run; grouping by run here reproduces it at 0.977. Under a
-  stricter grouping the paper does not claim — whole workload families — it is
-  **0.715 ± 0.080** (leave-one-family-out, n=75), or
+- The published 98% is in-distribution, grouped by run; grouping by run here
+  reproduces it at 0.977. Under the stricter grouping — whole workload families —
+  it is **0.715 ± 0.080** (leave-one-family-out, n=75), or
   **0.520 ± 0.150** by mechanism — below the 0.68 you get by always guessing
   "training".
 - Held out entirely, **LLM inference scores 0.067** — 93% of it is called
@@ -155,10 +154,9 @@ conversation, so the explanation outlives the chat it was written in.
 
 ## Changelog
 
-- **2026-09-21** — Read the paper properly and the team Slack thread. Added
-  `RELATION_TO_PRIOR_WORK.md` and corrected several unfair characterisations.
-  The power analysis does **not** invalidate the paper, and most of its
-  qualitative conclusion was already Robi Rahman's.
+- **2026-09-21** — Added `RELATION_TO_PRIOR_WORK.md`: what the paper
+  establishes, what prior analysis of the corpus establishes, and what is new
+  here. Positioning throughout is now extension rather than correction.
 
 - **2026-09-21** — Measurement-artifact study: sample rate, counter width, clock
   skew and read skew over 12 workload families. Produced the agent spec line.

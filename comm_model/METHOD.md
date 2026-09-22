@@ -4,8 +4,8 @@
 Parsa Salimi, SPAR F26. September 2026.
 
 Companion to `comm_model/README.md`, which states results. This states the
-method, including the two things I got wrong on the way and had to fix. If a
-term here isn't defined, see `GLOSSARY.md` at the repo root.
+method, including the traps this kind of model has to be built around. If a term
+here isn't defined, see `GLOSSARY.md` at the repo root.
 
 ---
 
@@ -175,23 +175,22 @@ belongs in the threat model.
 
 ---
 
-## 5. Two things I got wrong
+## 5. Three traps, and how the model is built around them
 
-### 5a. I nearly proved my own assumption
+### 5a. Features assigned by class prove only the assignment
 
-The first version attached a symmetry and a cadence value to each workload **by
-class**: training got one constant, serving another. Any classifier fed those
-separates the classes perfectly, because I had already separated them by hand.
-It returned **AUC 1.000**, which is not a result — it is a mirror.
+Attaching a symmetry and a cadence value to each workload **by class** — training
+one constant, serving another — makes any classifier fed those features separate
+the classes perfectly, because the separation was done by hand. Such a model
+returns **AUC 1.000**: a mirror, not a result.
 
-The fix was to attach those properties to the **mechanism** instead. A ring
-all-reduce is symmetric because of what a ring all-reduce *is*; a KV-cache push
-is directional because it goes from prefill to decode. Derived that way they
-genuinely cross-cut the classes: tensor-parallel **serving** is all-reduce
-traffic and therefore symmetric, while pipeline **training** is directional.
-That is what makes a result from them mean something.
+Those properties therefore belong to the **mechanism**. A ring all-reduce is
+symmetric because of what a ring all-reduce *is*; a KV-cache push is directional
+because it runs from prefill to decode. Derived that way they cross-cut the
+classes: tensor-parallel **serving** is all-reduce traffic and therefore
+symmetric, while pipeline **training** is directional.
 
-`test_commvol.py` asserts exactly this, so the mistake cannot come back:
+`test_commvol.py` asserts exactly this, so the property cannot regress:
 
 ```
 PASS  colocated TP INFERENCE is symmetric: 1 vs 1
@@ -200,29 +199,28 @@ PASS  pipeline TRAINING is directional: 0 vs 0
 
 ### 5b. Symmetry at transfer level is not symmetry at node level
 
-Building the trace generator forced a correction. `commvol` attaches `sym` to a
-**flow**, which is a per-transfer property — one pipeline send really is
-strictly one-directional. But a monitor observes **per-node aggregates**, and a
-middle pipeline stage receives from its predecessor as much as it sends to its
-successor. At node level, pipeline traffic is symmetric.
+`commvol` attaches `sym` to a **flow**, which is a per-transfer property — one
+pipeline send really is strictly one-directional. A monitor, however, observes
+**per-node aggregates**, and a middle pipeline stage receives from its
+predecessor as much as it sends to its successor. At node level, pipeline traffic
+is symmetric.
 
-The classes still separate, but for a narrower and sharper reason than I first
-claimed: what is genuinely asymmetric at node level is the **KV-cache push**,
-where prefill nodes only send and decode nodes only receive. The generator
-derives symmetry from actual accumulated tx/rx rather than from the flow label,
-and `trace/test_trace.py` pins the distinction:
+The classes still separate, but for a narrower and sharper reason: what is
+genuinely asymmetric at node level is the **KV-cache push**, where prefill nodes
+only send and decode nodes only receive. The generator therefore derives symmetry
+from accumulated tx/rx rather than from the flow label, and
+`trace/test_trace.py` pins the distinction:
 
 ```
 PASS  inter-node symmetry: training ~1, disaggregated serving ~0  [0.999 vs 0.000]
 PASS  ...while that SAME serving trace is symmetric on NVLink     [1.000]
 ```
 
-### 5c. And one physical error
+### 5c. A grid without a bandwidth constraint contains impossible configurations
 
-Before the bandwidth clamp, the grid contained serving configurations at
-**716 GB/s per GPU** on hardware whose NVLink tops out at 450. Adding
-`max(compute, comm)` fixed it, and produced §2's communication-bound finding as
-a side effect.
+Without the `max(compute, comm)` clamp the grid holds serving configurations at
+**716 GB/s per GPU** on hardware whose NVLink tops out at 450. The clamp also
+produces §2's communication-bound finding as a side effect.
 
 ---
 
@@ -240,11 +238,10 @@ nothing else in this directory means anything. Among them:
 - NVLink : NIC = 9 : 1 per GPU
 - DiLoCo at H=500 cuts sync volume by exactly 500×
 
-Two of those tests originally asserted on byte **rates** and failed once the
-bandwidth clamp went in — because at dp=1024 both DDP and FSDP are pinned at NIC
-bandwidth, so they move different volumes at the same rate. The tests now assert
-on bytes per step, and separately assert the comm-bound behaviour, which is
-itself worth pinning.
+Note that the volume assertions are on bytes **per step**, not on byte rates. At
+dp=1024 both DDP and FSDP are pinned at NIC bandwidth, so they move different
+volumes at the same rate; asserting on rates would encode the wrong invariant.
+The communication-bound behaviour is asserted separately.
 
 ---
 

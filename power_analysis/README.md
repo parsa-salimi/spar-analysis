@@ -7,14 +7,13 @@
 
 ## Summary
 
-Every accuracy number this project has produced so far is reported over **windows**.
-Windows are not independent observations. Within a run they are near-identical
-(the repo's own estimate is ICC(1) ≈ 0.98); across runs, the workload sweeps are
-knob settings on the same mechanism rather than different workloads. The unit of
-statistical replication is the **workload family**, and there are 75 of them in the
-datacenter corpus — 22 if you group by mechanism.
+Accuracy on this corpus is reported over **windows**, and windows are not
+independent observations. Within a run they are near-identical (ICC(1) ≈ 0.98);
+across runs, the workload sweeps are knob settings on one mechanism rather than
+distinct workloads. The unit of statistical replication is the **workload
+family** — 75 of them in the datacenter corpus, 22 by mechanism.
 
-Re-running the binary training-vs-rest classifier on that corpus, changing nothing
+Running the binary training-vs-rest classifier on that corpus, changing nothing
 but what is held out:
 
 | what is held out | groups | accuracy | sd across splits | trivial baseline | beats baseline |
@@ -26,13 +25,19 @@ but what is held out:
 | **workload family (knobs collapsed)** | **75** | **0.724** | **0.139** | 0.634 | **73%** |
 | mechanism class | 22 | 0.523 | 0.231 | 0.483 | 65% |
 
-The 98% is an **in-distribution** number, and the paper says so — it groups by
-run explicitly and reports its out-of-distribution results separately (43–87% on
-unexpected workloads, in its own abstract). The top row here reproduces it. What
-the lower rows show is a *different, stricter question*: generalisation to a kind
-of workload never seen before. See [`../RELATION_TO_PRIOR_WORK.md`](../RELATION_TO_PRIOR_WORK.md)
-— including what was already established in the team thread before this analysis
-began, which is most of the qualitative conclusion.
+The second row is the protocol of Rahman & Tajdari (arXiv 2606.19262), which
+groups by run so that no run's windows fall on both sides of a split. Their
+reported figure is 98.2% in-distribution, alongside 43–87% against unexpected
+adversarial workloads; the row reproduces it.
+
+The lower rows ask a stricter question — can the detector recognise a *kind* of
+workload it has never seen? Collapsing swept parameters into families follows
+Robi Rahman's analysis of this corpus, which established that workload-level
+hold-out still leaks: `interleave_f02/f05/f10/f20/f50` is one dilution sweep, not
+five workloads. What follows extends that from one grouping to a ladder, and
+attaches an interval and a collection budget to it. See
+[`../RELATION_TO_PRIOR_WORK.md`](../RELATION_TO_PRIOR_WORK.md) for the full
+division between established results and what is new here.
 
 The estimate this corpus can actually support is **leave-one-family-out: 0.715 ± 0.080**
 (95% CI, n = 75 families). At the mechanism level it is **0.520 ± 0.150** (n = 22) —
@@ -236,4 +241,5 @@ Two notes for anyone re-running this:
   with a boolean mask for every window, which is why the 8-hour runs are slow.
 - Do not cast the window timestamp columns to float32. Epoch seconds are ~1.79 × 10⁹,
   where float32 has ~128 s of resolution; the cast silently collapses distinct windows
-  onto the same timestamp. (Found the hard way.)
+  onto the same timestamp, and a later deduplication step then discards most of
+  the corpus with no error raised.

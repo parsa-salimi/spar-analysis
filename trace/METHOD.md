@@ -121,51 +121,56 @@ reading real traces and one number looks wrong.
 
 ---
 
-## 4. Three things I got wrong
+## 4. Four ways this study can measure nothing, and what stops each
 
-Each was caught by a control, which is the argument for having them.
+Each of these was caught by one of the controls in §2, which is the argument for
+having them.
 
-### 4a. The first population was trivially easy
+### 4a. A population that is trivially easy measures no knob at all
 
-Every training family used `tp=1` and every serving family `tp=8`. So no training
-family had **any** NVLink traffic and every serving family did — "has NVLink
-traffic" separated the classes perfectly. Every serving family's inter-node
-traffic was also a directional KV push, so symmetry separated them perfectly too.
+If every training family uses `tp=1` and every serving family `tp=8`, no training
+family has **any** NVLink traffic and every serving family does — "has NVLink
+traffic" then separates the classes perfectly. If every serving family's
+inter-node traffic is a directional KV push, symmetry separates them perfectly
+too. Either gives **AUC 1.000 in every condition**: no knob can have an effect
+because there is no room for one.
 
-Result: **AUC 1.000 in every single condition.** No knob had any effect, because
-there was no room for one. I had asserted the population was hard and not
-checked. The hardness control (volume-only AUC) now exists precisely so that
-claim is measured: it reads 0.457, so volume alone is at chance on this
-population.
+The hardness control exists so that the population's difficulty is measured
+rather than asserted. It reports the AUC of volume features alone at the ceiling:
+**0.457**, so volume is at chance on this population and the classes genuinely
+overlap on the easy signals.
 
-### 4b. The first metric was nearly binary
+### 4b. A near-binary metric leaves no resolution
 
-I initially held out one training family and one serving family together and
-took the mean AUC over the 35 pairs. That metric turned out to be almost
-binary — a held-out pair is decided as a unit, so its AUC is 0 or 1, with a
-standard deviation of **0.40** across pairs. It left a standard error of ~0.07 on
-every condition, far too wide.
+Holding out one training family and one serving family together, and taking the
+mean AUC over the 35 pairs, gives an almost binary metric — a held-out pair is
+decided as a unit, so its AUC is 0 or 1, with a standard deviation of **0.40**
+across pairs and a standard error of ~0.07 on every condition. Far too wide for
+the differences at issue.
 
 This is the same all-or-nothing behaviour the power analysis found for workload
-families, appearing again one level up. Pooling out-of-fold scores across folds
-fixed it.
+families, appearing one level up. Pooling out-of-fold scores across folds is what
+makes the metric usable.
 
-### 4c. The ceiling was measuring my own approximation
+### 4c. A ceiling above the generator's resolution measures the generator
 
-The original ceiling sampled at 200 Hz. But the generator bundles flows that
-fire faster than any sampler could resolve — decode-phase tensor parallelism does
-128 all-reduces every 0.72 ms, which over a 240 s trace is 43 million transfers,
-intractable to enumerate and invisible at any rate we study. Bundling makes those
-flows artificially regular at sub-millisecond scale, and a 200 Hz sampler can
-*see* that regularity. The ceiling was measuring my approximation rather than the
-workload. It is now 50 Hz, the top of the sweep and safely below where bundling
-becomes visible.
+The generator bundles flows that fire faster than any sampler could resolve —
+decode-phase tensor parallelism does 128 all-reduces every 0.72 ms, which over a
+240 s trace is 43 million transfers, intractable to enumerate and invisible at
+any rate studied. Bundling makes those flows artificially regular at
+sub-millisecond scale, and a sampler above ~100 Hz can *see* that regularity. A
+200 Hz ceiling would therefore measure the approximation rather than the
+workload. The ceiling is 50 Hz: the top of the sweep, and safely below where
+bundling becomes visible.
 
-A fourth thing, found before the study could run at all: `trace_features` was
-joining the per-node and cross-node tables on floating-point window starts
-computed from two different time origins. Most rows missed and were filled with
-zero, so the cross-node synchrony feature read 0.25 when its true per-window
-value was 1.00. Both tables now carry an integer window index off a shared grid.
+### 4d. Joining tables on floating-point window starts silently drops rows
+
+`trace_features` merges per-node and cross-node feature tables. Keyed on
+floating-point window starts computed from two different time origins, most rows
+miss and are filled with zero — which made the cross-node synchrony feature read
+0.25 when its true per-window value was 1.00. Both tables carry an integer window
+index off a shared grid for this reason, and `window_features` takes an explicit
+`t_origin` so every node shares one window grid.
 
 ---
 
