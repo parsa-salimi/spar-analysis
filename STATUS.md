@@ -63,6 +63,7 @@ is worth the care it has had.
 | 3c | **Collection plan** | What do we collect in November, and what precision does it buy? | ✅ done | `COLLECTION_PLAN.md` |
 | 4 | Aggregator + features + classifier | The detector itself | ⬜ not started | — |
 | 5 | Evasion evaluation | What does hiding cost the adversary? | 🟡 modelled, not measured | `comm_model/evasions.py` |
+| 5b | **Symmetry attack** | Can the one feature that works be evaded, and at what price? | 🟡 A1 measured; D1 defence not built | `comm_model/ATTACK_SYMMETRY.md` |
 
 Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 3 is the pipe everything else runs through.
@@ -121,6 +122,13 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 - **Blind spot:** single-GPU training and replicated serving both emit nothing.
 - **Three of four evasions are free.** DiLoCo is 1,500× quieter at no cost and
   *faster* when the run was network-bound.
+- **Defeating the symmetry feature is not free, and is dearest where it
+  matters.** Padding traffic to the directional balance of real disaggregated
+  serving needs 9× the job's own inter-node bytes, which costs a median **4.26×
+  wall-clock** across the grid. No communication-bound configuration can do it
+  free at all, and FSDP at world ≥ 128 pays 6–7×. You cannot pad a link that is
+  already saturated. Threat model and cost metric fixed in advance in
+  `comm_model/ATTACK_SYMMETRY.md`.
 
 **From the trace work (3):**
 
@@ -221,6 +229,13 @@ conversation, so the explanation outlives the chat it was written in.
 ---
 
 ## Changelog
+
+- **2026-09-22** — Symmetry attack formalised and costed. Adversary
+  capabilities, cost metric and an attacker/defender escalation ladder fixed in
+  advance; the cheapest attack (constant-rate partition padding) measured over
+  the grid at a median 4.26× slowdown, and free for no communication-bound
+  configuration. Next rung is the D1 defence: symmetry of the high-pass
+  component, which constant-rate padding leaves untouched.
 
 - **2026-09-22** — Mechanism-transfer analysis. Established that the collapse
   across grouping levels is not a data-volume effect (four controls), that no
