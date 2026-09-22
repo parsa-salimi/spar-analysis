@@ -31,6 +31,27 @@ it isn't, or if hiding is cheap, those proposals need rewriting.
 
 ---
 
+## The standing constraint
+
+**Compute access is permanently unavailable on this project.** Not a phase to be
+waited out: every piece of this work has to be buildable, runnable and verifiable
+without the cluster, for its whole duration.
+
+Two consequences shape everything below.
+
+**The synthetic pipeline is primary infrastructure, not insurance.** It was built
+so the detector could exist before the hardware collected anything. With the
+constraint permanent, it is the only instrument available on this side of the
+project — which makes the generator's fidelity a load-bearing assumption, and one
+that has never been checked against a real trace. A validation protocol for it,
+fixed in advance, is therefore part of the work rather than a nicety.
+
+**The trace schema is a permanent interface, not a temporary bridge.** Everything
+crossing between this side and the cluster crosses through it, indefinitely. It
+is worth the care it has had.
+
+---
+
 ## The pieces
 
 | # | Piece | What it answers | State | Where |
@@ -138,7 +159,6 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 | Question | Who | Why it matters |
 |---|---|---|
 | InfiniBand or Ethernet between the two current nodes? | Will / Long | Changes line rate 4×, and the counter-wrap floor with it |
-| Is my compute restriction the hardware class or me personally? | Will | Decides whether the CPU-only split is a phase or permanent |
 | Ownership tasks written into the plan | Will | Still `[TODO]`; will default if left |
 | Accept ±0.22, or seek more than three nodes? | Will | Bounds every claim in the December report |
 | Do DCGM fields 1011/1012 return bytes or a rate, at what width? | Long | Has never returned a real value in our data |
@@ -169,6 +189,11 @@ conversation, so the explanation outlives the chat it was written in.
 ---
 
 ## Changelog
+
+- **2026-09-22** — Compute access confirmed permanently unavailable. Recorded as
+  a standing constraint; the synthetic pipeline is reclassified from insurance to
+  primary instrument, which makes a pre-registered validation protocol for the
+  generator part of the required work.
 
 - **2026-09-21** — `COLLECTION_PLAN.md`: 14 inter-node mechanisms reachable on
   three nodes against 35 needed for ±0.20; the family definition fixed in
