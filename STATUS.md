@@ -85,6 +85,31 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 - **Precision is bought with workload families, not GPU-hours.** 7.2× more
   windows leaves the error bar unchanged. ±0.10 needs ~113 families; we have 75.
 
+**From the mechanism-transfer analysis (1b):**
+
+- **The collapse across grouping levels is not a data-volume effect.** Across 22
+  held-out classes there is no relationship between surviving training data and
+  accuracy (rho = -0.09). Randomly subsampling to 4,644 windows keeps held-out
+  DDP at 0.974; removing FSDP specifically, at the same 4,644 windows, gives
+  0.438.
+- **Detection is coverage, not transfer.** Trained on one training mechanism plus
+  all negatives, no mechanism teaches any other: DDP -> FSDP 0.23,
+  FSDP -> DDP 0.35, every other pair at or near zero. Yet the union of several
+  mechanisms covers DDP at 0.978. The classifier learns a patchwork, not an
+  abstraction, and a held-out mechanism is detected only if it lands inside some
+  other mechanism's patch.
+- **Leave-one-mechanism-out still leaks.** Held out alone, DDP scores 0.978; held
+  out alongside FSDP, 0.438. Per-class numbers measure how well the rest of the
+  corpus happens to cover that class, so the bottom rung of the grouping ladder
+  is an upper bound rather than a floor.
+- **Run diversity is what buys precision, not window count.** One run per family
+  gives 0.674 +/- 0.22 on held-out DDP; three runs give 0.905 +/- 0.03. Extra
+  windows inside runs already collected add nothing.
+- **This applies to our own interval arithmetic.** The collection plan treats
+  families as independent Bernoulli draws. Family outcomes are determined by
+  which other families are present, so the quoted interval is optimistic by an
+  amount we have not measured.
+
 **From the comm model (2):**
 
 - **Byte volume is a coin flip**: AUC 0.51 against co-located serving. 7B
@@ -134,12 +159,19 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 
 **From the collection plan (3c):**
 
-- **Three H200 nodes can produce 14 distinct inter-node communication
-  mechanisms.** With evasion strategies as a second axis, ~28 families total.
-- **±0.20 needs 35 families; ±0.10 needs 138.** So this allocation supports
-  about **±0.22**, and no amount of extra cluster time changes that.
+- **Two nodes reach all 14 inter-node communication mechanisms.** One node
+  reaches none, since there is no inter-node traffic to observe. Nodes three
+  through eight add zero new mechanisms: once data-parallel, pipeline and expert
+  groups can each cross a node boundary, every combination of collective kinds is
+  already available.
+- **The binding constraint is therefore neither cluster time nor node count — it
+  is the family definition.** Fourteen mechanisms is all this taxonomy contains
+  on any amount of hardware. Getting past fourteen requires the second axis,
+  evasion strategies, which costs engineering time to write workloads.
+- **±0.20 needs 35 families; ±0.10 needs 138.** With ~28 families this supports
+  about **±0.22**, before the dependence between families (see 1b) is accounted
+  for.
 - **Cluster time is not the constraint**: ~21 node-hours for the whole corpus.
-  Mechanism diversity is, and it is bounded by GPU count.
 - The family definition is fixed in advance — (communication signature, evasion
   strategy) — and recorded per trace so grouping stays auditable.
 
@@ -160,7 +192,7 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 |---|---|---|
 | InfiniBand or Ethernet between the two current nodes? | Will / Long | Changes line rate 4×, and the counter-wrap floor with it |
 | Ownership tasks written into the plan | Will | Still `[TODO]`; will default if left |
-| Accept ±0.22, or seek more than three nodes? | Will | Bounds every claim in the December report |
+| Accept ±0.22, knowing more nodes will not narrow it? | Will | Bounds every claim in the December report |
 | Do DCGM fields 1011/1012 return bytes or a rate, at what width? | Long | Has never returned a real value in our data |
 | vLLM with paged KV in the benign suite | Long | Without it the corpus contains no KV traffic at all |
 
@@ -189,6 +221,13 @@ conversation, so the explanation outlives the chat it was written in.
 ---
 
 ## Changelog
+
+- **2026-09-22** — Mechanism-transfer analysis. Established that the collapse
+  across grouping levels is not a data-volume effect (four controls), that no
+  training mechanism transfers to any other, and that detection here is a
+  coverage property of the corpus. Leave-one-mechanism-out is an upper bound, not
+  a floor. Node-count enumeration: the mechanism set saturates at two nodes.
+  `COLLECTION_PLAN.md` revised accordingly.
 
 - **2026-09-22** — Compute access confirmed permanently unavailable. Recorded as
   a standing constraint; the synthetic pipeline is reclassified from insurance to

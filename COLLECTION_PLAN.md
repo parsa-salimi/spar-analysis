@@ -7,19 +7,36 @@ Parsa Salimi, September 2026. For review before 1 November.
 
 ## 0. The one thing to decide now
 
-**The hardware ceiling is below the statistical requirement, and that bounds what
-the December report can claim.**
+**The ceiling on this claim is set by the family definition, not by the
+hardware, and that bounds what the December report can say.**
 
-Three 8-GPU H200 nodes can produce **14 distinct inter-node communication
-mechanisms**. Reaching ±0.20 on a detection rate needs **35 workload families**;
-±0.10 needs **138**. Evasion strategies add a second axis and get us to roughly
-28 families in total — about **±0.22**.
+**Two** 8-GPU nodes reach all **14 distinct inter-node communication
+mechanisms** this taxonomy contains. A third node adds none, and neither does a
+fourth or an eighth — once data-parallel, pipeline and expert-parallel groups can
+each cross a node boundary, every combination of collective kinds is already
+reachable. Reaching ±0.20 on a detection rate needs **35 workload families**;
+±0.10 needs **138**. Evasion strategies add the second axis and get us to roughly
+28 families — about **±0.22**.
 
-This is not a scheduling problem. Collecting 28 families three times over at 15
-minutes a run is **21 node-hours** out of a month of availability. The binding
-constraint is **mechanism diversity, which is bounded by GPU count**, not cluster
-time. Asking for more hours would not help; asking for more nodes, or accepting a
-wider interval and designing the claim around it, would.
+So neither more hours nor more nodes narrows the interval. Collecting 28 families
+three times over at 15 minutes a run is **21 node-hours** out of a month of
+availability, and the mechanism count is saturated at two nodes. What buys
+precision is **workload diversity along the evasion axis**, which costs
+engineering time rather than hardware.
+
+Two consequences for the ask. The hardware request should be modest — two nodes
+suffices for the mechanism sweep, three gives headroom for larger configurations
+within the same mechanisms. And the scarce resource to negotiate for is the
+engineering time to write 28 distinct workloads, which is where Robi's suggestion
+of using coding agents applies directly.
+
+One caveat that should travel with this. The saturation result is a property of
+*our* family definition, which counts the set of (collective kind, fabric) pairs.
+A finer definition — one that counted collective group size, message-size regime
+or per-peer fan-out — would keep growing with node count, since the ring
+all-reduce factor 2(N−1)/N and the fan-out both change with N even when the
+collective kinds do not. Whether that quantitative variation matters for
+detection is unknown and is one of the things the November corpus should settle.
 
 That decision belongs to Will, and it belongs before collection starts rather
 than in December.
@@ -101,10 +118,18 @@ and serving p2p are different families.
 | 13 | train | `allreduce + alltoall + p2p` | Mixtral-8x7B DDP dp2 tp4 pp2 | 2 | 15.8 |
 | 14 | train | `allgather + alltoall + p2p + reducescatter` | Mixtral-8x7B FSDP dp3 tp1 pp3 | 2 | 27.8 |
 
-Two things to note. Most mechanisms need only **two** nodes, so collection can
-start before the third is up. And the inter-node rates span 1.6 to 50 GB/s —
-overlapping across classes, which is the comm model's separability result showing
-up in the collection plan.
+Three things to note. **Every one of these mechanisms is reachable on two
+nodes**, so collection can start before a third is up and a third adds no new
+rows. The inter-node rates span 1.6 to 50 GB/s, overlapping across classes, which
+is the comm model's separability result showing up in the collection plan. And
+the mechanism count as nodes are added is flat after the second:
+
+| nodes | GPUs | inter-node mechanisms |
+|---:|---:|---:|
+| 1 | 8 | 0 |
+| 2 | 16 | **14** |
+| 3 | 24 | 14 |
+| 4+ | 32+ | 14 |
 
 **Configurations that need all 24 GPUs exist but are single instances** — there is
 exactly one way to get `allreduce + alltoall` at world 24. They are not a source
@@ -206,7 +231,8 @@ established:
 
 | question | who | why it blocks |
 |---|---|---|
-| Accept ±0.22, or seek more nodes? | Will | Bounds every claim in the December report |
+| Accept ±0.22, knowing more nodes will not narrow it? | Will | Bounds every claim in the December report |
+| Who funds engineering time for the 28 workloads? | Will | This, not hardware, is the binding constraint |
 | InfiniBand or Ethernet between nodes? | Will / Long | Changes inter-node rates ~4× and the counter-wrap floor with it |
 | Do DCGM fields 1011/1012 return real values on this cluster? | Long | If not, Tier 1 step 1 fails and the whole plan needs a different NVLink source |
 | Are 64-bit extended IB counters exposed? | Long | If not, sampling must rise to ~93 Hz on an 8-NIC node |
@@ -223,9 +249,11 @@ established:
 - **The ×1.44 heterogeneity inflation is measured on the NVML corpus**, not on
   interconnect data. If interconnect families differ from each other more than
   NVML families do, the requirement rises.
-- **The 14-mechanism ceiling is specific to 24 GPUs.** It is a property of how
-  few ways there are to factor a world size of 24 into dp × tp × pp with tp ≤ 8,
-  not a deep fact. More nodes would raise it, though not linearly.
+- **The 14-mechanism ceiling is a property of the family definition, not of the
+  hardware.** It counts sets of (collective kind, fabric) pairs, and every such
+  set is reachable once two nodes exist. A definition that also counted group
+  size or message-size regime would not saturate. Which definition is right is an
+  empirical question the corpus should answer.
 - **Evasion families may be less distinct than counted.** Two strategies that
   produce the same rate pattern are one family for detection purposes even if
   they are two different scripts. If that collapses Tier 2, the achievable
