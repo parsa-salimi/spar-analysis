@@ -9,11 +9,17 @@ I hit. If you only read one, read this one first.
 
 ---
 
+> **Read [`../RELATION_TO_PRIOR_WORK.md`](../RELATION_TO_PRIOR_WORK.md) first.**
+> It records what the paper actually claims, what was already established in the
+> team thread before this analysis, and where I mischaracterised both. Most of
+> the qualitative conclusion below was Robi Rahman's; the contribution here is
+> quantification and robustness, not discovery.
+
 ## 0. The question in one paragraph
 
 The project we are extending claims it can tell, from telemetry a cloud provider
 already collects, whether a GPU is training a model or doing something else. The
-published figure is **98.2% accuracy**. If that number is real, hardware-based
+published figure most often quoted is **98.2% accuracy**. If that number is real, hardware-based
 verification of compute-use agreements is basically a solved engineering problem.
 If it is an artefact of how the data was split, it is not. Our whole project
 inherits that claim as its foundation, so I wanted to know which it was before

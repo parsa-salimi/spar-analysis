@@ -5,7 +5,9 @@ training from interconnect telemetry**.
 
 Parsa Salimi. Mentor: Will Fowler. Co-mentee: Long Yi.
 
-**Start with [`STATUS.md`](STATUS.md)** — what exists, what it found, what is
+**Start with [`STATUS.md`](STATUS.md)**, and read
+[`RELATION_TO_PRIOR_WORK.md`](RELATION_TO_PRIOR_WORK.md) before quoting any
+number here against the paper's. — what exists, what it found, what is
 blocked on whom. Two minutes. [`GLOSSARY.md`](GLOSSARY.md) defines every term
 either file assumes.
 
@@ -28,7 +30,9 @@ That matters because compute-governance proposals lean on training runs being
 or if they are cheap to evade, those proposals need rewriting.
 
 Prior work (Rahman & Tajdari, arXiv 2606.19262) does this with nine **on-GPU**
-counters on **single nodes** and reports 98.2% accuracy. Our project changes the
+counters on **single nodes**, reporting 98.2% in-distribution accuracy and
+43–87% against unexpected adversarial workloads, and names multi-node
+interconnect as its first stated limitation. Our project changes the
 signal to **interconnect bytes** and the scale to **multi-node**, because the
 threat we care about — Seferis & Fist's "compute structuring" — is an adversary
 splitting a run so no single node looks like training.
@@ -41,8 +45,11 @@ Two pieces of work, each self-contained with its own write-up.
 
 ### `power_analysis/` — how much can this corpus actually support?
 
-The 98% is a property of how the data is split, not of the detector. Holding out
-progressively more honest units, on the same corpus with the same classifier:
+Accuracy depends strongly on what is held out. The paper's protocol groups by
+run; the first row below reproduces its result. The lower rows ask a stricter
+question it does not claim to answer — see
+[`RELATION_TO_PRIOR_WORK.md`](RELATION_TO_PRIOR_WORK.md), which also records what
+was already established in the team thread.
 
 | held out | groups | accuracy |
 |---|---:|---:|

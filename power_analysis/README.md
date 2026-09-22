@@ -26,7 +26,13 @@ but what is held out:
 | **workload family (knobs collapsed)** | **75** | **0.724** | **0.139** | 0.634 | **73%** |
 | mechanism class | 22 | 0.523 | 0.231 | 0.483 | 65% |
 
-The headline 98% is not a property of the detector. It is a property of the split.
+The 98% is an **in-distribution** number, and the paper says so — it groups by
+run explicitly and reports its out-of-distribution results separately (43–87% on
+unexpected workloads, in its own abstract). The top row here reproduces it. What
+the lower rows show is a *different, stricter question*: generalisation to a kind
+of workload never seen before. See [`../RELATION_TO_PRIOR_WORK.md`](../RELATION_TO_PRIOR_WORK.md)
+— including what was already established in the team thread before this analysis
+began, which is most of the qualitative conclusion.
 
 The estimate this corpus can actually support is **leave-one-family-out: 0.715 ± 0.080**
 (95% CI, n = 75 families). At the mechanism level it is **0.520 ± 0.150** (n = 22) —
