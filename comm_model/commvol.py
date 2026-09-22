@@ -5,14 +5,14 @@ interconnect per GPU per second, and with what *structure*?
 
 Design note — why traffic is modelled as COMPONENTS
 ---------------------------------------------------
-An earlier version of this file attached a symmetry and a cadence value to each
-workload according to its class ("training is metronomic, inference is Poisson").
-That is circular: any classifier fed those features would separate the classes
-perfectly because I had already separated them by hand.
+Attaching a symmetry or cadence value to a workload according to its CLASS
+("training is metronomic, inference is Poisson") is circular: any classifier fed
+those features separates the classes perfectly, because the separation was done
+by hand rather than derived.
 
-So every workload is instead built from `Flow` components, each of which is a
-specific collective or transfer with properties that follow from ITS OWN
-mechanism, not from the workload's label:
+So every workload is built from `Flow` components, each a specific collective or
+transfer whose properties follow from ITS OWN mechanism, never from the
+workload's label:
 
     ring all-reduce   symmetric (sends == receives), fixed size
     all-gather        symmetric, fixed size

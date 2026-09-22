@@ -56,12 +56,14 @@ H = C.HARDWARE["H100-SXM"]; M = C.MODELS
 # nothing, are trivially separable from anything that does, and would inflate
 # every number. The question here is how well the instrument resolves workloads
 # that DO communicate.
-# A FIRST ATTEMPT AT THIS POPULATION WAS USELESS and the failure is instructive.
-# Every training family used tp=1 and every serving family tp=8, so no training
-# family had ANY NVLink traffic and every serving family did -- "has NVLink
-# traffic" separated the classes perfectly. Every serving family's inter-node
-# traffic was also a directional KV push, so symmetry separated them perfectly
-# too. Result: AUC 1.000 in every condition, no knob measurable, nothing learned.
+# THE POPULATION HAS TO BE HARD OR NO KNOB IS MEASURABLE. If every training
+# family used tp=1 and every serving family tp=8, no training family would have
+# ANY NVLink traffic and every serving family would -- "has NVLink traffic" then
+# separates the classes perfectly. If every serving family's inter-node traffic
+# were a directional KV push, symmetry would separate them perfectly too. Either
+# gives AUC 1.000 in every condition: nothing is learned because there is no room
+# for a knob to matter. The hardness control in main() measures this rather than
+# assuming it.
 #
 # This population is built so the classes OVERLAP on the things that are easy to
 # see. Both sides use tensor parallelism inside the node, so both have heavy
@@ -184,12 +186,12 @@ from sklearn.metrics import roc_auc_score
 def evaluate(df: pd.DataFrame, shuffle: bool = False, seed: int = 0):
     """Leave-one-family-out, scores POOLED across folds.
 
-    A first version held out one training family and one serving family together
-    and took the mean AUC over the 35 pairs. That metric turned out to be nearly
-    binary -- a held-out pair is decided as a unit, so its AUC is 0 or 1, sd 0.40
-    across pairs -- which is the same all-or-nothing behaviour the power analysis
-    found, and it left a standard error of ~0.07 on every condition: far too wide
-    to resolve the differences this study is about.
+    Scores are POOLED across folds rather than scored per fold. Holding out one
+    training family and one serving family together and averaging the AUC over
+    the 35 pairs gives a nearly binary metric -- a held-out pair is decided as a
+    unit, so its AUC is 0 or 1, sd 0.40 across pairs -- the same all-or-nothing
+    behaviour the power analysis found, leaving a standard error of ~0.07 on
+    every condition, far too wide for the differences this study is about.
 
     Pooling instead: each family is held out exactly once, its out-of-fold scores
     are collected, and ONE AUC is computed over all of them. Same leakage
@@ -312,7 +314,7 @@ def main():
         floor = np.mean([evaluate(d0, shuffle=True, seed=s)[0] for s in range(5)])
         # HARDNESS control: how far does VOLUME alone get on this population, at
         # the ceiling? Demonstrates the population is hard instead of asserting
-        # it. A first attempt scored 1.000 here and had to be rebuilt.
+        # it: a population where this reads 1.000 cannot measure any knob.
         VOL = ["total_Bps_ib", "total_Bps_nvlink", "utilisation_ib", "utilisation_nvlink"]
         vol_only = evaluate(d0.assign(**{c: 0.0 for c in FEATURE_COLS if c not in VOL}))[0]
         S.to_csv(OUT / "conditions.csv", index=False)
