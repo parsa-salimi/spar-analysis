@@ -328,7 +328,7 @@ def main():
                   open(OUT / "controls.json", "w"), indent=1)
         print(f"\nFLOOR (shuffled labels): {floor:.3f}   must be ~0.5")
         print(f"HARDNESS (volume features only, at the ceiling): {vol_only:.3f}")
-        print(f"CEILING (200 Hz, 64-bit, perfect clocks): "
+        print(f"CEILING (50 Hz, 64-bit, perfect clocks): "
               f"{S[S.cond=='ceiling'].auc.iloc[0]:.3f}")
 
 

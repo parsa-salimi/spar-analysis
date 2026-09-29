@@ -49,6 +49,14 @@ strictly directional, so prefill nodes have `s ≈ 0` and decode nodes likewise.
 Pipeline parallelism is directional per transfer but symmetric at node level,
 because a middle stage receives as much as it forwards.
 
+**Symmetry clears; it does not accuse.** Co-located serving spread across nodes
+— pipeline stages or MoE experts on different nodes — is symmetric at node level
+too. So asymmetric inter-node traffic points to disaggregated serving, while
+symmetric traffic is ambiguous between training and co-located serving. The
+attack below is an attempt to fake the signature that clears a workload, and a
+detector still needs something other than symmetry — timing — to separate
+training from symmetric serving. `detector/` measures both.
+
 ---
 
 ## 2. The adversary
@@ -144,8 +152,15 @@ Breaking the `s* = 0.10` row down by regime:
 
 The mechanism is simple: **you cannot pad a link that is already full.** Large
 data-parallel training saturates its NICs, so there is no spare capacity to hide
-in, and every padded byte displaces a real one. Not one communication-bound
-configuration in the grid can pad to `s* = 0.10` for free.
+in, and every padded byte displaces a real one.
+
+Read the communication-bound row as arithmetic, not measurement. A configuration
+is communication-bound when its link is full, so padding `k` extra bytes per real
+byte costs exactly `1 + k` — the 10.00× in that row is 1 + 9. What the grid
+contributes is *how many* configurations are communication-bound (37% of the
+multi-node training grid), and that is a property of the configuration prior.
+The FSDP and world-size rows are informative in the same limited sense: they say
+where the saturated configurations sit.
 
 Small compute-bound DDP jobs can pad cheaply. Those are not the jobs
 compute-governance regimes are written about.
@@ -182,14 +197,27 @@ this ladder rather than a verdict.
 | | move | what it would resist | status |
 |---|---|---|---|
 | D0 | node-level window symmetry | A0 | in use |
-| D1 | symmetry of the high-pass component — separate a slowly-varying baseline, which the attacker sets freely, from the burst component, which A1 leaves untouched | A1 | **not built** |
+| D1 | symmetry of the burst component — separate a steady baseline, which the attacker sets freely, from the burst component, which A1 leaves untouched | A1 | **built and measured** — see below |
 | D2 | cross-node burst correlation — every node enters a collective together, so training bursts are synchronised cluster-wide in a way a background pad is not | A1, partly A2 | not built |
 
-**D1 is the next thing to build**, because A1 as modelled here adds a *constant*
-stream. The collective bursts underneath it are unchanged and still symmetric;
-only the baseline moves. If high-pass symmetry survives A1 at low cost to the
-defender, then A1 is defeated and the adversary is pushed to A2, which is the
-first move that costs real engineering rather than bandwidth.
+**D1 defeats A1.** A1 adds a *constant* stream: the collective bursts underneath
+it are unchanged and still symmetric, and only the baseline moves. Measured on
+synthetic traces in `detector/`, training against disaggregated serving, with a
+one-feature detector fitted on clean data and a decision at P > 0.5:
+
+| defence | training detected, clean | training detected, padded |
+|---|---:|---:|
+| raw symmetry (D0) | 100% | **0%** |
+| burst symmetry (D1) | 100% | **100%** |
+
+A1 therefore costs the adversary a median 4.26× slowdown and buys nothing against
+D1. The next rung is A2 — padding shaped to follow the collectives' bursts — which
+D1 does not resist by construction, and which is the first move that costs
+engineering rather than bandwidth.
+
+On the full population the question is moot for a different reason: detection
+there is carried by timing features that A1 does not move, so even the detector
+that uses raw symmetry loses almost nothing under attack.
 
 One caveat on byte conservation, which looks like a defence and is not: over the
 whole cluster `Σ T = Σ R` always, so padding cannot create net imbalance. But

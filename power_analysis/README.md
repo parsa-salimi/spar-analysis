@@ -108,6 +108,14 @@ false-positive rate that matters for a governance instrument, and it is invisibl
 any evaluation that lets some LLM inference into the training set. The converse also
 holds: 72% of LoRA fine-tuning is missed when no LoRA is in training.
 
+**These per-mechanism numbers measure coverage, not detectability.** Held out
+together, `train.ddp` and `train.fsdp` score 0.438 and 0.315 — each was being
+detected because the other sat in the training set. Randomly removing the same
+number of windows leaves `train.ddp` at 0.974, so this is not a data-volume
+effect. A mechanism is detected when something else in the corpus covers it, and
+the bottom rung of the grouping ladder is therefore an upper bound on
+detectability, not a floor. See `STATUS.md`, mechanism-transfer analysis.
+
 ![figures/f4_lofo_families.png](figures/f4_lofo_families.png)
 
 ---

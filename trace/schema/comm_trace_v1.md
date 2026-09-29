@@ -156,13 +156,14 @@ Two requirements follow:
   and treat any interval where the implied rate exceeds `peak_bw_bytes_per_s` as
   evidence of a missed wrap (set `flags` bit 1).
 
-**Measured requirement (see `trace/METHOD.md`):** sample at **≥ 2 Hz** and use
-the **64-bit** counters. Counter width turned out to matter more than sample
-rate over the whole range studied: 32-bit word counters degrade detection at
-every rate below 20 Hz, while above 1 Hz with 64-bit counters no further gain
-was measurable. Ordinary NTP (≤10 ms) is sufficient — it is enough for detection
-by a wide margin and is also what the cross-node synchrony feature needs. tx/rx
-read skew up to 10 ms is harmless.
+**Requirement (see `trace/METHOD.md`):** use the **64-bit** counters, and sample
+at **10 Hz, with 2 Hz as the floor**. The counter width requirement follows from
+the wrap arithmetic above, not from a measured loss of detection: a wrapped
+reading is simply the wrong number of bytes. On sample rate, 0.2 Hz fails,
+0.5–5 Hz is intermediate, and 10 Hz and above is indistinguishable from the best
+instrument studied. Ordinary NTP (≤10 ms) is sufficient — it is enough for
+detection by a wide margin and is also what the cross-node synchrony feature
+needs. tx/rx read skew up to 10 ms is harmless.
 
 The reader un-wraps as `delta = (v2 − v1) mod 2^width_bits`, which is correct for
 at most one wrap per interval and silently wrong beyond that. There is no way to

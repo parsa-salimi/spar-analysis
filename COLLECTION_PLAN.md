@@ -215,12 +215,13 @@ learn that at 14 families than at 28.
 Per `trace/schema/comm_trace_v1.md`, with the settings the artifact study
 established:
 
-- **tx and rx separately, per link.** Summing them discards the only feature that
-  survives held-out-family evaluation.
-- **≥ 2 Hz** sampling.
-- **64-bit counters.** Counter width matters more than sample rate across the
-  whole range studied; the standard 32-bit InfiniBand word counters wrap in
-  0.34 s at line rate.
+- **tx and rx separately, per link.** Summing them destroys the directional
+  information that identifies disaggregated serving, and with it the burst
+  symmetry that resists the padding attack.
+- **10 Hz** sampling, with 2 Hz as the floor.
+- **64-bit counters.** The standard 32-bit InfiniBand word counters wrap in
+  0.34 s at line rate; a wrapped counter reports the wrong number of bytes and
+  nothing in the values reveals it.
 - Ordinary NTP (≤ 10 ms) is sufficient; PTP is not worth the trouble.
 - The **communication signature** in `manifest.json`, so grouping stays auditable.
 - Both NVLink and NIC counters, kept separate.

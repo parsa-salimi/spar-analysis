@@ -1,5 +1,5 @@
 {
- "floor_shuffled_auc": 0.47081956592160673,
+ "floor_shuffled_auc": 0.4749303530936184,
  "hardness_volume_only_auc": 0.45714285714285713,
  "ceiling_auc": 0.9020408163265308,
  "n_families": 12,

@@ -1,0 +1,7 @@
+cell,rid
+s16_train_ddp_resnet50,2fe21a0d15bd
+s16_train_ddp_resnet50,674cd195ab50
+s16_train_fsdp30b,0b2bb8b7349b
+s16_train_fsdp7b,1ec3d1553df1
+s16_train_fsdp7b_seq2k,7d6a6984a6e9
+s16_train_fsdp7b_seq2k,840e86d3c499

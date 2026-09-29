@@ -7,6 +7,10 @@
 | you want | read |
 |---|---|
 | how these numbers relate to the paper's — **read before quoting one against the other** | `RELATION_TO_PRIOR_WORK.md` |
+| what Robi's multi-node branch contains, and what its real NIC data shows | `MULTINODE_BRANCH.md` |
+| **network-only detection on real multi-node data** | `network_detector/README.md` |
+| attack workloads aimed at the network detector, ready for Robi's queue | `attack_workloads/README.md` |
+| can timing catch one-directional training, and at what sample rate (simulated) | `cadence/README.md` |
 | what to collect in November and what it buys | `COLLECTION_PLAN.md` |
 | what any of the jargon means | `GLOSSARY.md` |
 | how the power analysis works, from scratch | `power_analysis/METHOD.md` |
@@ -61,9 +65,10 @@ is worth the care it has had.
 | 3 | **Trace schema + generator** | What does the collector write, and how do we build a detector before the hardware works? | ✅ done | `trace/` |
 | 3b | **Measurement-artifact study** | What does the *instrument* cost us, and what must the agent's settings be? | ✅ done | `trace/METHOD.md` |
 | 3c | **Collection plan** | What do we collect in November, and what precision does it buy? | ✅ done | `COLLECTION_PLAN.md` |
-| 4 | Aggregator + features + classifier | The detector itself | ⬜ not started | — |
+| 4b | **Network-only detection, real data** | Can a provider detect training from NIC counters alone, on unseen families? | ✅ on Robi's corpus; frozen predictions for the next round | `network_detector/` |
+| 4 | **Detector v0** | Which quantities carry the decision, and does the padding attack defeat it? | 🟡 v0 on synthetic traces | `detector/` |
 | 5 | Evasion evaluation | What does hiding cost the adversary? | 🟡 modelled, not measured | `comm_model/evasions.py` |
-| 5b | **Symmetry attack** | Can the one feature that works be evaded, and at what price? | 🟡 A1 measured; D1 defence not built | `comm_model/ATTACK_SYMMETRY.md` |
+| 5b | **Symmetry attack** | Can the symmetry feature be evaded, and at what price? | 🟡 A1 costed and defeated by D1; A2 not modelled | `comm_model/ATTACK_SYMMETRY.md` |
 
 Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 3 is the pipe everything else runs through.
@@ -93,12 +98,13 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
   accuracy (rho = -0.09). Randomly subsampling to 4,644 windows keeps held-out
   DDP at 0.974; removing FSDP specifically, at the same 4,644 windows, gives
   0.438.
-- **Detection is coverage, not transfer.** Trained on one training mechanism plus
-  all negatives, no mechanism teaches any other: DDP -> FSDP 0.23,
-  FSDP -> DDP 0.35, every other pair at or near zero. Yet the union of several
-  mechanisms covers DDP at 0.978. The classifier learns a patchwork, not an
-  abstraction, and a held-out mechanism is detected only if it lands inside some
-  other mechanism's patch.
+- **Detection is coverage, not transfer.** The strongest evidence is the union
+  result: no single other mechanism gets held-out DDP above 0.35, while several
+  together reach 0.978. The single-source matrix points the same way — trained on
+  one training mechanism plus all negatives, DDP -> FSDP 0.23, FSDP -> DDP 0.35,
+  every other pair near zero — but that design is biased toward zero, since with
+  one positive class anything unlike it looks negative. A fairer test trains on k
+  mechanisms and holds out the rest, for increasing k; not yet run.
 - **Leave-one-mechanism-out still leaks.** Held out alone, DDP scores 0.978; held
   out alongside FSDP, 0.438. Per-class numbers measure how well the rest of the
   corpus happens to cover that class, so the bottom rung of the grouping ladder
@@ -115,8 +121,11 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 
 - **Byte volume is a coin flip**: AUC 0.51 against co-located serving. 7B
   training sustains ~25 GB/s; disaggregated serving sustains ~27 GB/s.
-- **tx/rx symmetry is what works**: 0.757 → 0.965. Training averages gradients,
-  and averaging is symmetric; serving pushes cached state one direction.
+- **tx/rx symmetry separates training from disaggregated serving**: 0.757 →
+  0.965. Training averages gradients, and averaging is symmetric; disaggregated
+  serving pushes cached state one direction. **It clears; it does not accuse**:
+  co-located serving across nodes is symmetric too, so symmetric traffic is
+  ambiguous and something else — timing — has to separate it from training.
 - **Message size would be better still and is unobtainable** from a byte
   counter. It is excluded.
 - **Blind spot:** single-GPU training and replicated serving both emit nothing.
@@ -138,13 +147,23 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
   looks plausible: in test, 13.9% of bytes recovered, no alarm raised. The guard
   has to be a configuration check made *before* collection (`preflight()`), not a
   check on the values.
+- **The generator integrates counters exactly.** Any fixed integration grid
+  renders transfers shorter than one cell as rare, oversized spikes — unbiased in
+  total bytes, so byte-recovery tests pass, but small-message serving traffic
+  comes out bursty where the model makes it smooth (inter-node cv 0.72 against
+  0.02). Every synthetic result in this repo is computed with exact integration.
 
 **From the measurement-artifact study (3b):**
 
-- **Spec line for the agent: sample at ≥ 2 Hz, use 64-bit counters, ordinary NTP
-  is fine.** Counter width matters more than sample rate across the whole range.
-- Below 1 Hz detection degrades sharply; at 0.2 Hz with 32-bit counters it is
-  *worse than chance*.
+- **Spec line for the agent: 64-bit counters, 10 Hz sampling with 2 Hz as the
+  floor, ordinary NTP.** 0.2 Hz fails; 0.5–5 Hz is intermediate and noisy; 10 Hz
+  and above is indistinguishable from the best instrument studied. The 64-bit
+  requirement rests on the wrap arithmetic — a wrapped counter reports the wrong
+  bytes — not on a measured detection loss, which the study does not resolve.
+- **Between 0.5 and 50 Hz the AUC curve is decided by one family.** `ddp_7b`, the
+  only training family without NVLink traffic, flips between 0 and 1 regardless
+  of the knob — the power analysis's coverage failure in miniature. Per-family
+  scores and families-correct are reported alongside every AUC for that reason.
 - **Clock skew kills the cross-node synchrony feature (0.94 → 0.03) without
   hurting detection** — the other features carry the signal redundantly.
 - The study resolves one workload family = 0.083 AUC. Most knobs therefore read
@@ -160,8 +179,46 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
    conversion happen in the reader, where they can be redone.
 3. **Use 64-bit extended counters.** The standard 32-bit sysfs IB counters are
    unsafe below ~93 Hz on an 8-NIC node.
-4. Nothing from an in-process hook enters the feature set — that is the adversary
+4. **Sample at 10 Hz, with 2 Hz as the floor.**
+5. Nothing from an in-process hook enters the feature set — that is the adversary
    reporting on itself.
+
+---
+
+**From network-only detection on real data (4b):**
+
+- **A two-number rule on NIC counters — traffic present and balanced — catches
+  92% of training from held-out families at 0.2% false alarms** on Robi's
+  two-node H100/A100 jobs. Learned models on the same held-out families fail on
+  either channel: per-GPU catches 5% at 70% false alarms, a learned network model
+  74% at 72%. With seven families, learning cannot generalise; the mechanism does.
+- **Pipeline-sharded serving is cleared completely**, including the 72B
+  long-context configurations the per-GPU detector alarms on.
+- **Interleaving training with filler does not hide it from the network**: it is
+  caught at the rate it actually trains.
+- **The blind spot is training without cross-node synchronisation**, and the
+  predicted false alarms are balanced non-ML communication (all-to-all, halo
+  exchange). The rule is frozen with predictions for the next collection round.
+- **Symmetry measures the all-reduce, not training.** Evading it
+  (`network_detector/ATTACKS.md`): rare synchronisation is the structural limit
+  and needs ~100× compression on top to get under the noise floor; a lopsided
+  parameter server is free on two nodes but costs ≥ ⅓ of GPU nodes, or
+  proportionally slower communication, at scale.
+
+**From the detector (4):**
+
+- **Burst symmetry defeats the padding attack.** Training vs disaggregated
+  serving: a raw-symmetry detector goes from 100% to **0%** detection under
+  padding; a burst-symmetry detector stays at **100%**.
+- **On the full population detection is carried by timing.** Cadence and
+  cross-node synchrony alone detect 81% of training windows with no false
+  positives, and the attack does not move them. That separation is the
+  generator's assumption — training periodic and synchronised, serving
+  irregular — so validating timing on the first real traces is now the
+  load-bearing check.
+- **Raw-volume features cause false positives.** The artifact study's detector
+  calls 2 of 5 serving families training (40%); restricting to burst-based and
+  shift-invariant features cuts that to 2.4%.
 
 ---
 
@@ -187,10 +244,16 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 
 ## Next
 
-- The detector itself: aggregator, full feature extractor, and a two-stage
-  classifier whose second stage is blind to absolute byte volume.
-- Oct 12 midterm outline. The threat model, methods and evaluation sections are
-  largely written across the three METHOD documents.
+- **Pre-register the validation protocol**, Tier B first: burst duty cycle,
+  interval regularity and cross-node correlation are what the detector now rests
+  on. `trace/validate.py` exists and is untested; `VALIDATION.md` does not.
+- **Attack rung A2** — padding shaped to follow the collectives' bursts, which
+  burst symmetry does not resist by construction.
+- **Population:** a second training family without tensor parallelism, so no
+  mechanism is a singleton; then re-run the artifact study.
+- **Coverage, fairly tested:** train on k mechanisms, hold out the rest, for
+  increasing k; and the false-positive side of the transfer matrix.
+- Oct 12 midterm outline.
 
 ---
 
@@ -203,6 +266,7 @@ Each piece depends on the one above it. 1 is the ruler. 2 says what to measure.
 | Accept ±0.22, knowing more nodes will not narrow it? | Will | Bounds every claim in the December report |
 | Do DCGM fields 1011/1012 return bytes or a rate, at what width? | Long | Has never returned a real value in our data |
 | vLLM with paged KV in the benign suite | Long | Without it the corpus contains no KV traffic at all |
+| Are the 64-bit extended IB counters (`counters_ext`) exposed? | Long | If not, the agent needs ~93 Hz on an 8-NIC node |
 
 ---
 
@@ -229,6 +293,47 @@ conversation, so the explanation outlives the chat it was written in.
 ---
 
 ## Changelog
+
+- **2026-09-25** — `cadence/hardening.py`: a classifier trained on other attacks
+  does not catch an unseen one (paced 34%, stealth 0%) and flags 60–77% of honest
+  serving; trained on the same attacks it catches 95–99% by fingerprinting them.
+  `network_detector/ATTACKS.md` gains the rule-versus-every-attack table.
+
+- **2026-09-24** — `cadence/`: simulated. Burst shape separates one-directional
+  training from online serving at 10 Hz (AUC 0.97; ~8 samples per step needed)
+  and is worse than chance at 1 Hz. A paced parameter server evades it at every
+  rate for one step of staleness. Against an adaptive trainer, what per-node
+  counters retain is volume.
+
+- **2026-09-24** — `attack_workloads/`: GPU DiLoCo (rare sync; burst or trickle;
+  int8/int4) and a lopsided parameter server (top-c upload, dense download),
+  written for Robi's queue. 22/22 CPU checks pass, including exact agreement with
+  reference implementations; predicted network-rule calls per cell. The
+  parameter server is expected to evade the rule outright on two nodes.
+
+- **2026-09-24** — `network_detector/ATTACKS.md`: what evading the network rule
+  costs, anchored on measured noise floor (p99 0.19 MiB/s) and one-way reverse
+  traffic (4–17%).
+
+- **2026-09-24** — `network_detector/`: network-only detection on Robi's real
+  multi-node corpus. The network rule catches 92% of held-out-family training at
+  0.2% false alarms, against 5% at 70% for the learned per-GPU model. Six idle
+  jobs labelled as training found in the corpus. Rule frozen with predictions in
+  `network_detector/PREDICTIONS.md`.
+
+- **2026-09-24** — `MULTINODE_BRANCH.md`: digest of Robi's multi-node branch.
+  Real H100 NIC data: every cross-node training cell has per-node symmetry
+  0.954–0.961 and every pipeline-sharded serving cell 0.04–0.18. The generator
+  models pipeline serving as symmetric and needs its inference `p2p` flow made
+  forward-only.
+
+- **2026-09-22** — Detector v0 (`detector/`): baseline/burst split, burst
+  symmetry, and the padding attack with its cost paid inside the trace as a
+  slowdown. Burst symmetry defeats the attack; on the full population timing
+  carries detection. Generator now integrates counters exactly; the artifact
+  study was re-run on it, and its spec line is now 64-bit counters and 10 Hz with
+  a 2 Hz floor, with the sample-rate curve shown to be dominated by a single
+  coverage-marginal family.
 
 - **2026-09-22** — Symmetry attack formalised and costed. Adversary
   capabilities, cost metric and an attacker/defender escalation ladder fixed in

@@ -66,9 +66,10 @@ FSDP costs 1.5× the bytes and lets you train what doesn't. Above roughly 13B on
 80 GB cards you have no choice.
 
 **Why the distinction keeps coming up here:** in the power analysis, held-out
-`train.ddp` scored **0.978** and held-out `train.fsdp` scored **0.577**. DDP is
-the toy case; FSDP is what anyone training a frontier model actually uses. That
-gap is an open research question in this repo.
+`train.ddp` scored 0.978 and held-out `train.fsdp` scored 0.577 — but held out
+*together* they score 0.438 and 0.315. Neither generalises on its own; each was
+being covered by the other's presence in the training set. See **coverage**
+below.
 
 ### Tensor parallel (TP)
 
@@ -150,6 +151,11 @@ NVLink bytes. They have never returned a real value in our data.
 counts **4-byte words**, not bytes, and is **32 bits wide** on the standard
 counters. `/sys/class/net/<if>/statistics/tx_bytes` counts bytes and is 64-bit.
 
+**Baseline and burst** — a node's byte rate over a window split into a steady
+floor (a low percentile of the rate) and the bursts above it. Collectives arrive
+as bursts; a saturated link, a background stream or deliberate padding sits in
+the baseline. **Burst symmetry** is tx/rx symmetry computed on the bursts alone.
+
 **Counter wraparound** — counters fill and roll back to zero. A 32-bit word
 counter holds 17.2 GB, which at IB NDR line rate is **0.34 seconds**.
 
@@ -167,6 +173,11 @@ memory.
 **DiLoCo** — each worker takes H local steps and workers synchronise only once
 per H. Cuts data-parallel traffic by a factor of H. In our model: 1,500× quieter
 at no wall-clock cost, and *faster* when the baseline was network-bound.
+
+**Partition padding** — an attack on symmetry: split the nodes into senders and
+receivers and stream dummy bytes between them so training looks as one-directional
+as disaggregated serving. Needs ~9× the job's own inter-node traffic, so it slows
+a saturated job by up to 10×. See `comm_model/ATTACK_SYMMETRY.md`.
 
 **Gradient accumulation** — accumulate gradients over k micro-batches before
 syncing. Cuts sync traffic per token by k, at the cost of a larger effective
@@ -193,6 +204,12 @@ score points the wrong way**.
 **ICC — intraclass correlation** — the fraction of total variance that sits
 *between* groups rather than *within* them. At ICC ≈ 0.98, an 8-hour run at 1 Hz
 carries about 1.3 windows' worth of independent information, not 28,800.
+
+**Coverage** — a held-out workload is detected only if other workloads in the
+training set happen to cover its region of feature space. Detection that works by
+coverage generalises to new *instances* of known mechanisms, not to new
+mechanisms: trained on one training mechanism, the classifier detects almost no
+other.
 
 **Leave-one-family-out** — hold out each workload family in turn, train on the
 rest. The confidence interval comes from the measured spread of per-family

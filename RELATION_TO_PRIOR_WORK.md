@@ -182,8 +182,10 @@ classifier already does that to itself, with no adversary present.
 ### 3f. Sampling rate, clock skew and counter width
 
 `trace/METHOD.md` answers the paper's limitation 5 and produces a spec line for
-the collection agent: sample at ≥ 2 Hz, use 64-bit counters, ordinary NTP is
-sufficient.
+the collection agent: 64-bit counters, 10 Hz sampling with 2 Hz as the floor,
+ordinary NTP. On synthetic traffic only 0.2 Hz is clearly worse than the best
+instrument studied; above 0.5 Hz the study resolves no more than a suggestive
+improvement up to about 10 Hz.
 
 ### 3g. Whether interconnect volume separates the classes at all
 

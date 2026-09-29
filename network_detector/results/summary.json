@@ -1,0 +1,35 @@
+{
+ "totals_honest_heldout": {
+  "net": {
+   "FPR (window)": 0.7158,
+   "TPR (window)": 0.7406,
+   "FPR (job)": 0.7727,
+   "TPR (job)": 0.7895
+  },
+  "gpu": {
+   "FPR (window)": 0.7027,
+   "TPR (window)": 0.0499,
+   "FPR (job)": 0.6818,
+   "TPR (job)": 0.0526
+  },
+  "both": {
+   "FPR (window)": 0.8151,
+   "TPR (window)": 0.1706,
+   "FPR (job)": 0.7955,
+   "TPR (job)": 0.1579
+  },
+  "rule": {
+   "FPR (window)": 0.0016,
+   "TPR (window)": 0.9237,
+   "FPR (job)": 0.0,
+   "TPR (job)": 0.9474
+  },
+  "combined": {
+   "FPR (window)": 0.1146,
+   "TPR (window)": 0.9237,
+   "FPR (job)": 0.0227,
+   "TPR (job)": 0.9474
+  }
+ },
+ "note": "written by evaluate.py; see totals.csv"
+}

@@ -154,15 +154,15 @@ the schema refuses a summed-bytes column.
 `sym` to a flow, and one pipeline send really is strictly directional — but a
 middle pipeline stage receives from its predecessor as much as it sends to its
 successor, so at node level it is symmetric. The genuinely asymmetric case is
-narrower than first claimed: the KV-cache push, where prefill nodes only send
+narrow: the KV-cache push, where prefill nodes only send
 and decode nodes only receive. The generator derives symmetry from accumulated
 tx/rx rather than from the flow's label.
 
 **Transfers are ramps, not impulses.** A 700 GB all-gather takes 1.75 s at line
 rate; the counter rises steadily through it. Modelling transfers as instantaneous
-produced sample intervals implying **2.9 TB/s on a 400 GB/s link** — physically
-impossible, and it fired the wrap heuristic as a false positive. Caught by the
-tests, fixed in `_cumulative_at`.
+implies sample intervals at **2.9 TB/s on a 400 GB/s link** — physically
+impossible, and it fires the wrap heuristic as a false positive.
+`_cumulative_at` integrates each ramp exactly, at any transfer size.
 
 ---
 
@@ -171,11 +171,14 @@ tests, fixed in `_cumulative_at`.
 Done — see [`METHOD.md`](METHOD.md). Sweeping sample rate, counter width, clock
 skew and tx/rx read skew over 12 workload families gives the spec line:
 
-> **Sample at ≥ 2 Hz, use the 64-bit counters, ordinary NTP is fine.**
+> **Use the 64-bit counters, sample at 10 Hz with 2 Hz as the floor, ordinary
+> NTP is fine.**
 
-Counter width matters more than sample rate. Clock skew destroys the cross-node
-synchrony feature (0.94 → 0.03 from perfect sync to 1 s) without hurting
-detection, because the other features carry the signal redundantly.
+0.2 Hz fails; 10 Hz and above is indistinguishable from the best instrument
+studied. The 64-bit requirement rests on the wrap arithmetic, not on a measured
+detection loss. Clock skew destroys the cross-node synchrony feature (0.94 → 0.03
+from perfect sync to 1 s) without hurting detection, because the other features
+carry the signal redundantly.
 
 The study's resolution is one workload family = 0.083 AUC, so most knobs come
 back "no measurable effect" rather than "no effect" — the same

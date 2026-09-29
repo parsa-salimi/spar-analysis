@@ -67,7 +67,7 @@ of replication — the lesson from the power analysis, applied to my own study.
 
 | control | value | what it establishes |
 |---|---:|---|
-| floor — labels shuffled | **0.471** | must be ~0.5, or something leaks |
+| floor — labels shuffled | **0.475** | must be ~0.5, or something leaks |
 | hardness — volume features only, at the ceiling | **0.457** | the population really is hard, demonstrated not asserted |
 | ceiling — 50 Hz, 64-bit, perfect clocks | **0.902** (11/12 families) | the best instrument we would actually consider |
 
@@ -75,7 +75,7 @@ of replication — the lesson from the power analysis, applied to my own study.
 
 ## 3. The result
 
-![figures/a1_measurement_artifacts.png](figures/a1_measurement_artifacts.png)
+![figures/a1_measurement_artifacts.png](artifact_results/figures/a1_measurement_artifacts.png)
 
 **The study's resolution is one workload family, which is 1/12 = 0.083 of AUC.**
 Nothing smaller than that is measurable here, and most of the differences in the
@@ -84,33 +84,54 @@ everything that follows.
 
 ### What is resolved
 
-**Sampling below 1 Hz fails.** At 0.2 Hz with 64-bit counters the AUC falls to
-0.572 and three families flip; with 32-bit counters it falls to 0.401 — *worse
-than chance*, with only 6 of 12 families correct. At 0.5 Hz the 64-bit case has
-already recovered to 0.871 (10/12).
+**0.2 Hz fails.** It is the one sample rate that is worse than the ceiling across
+most families rather than one: with 64-bit counters the AUC is 0.518 and 8 of 11
+families are called correctly; with 32-bit counters, 0.429 and 7 of 11. Training
+families that are otherwise certain drop to 0.56–0.66, and a pipeline-serving
+family is called training at 0.99.
 
-**Counter width matters more than sample rate.** 32-bit word counters are worse
-at every rate below 20 Hz, and the gap is large: 0.592 vs 0.873 at 5 Hz, 0.664 vs
-0.779 at 10 Hz. This is the wraparound problem from `trace/README.md` biting
-exactly as predicted — a 32-bit word counter holds 17.2 GB, which at line rate
-is a third of a second.
+**Clock skew and tx/rx read skew have no measurable effect on detection** — skew
+anywhere from 0 to 1000 ms, read skew up to 10 ms.
 
 ### What is not resolved
 
-**Clock skew has no measurable effect on detection** anywhere from 0 to 1000 ms.
-Every paired comparison against the ceiling crosses zero.
+**Between 0.5 and 50 Hz the AUC curve is decided by one family.** Held-out
+`ddp_7b` scores either 0.00 or 1.00 depending on the condition, with no relation
+to the knob. It is the only training family with tensor-parallel degree 1, so
+the only one with no NVLink traffic, and nothing else in the population covers
+it — the coverage failure from the power analysis, reproduced in miniature. At
+one-seventh of the training windows, its flip moves the AUC by about ±0.2, which
+is larger than any effect the knob produces.
 
-**tx/rx read skew has no measurable effect** up to 10 ms.
+Setting it aside — a post-hoc sensitivity check, labelled as such — leaves a
+readable trend for 64-bit counters:
 
-**Between 1 Hz and 50 Hz with 64-bit counters, nothing is distinguishable.** The
-apparent wobble — 0.779 at 10 Hz, 0.939 at 20 Hz — is one family flipping back
-and forth. It is not a finding and should not be read as one.
+| sample rate | AUC excl. `ddp_7b` | families right (of 11) |
+|---|---:|---:|
+| 0.2 Hz | 0.604 | 8 |
+| 0.5 – 5 Hz | 0.77 – 0.82 | 8 – 10 |
+| 10 – 50 Hz | 0.88 – 0.92 | 10 |
+| ceiling | 0.919 | 10 |
+
+and one family with a clean dose–response: the false-positive score of
+`pp_serve_32b` falls 0.99 → 0.68 → 0.26 → 0.17 → 0.08 → 0.03 from 0.2 Hz to
+10 Hz. Together these suggest detection keeps improving up to about 10 Hz. At a
+resolution of one family, that is suggestive, not established.
+
+**Counter width has no consistent effect on detection.** With the coin-flip
+family set aside, 32-bit and 64-bit counters trade places from one rate to the
+next. That is not evidence that 32-bit counters are safe. A wrapped counter
+reports the wrong number of bytes — the trace tests recover 14% of the true
+total, with no alarm raised — and this classifier happens not to depend on
+correct magnitudes. Anything that does breaks: the byte-total checks in the
+validation protocol, any volume-anomaly reasoning, and the cost argument against
+the padding attack.
 
 ### The one genuinely interesting result
 
 **Clock skew destroys the cross-node synchrony feature without hurting
 detection.** That feature — do all the nodes transmit at the same instant? —
-falls from 0.944 at perfect sync to 0.929 at 10 ms, 0.281 at 100 ms and 0.025 at
+falls from 0.944 at perfect sync to 0.930 at 10 ms, 0.281 at 100 ms and 0.025 at
 1 second. It is comprehensively dead. Detection does not move, because the other
 features carry the signal redundantly.
 
@@ -121,7 +142,7 @@ reading real traces and one number looks wrong.
 
 ---
 
-## 4. Four ways this study can measure nothing, and what stops each
+## 4. Six ways this study can measure nothing, and what stops each
 
 Each of these was caught by one of the controls in §2, which is the argument for
 having them.
@@ -174,17 +195,41 @@ index off a shared grid for this reason, and `window_features` takes an explicit
 
 ---
 
+### 4e. A singleton mechanism turns the curve into a coin flip
+
+If one family is the only representative of its mechanism, its held-out score
+depends on whichever other family it happens to sit nearest, and small changes
+in the instrument flip it wholesale. `ddp_7b` is that family here (§3). Per-family
+scores and the count of families called correctly are reported alongside every
+AUC so that a single flip is visible as one, and the population for any future
+version should contain no mechanism with fewer than two families.
+
+### 4f. Integrating on a fixed grid misrenders small transfers
+
+Counter values are the integral of every transfer's ramp up to the sample time.
+Integrated on a fixed grid, a transfer shorter than one grid cell either vanishes
+or is spread over a whole cell at line rate — unbiased in total bytes, so byte
+recovery tests still pass, but small-message traffic comes out as rare oversized
+spikes. Serving families move small messages, so they would look far burstier
+than the modelled traffic (inter-node cv 0.72 where the model gives 0.02).
+`_cumulative_at` integrates exactly, from prefix sums over start and end times,
+at any transfer size.
+
+---
+
 ## 5. What goes in the schema
 
-> **Sample at ≥ 2 Hz.** 1 Hz is the point at which nothing is yet measurably
-> lost; 2 Hz is margin. Below 1 Hz detection degrades sharply and below 0.5 Hz it
-> collapses. Sampling faster than 2 Hz bought nothing measurable here, so the
-> cost of going faster is Long's to weigh against agent overhead, not ours.
+> **Use the 64-bit extended counters.** Required on arithmetic rather than on
+> this study's AUCs: a 32-bit InfiniBand word counter wraps in 0.34 s at one NIC's
+> line rate, a wrapped reading is wrong rather than missing, and no check on the
+> values can tell (`trace/README.md`).
 >
-> **Use the 64-bit extended counters.** This is the single most consequential
-> choice — larger than the sample rate over the whole range studied. If only
-> 32-bit counters are available, the required rate rises steeply and detection
-> is degraded at every rate below 20 Hz.
+> **Sample at 10 Hz; treat 2 Hz as the floor.** 0.2 Hz fails. Between 0.5 and
+> 5 Hz detection is intermediate and noisy, and from 10 Hz up it is
+> indistinguishable from the ceiling once the one coverage-marginal family is set
+> aside. There is a mechanistic reason as well: steps in this population last
+> roughly 1–10 s, and a burst pattern needs several samples per step to be seen.
+> At 10 Hz that is 10–100 samples per step; at 2 Hz, 2–20.
 >
 > **Ordinary NTP (≤10 ms) is sufficient.** It is enough for detection by a wide
 > margin, and it is also what the cross-node synchrony feature needs. PTP is not
@@ -201,8 +246,12 @@ index off a shared grid for this reason, and `window_features` takes an explicit
 than modelled, the true requirement is *higher*. It tells Long where to start,
 not where to stop, and must be re-validated against the first real traces.
 
-**Twelve families is not many.** The resolution is 0.083 AUC, which is why most
-knobs come back "no measurable effect" rather than "no effect". Resolving a 0.03
+**Twelve families is not many, and one of them is a singleton.** The resolution
+is one family, and with a coverage-marginal family in the population a single
+flip moves the AUC by about 0.2 (§4e). Most knobs therefore come back "no
+measurable effect" rather than "no effect". The paired comparisons are also not
+corrected for the 27 conditions tested, so an isolated "resolved" flag should be
+read as a prompt to look at the per-family scores, not as a finding. Resolving a 0.03
 difference would need roughly ten times the families — the same arithmetic as the
 power analysis, and the same answer: precision is bought with families.
 
