@@ -1,0 +1,10 @@
+sync_interval_s,window_cov_burst,window_cov_spread,caught_any_window,caught_majority_burst
+10,1.0,1.0,True,True
+20,1.0,1.0,True,True
+30,0.996,1.0,True,True
+60,0.496,1.0,True,False
+120,0.244,1.0,True,False
+300,0.092,1.0,True,False
+600,0.042,1.0,True,False
+1200,0.017,1.0,True,False
+3600,0.0,1.0,False,False
