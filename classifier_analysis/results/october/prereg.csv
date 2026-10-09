@@ -1,0 +1,13 @@
+cells,cls,predicted,jobs,jobs_matching,windows_called,median_sym,median_rate_mibps
+train_lora,training,training,8,8,0.923,0.999,18.993
+train_contrastive$,training,training,4,4,1.0,0.999,2025.927
+train_diffusion$,training,training,4,4,1.0,0.999,640.102
+train_pipe7b$,training,training,4,4,0.895,0.989,477.117
+advtrain_pipe(1b|70b),training,training,13,11,0.823,0.989,898.473
+inferrec_dlrm,inference,false alarm,8,8,1.0,0.999,5955.32
+nonml_fftshard,other,false alarm,8,8,1.0,0.999,6585.092
+nonml_stencil$,other,false alarm,4,4,1.0,0.999,2835.191
+nonml_nccl_bw$,other,false alarm,4,4,1.0,0.999,4906.327
+(infervis_vitl|inferembed_|inferdiff_sdxl|inferasr_whisper|infercnn_rn50|inferhf_qwen7b),inference,no call,23,23,0.0,0.635,0.002
+inferhf_shard72b,inference,no call,6,6,0.0,0.434,0.001
+(infermem_|inferserve_),inference,cleared,34,34,0.0,0.005,128.863

@@ -1,0 +1,820 @@
+held,is_train,m,draw,fs,called,p_mean
+s16_inferrep_qwen1_5b,0,3,0,NIC (14),0.0,0.026287939380806546
+s16_inferrep_qwen1_5b,0,3,0,GPU (all 174),0.0,0.0006713875555206856
+s16_inferrep_qwen1_5b,0,3,0,Everything,0.0,0.0067921950089745815
+s16_inferrep_qwen1_5b,0,3,1,NIC (14),0.07017543859649122,0.3060664519437687
+s16_inferrep_qwen1_5b,0,3,1,GPU (all 174),0.0,0.2772917772131883
+s16_inferrep_qwen1_5b,0,3,1,Everything,0.0,0.3152769278664614
+s16_inferrep_qwen1_5b,0,3,2,NIC (14),0.2631578947368421,0.39812744669235095
+s16_inferrep_qwen1_5b,0,3,2,GPU (all 174),0.10526315789473684,0.4471287038712739
+s16_inferrep_qwen1_5b,0,3,2,Everything,0.10526315789473684,0.4484871164755429
+s16_inferrep_qwen1_5b,0,6,0,NIC (14),0.0,0.005956915739147335
+s16_inferrep_qwen1_5b,0,6,0,GPU (all 174),0.0,0.005909226351031865
+s16_inferrep_qwen1_5b,0,6,0,Everything,0.0,0.010977937642077532
+s16_inferrep_qwen1_5b,0,6,1,NIC (14),0.05263157894736842,0.26139124376017314
+s16_inferrep_qwen1_5b,0,6,1,GPU (all 174),0.0,0.03270226760979269
+s16_inferrep_qwen1_5b,0,6,1,Everything,0.0,0.022599725366875652
+s16_inferrep_qwen1_5b,0,6,2,NIC (14),0.0,0.002745177119042818
+s16_inferrep_qwen1_5b,0,6,2,GPU (all 174),0.0,0.010980380416342335
+s16_inferrep_qwen1_5b,0,6,2,Everything,0.0,0.008668035592888644
+s16_inferrep_qwen1_5b,0,10,0,NIC (14),0.0,0.04526115033660839
+s16_inferrep_qwen1_5b,0,10,0,GPU (all 174),0.0,0.0058319832600635035
+s16_inferrep_qwen1_5b,0,10,0,Everything,0.0,0.0018631432123648992
+s16_inferrep_qwen1_5b,0,10,1,NIC (14),0.22807017543859648,0.24569893427172004
+s16_inferrep_qwen1_5b,0,10,1,GPU (all 174),0.0,0.08744017785249907
+s16_inferrep_qwen1_5b,0,10,1,Everything,0.0,0.20113868753827197
+s16_inferrep_qwen1_5b,0,10,2,NIC (14),0.0,0.0033948596179169664
+s16_inferrep_qwen1_5b,0,10,2,GPU (all 174),0.0,0.010035038827891885
+s16_inferrep_qwen1_5b,0,10,2,Everything,0.0,0.010588499186324162
+s16_inferrep_qwen1_5b,0,15,0,NIC (14),0.0,0.025126931036808273
+s16_inferrep_qwen1_5b,0,15,0,GPU (all 174),0.0,0.006935003731616664
+s16_inferrep_qwen1_5b,0,15,0,Everything,0.0,0.005058252023408584
+s16_inferrep_qwen1_5b,0,15,1,NIC (14),0.0,0.027288579525224236
+s16_inferrep_qwen1_5b,0,15,1,GPU (all 174),0.0,0.01142314669085552
+s16_inferrep_qwen1_5b,0,15,1,Everything,0.0,0.0067807332471468895
+s16_inferrep_qwen1_5b,0,15,2,NIC (14),0.0,0.026314289132611537
+s16_inferrep_qwen1_5b,0,15,2,GPU (all 174),0.0,0.006635637594445157
+s16_inferrep_qwen1_5b,0,15,2,Everything,0.0,0.0057667666846461805
+s16_inferrep_qwen1_5b,0,20,0,NIC (14),0.08771929824561403,0.15620657390958792
+s16_inferrep_qwen1_5b,0,20,0,GPU (all 174),0.0,0.017563245965367003
+s16_inferrep_qwen1_5b,0,20,0,Everything,0.0,0.025502906003288053
+s16_infershard_qwen1_5b_kv16k_b48,0,3,0,NIC (14),0.0,0.0021554884408302743
+s16_infershard_qwen1_5b_kv16k_b48,0,3,0,GPU (all 174),0.0,0.00792770329420628
+s16_infershard_qwen1_5b_kv16k_b48,0,3,0,Everything,0.0,0.007641224966423531
+s16_infershard_qwen1_5b_kv16k_b48,0,3,1,NIC (14),0.0,0.08044037335620577
+s16_infershard_qwen1_5b_kv16k_b48,0,3,1,GPU (all 174),0.0,0.03922763016675991
+s16_infershard_qwen1_5b_kv16k_b48,0,3,1,Everything,0.0,0.04130642518206615
+s16_infershard_qwen1_5b_kv16k_b48,0,3,2,NIC (14),0.0,0.0005019895928986838
+s16_infershard_qwen1_5b_kv16k_b48,0,3,2,GPU (all 174),0.0,0.13626408784817878
+s16_infershard_qwen1_5b_kv16k_b48,0,3,2,Everything,0.0,0.07487779872086094
+s16_infershard_qwen1_5b_kv16k_b48,0,6,0,NIC (14),0.0,0.0047365687412134145
+s16_infershard_qwen1_5b_kv16k_b48,0,6,0,GPU (all 174),0.0,0.07185027382234742
+s16_infershard_qwen1_5b_kv16k_b48,0,6,0,Everything,0.0,0.05434945702782826
+s16_infershard_qwen1_5b_kv16k_b48,0,6,1,NIC (14),0.0,0.0003655370089360985
+s16_infershard_qwen1_5b_kv16k_b48,0,6,1,GPU (all 174),0.0,0.05685350854735647
+s16_infershard_qwen1_5b_kv16k_b48,0,6,1,Everything,0.0,0.055825549373349055
+s16_infershard_qwen1_5b_kv16k_b48,0,6,2,NIC (14),0.0,0.09178158511458495
+s16_infershard_qwen1_5b_kv16k_b48,0,6,2,GPU (all 174),0.044444444444444446,0.11837562209677789
+s16_infershard_qwen1_5b_kv16k_b48,0,6,2,Everything,0.044444444444444446,0.1265979058535166
+s16_infershard_qwen1_5b_kv16k_b48,0,10,0,NIC (14),0.0,0.01052927953803181
+s16_infershard_qwen1_5b_kv16k_b48,0,10,0,GPU (all 174),0.0,0.1273962549123674
+s16_infershard_qwen1_5b_kv16k_b48,0,10,0,Everything,0.0,0.08745322884093243
+s16_infershard_qwen1_5b_kv16k_b48,0,10,1,NIC (14),0.0,9.97581943509715e-05
+s16_infershard_qwen1_5b_kv16k_b48,0,10,1,GPU (all 174),0.0,0.012962833446764119
+s16_infershard_qwen1_5b_kv16k_b48,0,10,1,Everything,0.0,0.003284943379536156
+s16_infershard_qwen1_5b_kv16k_b48,0,10,2,NIC (14),0.0,0.0001737482026940038
+s16_infershard_qwen1_5b_kv16k_b48,0,10,2,GPU (all 174),0.0,0.006180676328502415
+s16_infershard_qwen1_5b_kv16k_b48,0,10,2,Everything,0.0,0.0027661988392663896
+s16_infershard_qwen1_5b_kv16k_b48,0,15,0,NIC (14),0.0,0.001587978624772296
+s16_infershard_qwen1_5b_kv16k_b48,0,15,0,GPU (all 174),0.0,0.01123231662966228
+s16_infershard_qwen1_5b_kv16k_b48,0,15,0,Everything,0.0,0.0032701780840710282
+s16_infershard_qwen1_5b_kv16k_b48,0,15,1,NIC (14),0.0,0.040016565906912466
+s16_infershard_qwen1_5b_kv16k_b48,0,15,1,GPU (all 174),0.0,0.05191377734603408
+s16_infershard_qwen1_5b_kv16k_b48,0,15,1,Everything,0.0,0.040238600928983466
+s16_infershard_qwen1_5b_kv16k_b48,0,15,2,NIC (14),0.0,0.005867040150250421
+s16_infershard_qwen1_5b_kv16k_b48,0,15,2,GPU (all 174),0.0,0.011768236665565117
+s16_infershard_qwen1_5b_kv16k_b48,0,15,2,Everything,0.0,0.0076071224018618025
+s16_infershard_qwen1_5b_kv16k_b48,0,20,0,NIC (14),0.0,0.01200940163389602
+s16_infershard_qwen1_5b_kv16k_b48,0,20,0,GPU (all 174),0.0,0.013538342603516558
+s16_infershard_qwen1_5b_kv16k_b48,0,20,0,Everything,0.0,0.007506297099788523
+s16_infershard_qwen1_5b_tp4pp4,0,3,0,NIC (14),0.0,0.025517541565039957
+s16_infershard_qwen1_5b_tp4pp4,0,3,0,GPU (all 174),0.0,0.016211221384652114
+s16_infershard_qwen1_5b_tp4pp4,0,3,0,Everything,0.0,0.01757745724714006
+s16_infershard_qwen1_5b_tp4pp4,0,3,1,NIC (14),0.0,0.037320657212151866
+s16_infershard_qwen1_5b_tp4pp4,0,3,1,GPU (all 174),0.0,0.043889677982942236
+s16_infershard_qwen1_5b_tp4pp4,0,3,1,Everything,0.0,0.05376006323047501
+s16_infershard_qwen1_5b_tp4pp4,0,3,2,NIC (14),0.0,0.06826949406295017
+s16_infershard_qwen1_5b_tp4pp4,0,3,2,GPU (all 174),0.0,0.15093562308232997
+s16_infershard_qwen1_5b_tp4pp4,0,3,2,Everything,0.0,0.0700416963505841
+s16_infershard_qwen1_5b_tp4pp4,0,6,0,NIC (14),0.0,0.0016601949548740336
+s16_infershard_qwen1_5b_tp4pp4,0,6,0,GPU (all 174),0.0,0.1665343307168123
+s16_infershard_qwen1_5b_tp4pp4,0,6,0,Everything,0.0,0.11250660560155012
+s16_infershard_qwen1_5b_tp4pp4,0,6,1,NIC (14),0.0,0.18010371465120198
+s16_infershard_qwen1_5b_tp4pp4,0,6,1,GPU (all 174),0.0,0.032178402240874045
+s16_infershard_qwen1_5b_tp4pp4,0,6,1,Everything,0.0,0.06763142408974945
+s16_infershard_qwen1_5b_tp4pp4,0,6,2,NIC (14),0.0,0.05478505837432483
+s16_infershard_qwen1_5b_tp4pp4,0,6,2,GPU (all 174),0.0,0.06657057165069179
+s16_infershard_qwen1_5b_tp4pp4,0,6,2,Everything,0.0,0.06788919495172555
+s16_infershard_qwen1_5b_tp4pp4,0,10,0,NIC (14),0.0,0.06837359097679487
+s16_infershard_qwen1_5b_tp4pp4,0,10,0,GPU (all 174),0.023166023166023165,0.11883160320853334
+s16_infershard_qwen1_5b_tp4pp4,0,10,0,Everything,0.015444015444015444,0.08312029497647952
+s16_infershard_qwen1_5b_tp4pp4,0,10,1,NIC (14),0.0,0.04895059141297163
+s16_infershard_qwen1_5b_tp4pp4,0,10,1,GPU (all 174),0.0,0.03448207890385823
+s16_infershard_qwen1_5b_tp4pp4,0,10,1,Everything,0.0,0.06363150853726068
+s16_infershard_qwen1_5b_tp4pp4,0,10,2,NIC (14),0.0,0.0868375798978518
+s16_infershard_qwen1_5b_tp4pp4,0,10,2,GPU (all 174),0.023166023166023165,0.23471950018674542
+s16_infershard_qwen1_5b_tp4pp4,0,10,2,Everything,0.019305019305019305,0.23942506601057417
+s16_infershard_qwen1_5b_tp4pp4,0,15,0,NIC (14),0.0,0.09189581954071033
+s16_infershard_qwen1_5b_tp4pp4,0,15,0,GPU (all 174),0.019305019305019305,0.085638733577201
+s16_infershard_qwen1_5b_tp4pp4,0,15,0,Everything,0.011583011583011582,0.05335483090048455
+s16_infershard_qwen1_5b_tp4pp4,0,15,1,NIC (14),0.0,0.014341684067698077
+s16_infershard_qwen1_5b_tp4pp4,0,15,1,GPU (all 174),0.0,0.03549863537263006
+s16_infershard_qwen1_5b_tp4pp4,0,15,1,Everything,0.0,0.04211979574522744
+s16_infershard_qwen1_5b_tp4pp4,0,15,2,NIC (14),0.0,0.06280662762717103
+s16_infershard_qwen1_5b_tp4pp4,0,15,2,GPU (all 174),0.023166023166023165,0.07656759905439711
+s16_infershard_qwen1_5b_tp4pp4,0,15,2,Everything,0.023166023166023165,0.08294580073563944
+s16_infershard_qwen1_5b_tp4pp4,0,20,0,NIC (14),0.0,0.0409700634239762
+s16_infershard_qwen1_5b_tp4pp4,0,20,0,GPU (all 174),0.023166023166023165,0.11612327540334821
+s16_infershard_qwen1_5b_tp4pp4,0,20,0,Everything,0.023166023166023165,0.08323496994166558
+s16_infershard_qwen72b_kv16k_b24,0,3,0,NIC (14),0.0,0.0467246626020171
+s16_infershard_qwen72b_kv16k_b24,0,3,0,GPU (all 174),0.0,0.2071241311355872
+s16_infershard_qwen72b_kv16k_b24,0,3,0,Everything,0.0,0.19411979409451724
+s16_infershard_qwen72b_kv16k_b24,0,3,1,NIC (14),0.0,0.016061516500656833
+s16_infershard_qwen72b_kv16k_b24,0,3,1,GPU (all 174),0.0,0.07632411468365403
+s16_infershard_qwen72b_kv16k_b24,0,3,1,Everything,0.0,0.036361769195791566
+s16_infershard_qwen72b_kv16k_b24,0,3,2,NIC (14),0.0851063829787234,0.2494739509829205
+s16_infershard_qwen72b_kv16k_b24,0,3,2,GPU (all 174),0.0851063829787234,0.33426727633320563
+s16_infershard_qwen72b_kv16k_b24,0,3,2,Everything,0.07446808510638298,0.3036944457209102
+s16_infershard_qwen72b_kv16k_b24,0,6,0,NIC (14),0.0,0.009125060109822131
+s16_infershard_qwen72b_kv16k_b24,0,6,0,GPU (all 174),0.0,0.0085992955142171
+s16_infershard_qwen72b_kv16k_b24,0,6,0,Everything,0.0,0.009734585652476233
+s16_infershard_qwen72b_kv16k_b24,0,6,1,NIC (14),0.0,0.0012466978931935748
+s16_infershard_qwen72b_kv16k_b24,0,6,1,GPU (all 174),0.0,0.0016245750372909634
+s16_infershard_qwen72b_kv16k_b24,0,6,1,Everything,0.0,0.00035460992907801415
+s16_infershard_qwen72b_kv16k_b24,0,6,2,NIC (14),0.0,0.014214699248511056
+s16_infershard_qwen72b_kv16k_b24,0,6,2,GPU (all 174),0.0,0.011518162282891872
+s16_infershard_qwen72b_kv16k_b24,0,6,2,Everything,0.0,0.012365925571758706
+s16_infershard_qwen72b_kv16k_b24,0,10,0,NIC (14),0.0,0.003979551971680748
+s16_infershard_qwen72b_kv16k_b24,0,10,0,GPU (all 174),0.0,0.002526347311497293
+s16_infershard_qwen72b_kv16k_b24,0,10,0,Everything,0.0,0.0039723779676570405
+s16_infershard_qwen72b_kv16k_b24,0,10,1,NIC (14),0.0,0.10554453177711472
+s16_infershard_qwen72b_kv16k_b24,0,10,1,GPU (all 174),0.0,0.0714229727387108
+s16_infershard_qwen72b_kv16k_b24,0,10,1,Everything,0.0,0.08196890106206914
+s16_infershard_qwen72b_kv16k_b24,0,10,2,NIC (14),0.0,0.10972119838019377
+s16_infershard_qwen72b_kv16k_b24,0,10,2,GPU (all 174),0.0,0.04273387583372406
+s16_infershard_qwen72b_kv16k_b24,0,10,2,Everything,0.0,0.05544566303843564
+s16_infershard_qwen72b_kv16k_b24,0,15,0,NIC (14),0.0,0.007176581445130431
+s16_infershard_qwen72b_kv16k_b24,0,15,0,GPU (all 174),0.0,0.026096826371642668
+s16_infershard_qwen72b_kv16k_b24,0,15,0,Everything,0.0,0.02027480462015506
+s16_infershard_qwen72b_kv16k_b24,0,15,1,NIC (14),0.0,0.07551682719681464
+s16_infershard_qwen72b_kv16k_b24,0,15,1,GPU (all 174),0.0,0.018935645525196457
+s16_infershard_qwen72b_kv16k_b24,0,15,1,Everything,0.0,0.0330834435003876
+s16_infershard_qwen72b_kv16k_b24,0,15,2,NIC (14),0.0,0.065506667781618
+s16_infershard_qwen72b_kv16k_b24,0,15,2,GPU (all 174),0.0,0.015848518182659817
+s16_infershard_qwen72b_kv16k_b24,0,15,2,Everything,0.0,0.01979382249722937
+s16_infershard_qwen72b_kv16k_b24,0,20,0,NIC (14),0.0,0.06618283489137046
+s16_infershard_qwen72b_kv16k_b24,0,20,0,GPU (all 174),0.0,0.017540116923208816
+s16_infershard_qwen72b_kv16k_b24,0,20,0,Everything,0.0,0.040609657541014116
+s16_infershard_qwen72b_kv1k,0,3,0,NIC (14),0.0,0.16577078652133712
+s16_infershard_qwen72b_kv1k,0,3,0,GPU (all 174),0.0,0.08919951843036314
+s16_infershard_qwen72b_kv1k,0,3,0,Everything,0.0,0.09488031475825133
+s16_infershard_qwen72b_kv1k,0,3,1,NIC (14),0.0,0.003070517977531604
+s16_infershard_qwen72b_kv1k,0,3,1,GPU (all 174),0.0,0.15496486202188361
+s16_infershard_qwen72b_kv1k,0,3,1,Everything,0.0,0.11888850725560393
+s16_infershard_qwen72b_kv1k,0,3,2,NIC (14),0.0,0.02097753903035452
+s16_infershard_qwen72b_kv1k,0,3,2,GPU (all 174),0.7819548872180451,0.4914558464891871
+s16_infershard_qwen72b_kv1k,0,3,2,Everything,0.015037593984962405,0.37241011028890236
+s16_infershard_qwen72b_kv1k,0,6,0,NIC (14),0.0,0.012589872614352416
+s16_infershard_qwen72b_kv1k,0,6,0,GPU (all 174),0.0,0.068288777291008
+s16_infershard_qwen72b_kv1k,0,6,0,Everything,0.0,0.07587686775266941
+s16_infershard_qwen72b_kv1k,0,6,1,NIC (14),0.0,0.0005238448233259203
+s16_infershard_qwen72b_kv1k,0,6,1,GPU (all 174),0.0,0.007002467878873003
+s16_infershard_qwen72b_kv1k,0,6,1,Everything,0.0,0.0024821520052681683
+s16_infershard_qwen72b_kv1k,0,6,2,NIC (14),0.0,0.1217562719411028
+s16_infershard_qwen72b_kv1k,0,6,2,GPU (all 174),0.12781954887218044,0.1090207335376132
+s16_infershard_qwen72b_kv1k,0,6,2,Everything,0.12781954887218044,0.1079813907481505
+s16_infershard_qwen72b_kv1k,0,10,0,NIC (14),0.0,0.003216972391738344
+s16_infershard_qwen72b_kv1k,0,10,0,GPU (all 174),0.0,0.0020702772307153792
+s16_infershard_qwen72b_kv1k,0,10,0,Everything,0.0,0.0022970099711758026
+s16_infershard_qwen72b_kv1k,0,10,1,NIC (14),0.0,0.010375564115859654
+s16_infershard_qwen72b_kv1k,0,10,1,GPU (all 174),0.0,0.02766592586590672
+s16_infershard_qwen72b_kv1k,0,10,1,Everything,0.0,0.01845382812698691
+s16_infershard_qwen72b_kv1k,0,10,2,NIC (14),0.0,0.004640679730794353
+s16_infershard_qwen72b_kv1k,0,10,2,GPU (all 174),0.0,0.024341038355822506
+s16_infershard_qwen72b_kv1k,0,10,2,Everything,0.0,0.030342443217503186
+s16_infershard_qwen72b_kv1k,0,15,0,NIC (14),0.0,0.02437133330556855
+s16_infershard_qwen72b_kv1k,0,15,0,GPU (all 174),0.0,0.04718992612361144
+s16_infershard_qwen72b_kv1k,0,15,0,Everything,0.0,0.04834918997777142
+s16_infershard_qwen72b_kv1k,0,15,1,NIC (14),0.0,0.00907981963211593
+s16_infershard_qwen72b_kv1k,0,15,1,GPU (all 174),0.0,0.03364419368987916
+s16_infershard_qwen72b_kv1k,0,15,1,Everything,0.0,0.03421767235293193
+s16_infershard_qwen72b_kv1k,0,15,2,NIC (14),0.0,0.012672068700344229
+s16_infershard_qwen72b_kv1k,0,15,2,GPU (all 174),0.0,0.02017277926960438
+s16_infershard_qwen72b_kv1k,0,15,2,Everything,0.0,0.015453674542071985
+s16_infershard_qwen72b_kv1k,0,20,0,NIC (14),0.0,0.010403925159423144
+s16_infershard_qwen72b_kv1k,0,20,0,GPU (all 174),0.0,0.018651280861180102
+s16_infershard_qwen72b_kv1k,0,20,0,Everything,0.0,0.02046291698680185
+s16_infershard_qwen72b_kv32k_b16,0,3,0,NIC (14),0.0,0.004156982229049095
+s16_infershard_qwen72b_kv32k_b16,0,3,0,GPU (all 174),0.0,0.002733703798732595
+s16_infershard_qwen72b_kv32k_b16,0,3,0,Everything,0.0,0.0010757761432107133
+s16_infershard_qwen72b_kv32k_b16,0,3,1,NIC (14),0.0,0.14258912329171117
+s16_infershard_qwen72b_kv32k_b16,0,3,1,GPU (all 174),0.9534883720930233,0.6728165374677002
+s16_infershard_qwen72b_kv32k_b16,0,3,1,Everything,0.9224806201550387,0.5713696421734978
+s16_infershard_qwen72b_kv32k_b16,0,3,2,NIC (14),0.0,0.03181954521336591
+s16_infershard_qwen72b_kv32k_b16,0,3,2,GPU (all 174),0.0,0.09478513692578225
+s16_infershard_qwen72b_kv32k_b16,0,3,2,Everything,0.0,0.08204144791412658
+s16_infershard_qwen72b_kv32k_b16,0,6,0,NIC (14),0.0,0.02327791064478804
+s16_infershard_qwen72b_kv32k_b16,0,6,0,GPU (all 174),0.0,0.04450572044464262
+s16_infershard_qwen72b_kv32k_b16,0,6,0,Everything,0.0,0.025409826224282377
+s16_infershard_qwen72b_kv32k_b16,0,6,1,NIC (14),0.0,9.615535196930546e-05
+s16_infershard_qwen72b_kv32k_b16,0,6,1,GPU (all 174),0.0,0.0006331523505250365
+s16_infershard_qwen72b_kv32k_b16,0,6,1,Everything,0.0,0.0002992717876438807
+s16_infershard_qwen72b_kv32k_b16,0,6,2,NIC (14),0.0,0.0001550387596899225
+s16_infershard_qwen72b_kv32k_b16,0,6,2,GPU (all 174),0.0,0.001036707877718318
+s16_infershard_qwen72b_kv32k_b16,0,6,2,Everything,0.0,0.0008304256103652041
+s16_infershard_qwen72b_kv32k_b16,0,10,0,NIC (14),0.0,0.0009365911308983968
+s16_infershard_qwen72b_kv32k_b16,0,10,0,GPU (all 174),0.0,0.009912618937153533
+s16_infershard_qwen72b_kv32k_b16,0,10,0,Everything,0.0,0.0035632178564723844
+s16_infershard_qwen72b_kv32k_b16,0,10,1,NIC (14),0.0,8.448078534093188e-05
+s16_infershard_qwen72b_kv32k_b16,0,10,1,GPU (all 174),0.0,0.0026172695806928594
+s16_infershard_qwen72b_kv32k_b16,0,10,1,Everything,0.0,0.001765495751802461
+s16_infershard_qwen72b_kv32k_b16,0,10,2,NIC (14),0.0,0.00023758259242914818
+s16_infershard_qwen72b_kv32k_b16,0,10,2,GPU (all 174),0.0,0.0033265707106552222
+s16_infershard_qwen72b_kv32k_b16,0,10,2,Everything,0.0,0.013721133038001583
+s16_infershard_qwen72b_kv32k_b16,0,15,0,NIC (14),0.0,0.0030429264348159004
+s16_infershard_qwen72b_kv32k_b16,0,15,0,GPU (all 174),0.0,0.006017741787530656
+s16_infershard_qwen72b_kv32k_b16,0,15,0,Everything,0.0,0.0043320380815983885
+s16_infershard_qwen72b_kv32k_b16,0,15,1,NIC (14),0.0,0.0025901426690204074
+s16_infershard_qwen72b_kv32k_b16,0,15,1,GPU (all 174),0.0,0.009533931317365978
+s16_infershard_qwen72b_kv32k_b16,0,15,1,Everything,0.0,0.01291092160051932
+s16_infershard_qwen72b_kv32k_b16,0,15,2,NIC (14),0.0,0.0031275993601575
+s16_infershard_qwen72b_kv32k_b16,0,15,2,GPU (all 174),0.0,0.010514088839670236
+s16_infershard_qwen72b_kv32k_b16,0,15,2,Everything,0.0,0.002729420450350683
+s16_infershard_qwen72b_kv32k_b16,0,20,0,NIC (14),0.0,0.0014175687742414742
+s16_infershard_qwen72b_kv32k_b16,0,20,0,GPU (all 174),0.0,0.005085021206130713
+s16_infershard_qwen72b_kv32k_b16,0,20,0,Everything,0.0,0.005699085772493418
+s16_infershard_qwen72b_kv32k_b32,0,3,0,NIC (14),0.0,0.003144689625085018
+s16_infershard_qwen72b_kv32k_b32,0,3,0,GPU (all 174),0.0,0.02045364140214355
+s16_infershard_qwen72b_kv32k_b32,0,3,0,Everything,0.0,0.0053875063360662116
+s16_infershard_qwen72b_kv32k_b32,0,3,1,NIC (14),0.0,0.001438148763077905
+s16_infershard_qwen72b_kv32k_b32,0,3,1,GPU (all 174),0.0,0.13006325620032552
+s16_infershard_qwen72b_kv32k_b32,0,3,1,Everything,0.0,0.06443696654931422
+s16_infershard_qwen72b_kv32k_b32,0,3,2,NIC (14),0.0,0.002712917479058429
+s16_infershard_qwen72b_kv32k_b32,0,3,2,GPU (all 174),0.9147286821705426,0.5473068613155716
+s16_infershard_qwen72b_kv32k_b32,0,3,2,Everything,0.7364341085271318,0.5078902354465248
+s16_infershard_qwen72b_kv32k_b32,0,6,0,NIC (14),0.0,0.0006868681132356448
+s16_infershard_qwen72b_kv32k_b32,0,6,0,GPU (all 174),0.0,0.005069562165448015
+s16_infershard_qwen72b_kv32k_b32,0,6,0,Everything,0.0,0.0011448879854283954
+s16_infershard_qwen72b_kv32k_b32,0,6,1,NIC (14),0.0,0.0002470438575070706
+s16_infershard_qwen72b_kv32k_b32,0,6,1,GPU (all 174),0.0,0.0015532499316916065
+s16_infershard_qwen72b_kv32k_b32,0,6,1,Everything,0.0,0.0010875887828502842
+s16_infershard_qwen72b_kv32k_b32,0,6,2,NIC (14),0.0,0.007169230592259492
+s16_infershard_qwen72b_kv32k_b32,0,6,2,GPU (all 174),0.0,0.011471397030105985
+s16_infershard_qwen72b_kv32k_b32,0,6,2,Everything,0.0,0.010977666587138267
+s16_infershard_qwen72b_kv32k_b32,0,10,0,NIC (14),0.0,0.002768375985650588
+s16_infershard_qwen72b_kv32k_b32,0,10,0,GPU (all 174),0.0,0.0072608372289221
+s16_infershard_qwen72b_kv32k_b32,0,10,0,Everything,0.0,0.002720795897510098
+s16_infershard_qwen72b_kv32k_b32,0,10,1,NIC (14),0.0,0.0032352329875900364
+s16_infershard_qwen72b_kv32k_b32,0,10,1,GPU (all 174),0.0,0.028992117290862075
+s16_infershard_qwen72b_kv32k_b32,0,10,1,Everything,0.0,0.017492101687651324
+s16_infershard_qwen72b_kv32k_b32,0,10,2,NIC (14),0.0,0.0006376183599419327
+s16_infershard_qwen72b_kv32k_b32,0,10,2,GPU (all 174),0.0,0.0024897906427136436
+s16_infershard_qwen72b_kv32k_b32,0,10,2,Everything,0.0,0.0020846740460359822
+s16_infershard_qwen72b_kv32k_b32,0,15,0,NIC (14),0.0,0.0007617073826871499
+s16_infershard_qwen72b_kv32k_b32,0,15,0,GPU (all 174),0.0,0.003297915549954073
+s16_infershard_qwen72b_kv32k_b32,0,15,0,Everything,0.0,0.005832839051753385
+s16_infershard_qwen72b_kv32k_b32,0,15,1,NIC (14),0.0,4.3779060707205785e-05
+s16_infershard_qwen72b_kv32k_b32,0,15,1,GPU (all 174),0.0,0.0013268156685863066
+s16_infershard_qwen72b_kv32k_b32,0,15,1,Everything,0.0,0.0008133519086713691
+s16_infershard_qwen72b_kv32k_b32,0,15,2,NIC (14),0.0,0.001993161916010821
+s16_infershard_qwen72b_kv32k_b32,0,15,2,GPU (all 174),0.0,0.01223022106651564
+s16_infershard_qwen72b_kv32k_b32,0,15,2,Everything,0.0,0.010974589221898914
+s16_infershard_qwen72b_kv32k_b32,0,20,0,NIC (14),0.0,0.0015554691901777725
+s16_infershard_qwen72b_kv32k_b32,0,20,0,GPU (all 174),0.0,0.005179632403618148
+s16_infershard_qwen72b_kv32k_b32,0,20,0,Everything,0.0,0.002481078670512001
+s16_infershard_qwen72b_kv32k_b8,0,3,0,NIC (14),0.0,0.0032347958503854573
+s16_infershard_qwen72b_kv32k_b8,0,3,0,GPU (all 174),0.0,0.005355295087569248
+s16_infershard_qwen72b_kv32k_b8,0,3,0,Everything,0.0,0.010190178727068112
+s16_infershard_qwen72b_kv32k_b8,0,3,1,NIC (14),0.0,0.10929891213408449
+s16_infershard_qwen72b_kv32k_b8,0,3,1,GPU (all 174),1.0,0.7297177592589557
+s16_infershard_qwen72b_kv32k_b8,0,3,1,Everything,0.8796992481203008,0.5922365937301922
+s16_infershard_qwen72b_kv32k_b8,0,3,2,NIC (14),0.0,0.0014383382635736826
+s16_infershard_qwen72b_kv32k_b8,0,3,2,GPU (all 174),0.0,0.010996508828064844
+s16_infershard_qwen72b_kv32k_b8,0,3,2,Everything,0.0,0.01707889098892598
+s16_infershard_qwen72b_kv32k_b8,0,6,0,NIC (14),0.0,0.0003424022483955554
+s16_infershard_qwen72b_kv32k_b8,0,6,0,GPU (all 174),0.0,0.0
+s16_infershard_qwen72b_kv32k_b8,0,6,0,Everything,0.0,0.0005259536123545859
+s16_infershard_qwen72b_kv32k_b8,0,6,1,NIC (14),0.0,0.0009554857964058192
+s16_infershard_qwen72b_kv32k_b8,0,6,1,GPU (all 174),0.0,0.02975535930008769
+s16_infershard_qwen72b_kv32k_b8,0,6,1,Everything,0.0,0.03317544214142145
+s16_infershard_qwen72b_kv32k_b8,0,6,2,NIC (14),0.0,0.0004027744809326914
+s16_infershard_qwen72b_kv32k_b8,0,6,2,GPU (all 174),0.0,0.007525307918658066
+s16_infershard_qwen72b_kv32k_b8,0,6,2,Everything,0.0,0.006639474382229475
+s16_infershard_qwen72b_kv32k_b8,0,10,0,NIC (14),0.0,0.0
+s16_infershard_qwen72b_kv32k_b8,0,10,0,GPU (all 174),0.0,0.0030608066194651984
+s16_infershard_qwen72b_kv32k_b8,0,10,0,Everything,0.0,0.003141237200318761
+s16_infershard_qwen72b_kv32k_b8,0,10,1,NIC (14),0.0,0.0010650097648347773
+s16_infershard_qwen72b_kv32k_b8,0,10,1,GPU (all 174),0.0,0.03788763344614081
+s16_infershard_qwen72b_kv32k_b8,0,10,1,Everything,0.0,0.030160365981973438
+s16_infershard_qwen72b_kv32k_b8,0,10,2,NIC (14),0.0,0.0
+s16_infershard_qwen72b_kv32k_b8,0,10,2,GPU (all 174),0.0,0.05312970148076291
+s16_infershard_qwen72b_kv32k_b8,0,10,2,Everything,0.0,0.027330850490712762
+s16_infershard_qwen72b_kv32k_b8,0,15,0,NIC (14),0.0,0.009533801517604381
+s16_infershard_qwen72b_kv32k_b8,0,15,0,GPU (all 174),0.0,0.020728668423990744
+s16_infershard_qwen72b_kv32k_b8,0,15,0,Everything,0.0,0.01608990274640738
+s16_infershard_qwen72b_kv32k_b8,0,15,1,NIC (14),0.0,0.010900782194009384
+s16_infershard_qwen72b_kv32k_b8,0,15,1,GPU (all 174),0.0,0.026453557593992504
+s16_infershard_qwen72b_kv32k_b8,0,15,1,Everything,0.0,0.01801312343542734
+s16_infershard_qwen72b_kv32k_b8,0,15,2,NIC (14),0.0,0.0008061676011187693
+s16_infershard_qwen72b_kv32k_b8,0,15,2,GPU (all 174),0.0,0.0029048577219910167
+s16_infershard_qwen72b_kv32k_b8,0,15,2,Everything,0.0,0.00383832564494102
+s16_infershard_qwen72b_kv32k_b8,0,20,0,NIC (14),0.0,0.006031475654006457
+s16_infershard_qwen72b_kv32k_b8,0,20,0,GPU (all 174),0.0,0.022094340717731118
+s16_infershard_qwen72b_kv32k_b8,0,20,0,Everything,0.0,0.012435702627366927
+s16_infershard_qwen72b_kv32k_out2k,0,3,0,NIC (14),0.0,0.13059627953745603
+s16_infershard_qwen72b_kv32k_out2k,0,3,0,GPU (all 174),0.4666666666666667,0.44993939393939386
+s16_infershard_qwen72b_kv32k_out2k,0,3,0,Everything,0.7111111111111111,0.5489158249158249
+s16_infershard_qwen72b_kv32k_out2k,0,3,1,NIC (14),0.2777777777777778,0.4286825414928238
+s16_infershard_qwen72b_kv32k_out2k,0,3,1,GPU (all 174),0.32222222222222224,0.4604088372315943
+s16_infershard_qwen72b_kv32k_out2k,0,3,1,Everything,0.3333333333333333,0.49916382960244454
+s16_infershard_qwen72b_kv32k_out2k,0,3,2,NIC (14),0.0,0.01228737532790321
+s16_infershard_qwen72b_kv32k_out2k,0,3,2,GPU (all 174),0.0,0.06997796953470553
+s16_infershard_qwen72b_kv32k_out2k,0,3,2,Everything,0.0,0.02716299904273166
+s16_infershard_qwen72b_kv32k_out2k,0,6,0,NIC (14),0.0,0.012125851448611686
+s16_infershard_qwen72b_kv32k_out2k,0,6,0,GPU (all 174),0.0,0.10376550958023528
+s16_infershard_qwen72b_kv32k_out2k,0,6,0,Everything,0.0,0.07923162110548661
+s16_infershard_qwen72b_kv32k_out2k,0,6,1,NIC (14),0.0,0.17352365403331513
+s16_infershard_qwen72b_kv32k_out2k,0,6,1,GPU (all 174),0.23333333333333334,0.3109980050271032
+s16_infershard_qwen72b_kv32k_out2k,0,6,1,Everything,0.08888888888888889,0.3148891839011592
+s16_infershard_qwen72b_kv32k_out2k,0,6,2,NIC (14),0.0,0.007258333987427599
+s16_infershard_qwen72b_kv32k_out2k,0,6,2,GPU (all 174),0.0,0.1381083331055901
+s16_infershard_qwen72b_kv32k_out2k,0,6,2,Everything,0.0,0.13588436820538197
+s16_infershard_qwen72b_kv32k_out2k,0,10,0,NIC (14),0.0,0.08786592377628881
+s16_infershard_qwen72b_kv32k_out2k,0,10,0,GPU (all 174),0.0,0.12804082047694304
+s16_infershard_qwen72b_kv32k_out2k,0,10,0,Everything,0.0,0.12552007548805835
+s16_infershard_qwen72b_kv32k_out2k,0,10,1,NIC (14),0.0,0.045313205271465554
+s16_infershard_qwen72b_kv32k_out2k,0,10,1,GPU (all 174),0.0,0.09297612441013615
+s16_infershard_qwen72b_kv32k_out2k,0,10,1,Everything,0.0,0.08542821000197341
+s16_infershard_qwen72b_kv32k_out2k,0,10,2,NIC (14),0.0,0.009152664859981932
+s16_infershard_qwen72b_kv32k_out2k,0,10,2,GPU (all 174),0.0,0.04132496321110055
+s16_infershard_qwen72b_kv32k_out2k,0,10,2,Everything,0.0,0.010908606364022723
+s16_infershard_qwen72b_kv32k_out2k,0,15,0,NIC (14),0.0,0.01942702018797841
+s16_infershard_qwen72b_kv32k_out2k,0,15,0,GPU (all 174),0.0,0.06328541792756967
+s16_infershard_qwen72b_kv32k_out2k,0,15,0,Everything,0.0,0.054475323483489387
+s16_infershard_qwen72b_kv32k_out2k,0,15,1,NIC (14),0.0,0.013519557416231178
+s16_infershard_qwen72b_kv32k_out2k,0,15,1,GPU (all 174),0.0,0.09357156580224467
+s16_infershard_qwen72b_kv32k_out2k,0,15,1,Everything,0.0,0.05343769729694123
+s16_infershard_qwen72b_kv32k_out2k,0,15,2,NIC (14),0.0,0.02218452887966154
+s16_infershard_qwen72b_kv32k_out2k,0,15,2,GPU (all 174),0.0,0.08691591128528053
+s16_infershard_qwen72b_kv32k_out2k,0,15,2,Everything,0.0,0.07391850871363968
+s16_infershard_qwen72b_kv32k_out2k,0,20,0,NIC (14),0.0,0.021225095975276994
+s16_infershard_qwen72b_kv32k_out2k,0,20,0,GPU (all 174),0.0,0.08058958329958872
+s16_infershard_qwen72b_kv32k_out2k,0,20,0,Everything,0.0,0.06628866942326506
+s16_infershard_qwen72b_kv4k_b48,0,3,0,NIC (14),0.0,0.06152487607908661
+s16_infershard_qwen72b_kv4k_b48,0,3,0,GPU (all 174),0.0,0.052976593419575876
+s16_infershard_qwen72b_kv4k_b48,0,3,0,Everything,0.0,0.09089897539419921
+s16_infershard_qwen72b_kv4k_b48,0,3,1,NIC (14),0.011111111111111112,0.1482890579697197
+s16_infershard_qwen72b_kv4k_b48,0,3,1,GPU (all 174),0.0,0.17850703143123586
+s16_infershard_qwen72b_kv4k_b48,0,3,1,Everything,0.0,0.11139938935982294
+s16_infershard_qwen72b_kv4k_b48,0,3,2,NIC (14),0.0,0.00575934839879794
+s16_infershard_qwen72b_kv4k_b48,0,3,2,GPU (all 174),0.0,0.03540624591071519
+s16_infershard_qwen72b_kv4k_b48,0,3,2,Everything,0.0,0.020195888160244597
+s16_infershard_qwen72b_kv4k_b48,0,6,0,NIC (14),0.0,0.05585111987560329
+s16_infershard_qwen72b_kv4k_b48,0,6,0,GPU (all 174),0.0,0.027543700514516545
+s16_infershard_qwen72b_kv4k_b48,0,6,0,Everything,0.0,0.02497198248534392
+s16_infershard_qwen72b_kv4k_b48,0,6,1,NIC (14),0.0,0.006573968400533498
+s16_infershard_qwen72b_kv4k_b48,0,6,1,GPU (all 174),0.0,0.0012937345485632093
+s16_infershard_qwen72b_kv4k_b48,0,6,1,Everything,0.0,0.000706434284729869
+s16_infershard_qwen72b_kv4k_b48,0,6,2,NIC (14),0.011111111111111112,0.02677235440906389
+s16_infershard_qwen72b_kv4k_b48,0,6,2,GPU (all 174),0.0,0.036543952884641524
+s16_infershard_qwen72b_kv4k_b48,0,6,2,Everything,0.0,0.03473757590909158
+s16_infershard_qwen72b_kv4k_b48,0,10,0,NIC (14),0.0,0.003215006541516063
+s16_infershard_qwen72b_kv4k_b48,0,10,0,GPU (all 174),0.0,0.0003223899360251139
+s16_infershard_qwen72b_kv4k_b48,0,10,0,Everything,0.0,0.0005114202974285278
+s16_infershard_qwen72b_kv4k_b48,0,10,1,NIC (14),0.0,0.021246265822357984
+s16_infershard_qwen72b_kv4k_b48,0,10,1,GPU (all 174),0.0,0.03797604263551755
+s16_infershard_qwen72b_kv4k_b48,0,10,1,Everything,0.0,0.021915184383298113
+s16_infershard_qwen72b_kv4k_b48,0,10,2,NIC (14),0.03333333333333333,0.03025186993450568
+s16_infershard_qwen72b_kv4k_b48,0,10,2,GPU (all 174),0.0,0.04896814195555006
+s16_infershard_qwen72b_kv4k_b48,0,10,2,Everything,0.0,0.029955552536711137
+s16_infershard_qwen72b_kv4k_b48,0,15,0,NIC (14),0.0,0.011062169540399985
+s16_infershard_qwen72b_kv4k_b48,0,15,0,GPU (all 174),0.0,0.02332436642781198
+s16_infershard_qwen72b_kv4k_b48,0,15,0,Everything,0.0,0.00556645661625841
+s16_infershard_qwen72b_kv4k_b48,0,15,1,NIC (14),0.011111111111111112,0.02222525151181473
+s16_infershard_qwen72b_kv4k_b48,0,15,1,GPU (all 174),0.0,0.03952944147736421
+s16_infershard_qwen72b_kv4k_b48,0,15,1,Everything,0.0,0.016597130778470724
+s16_infershard_qwen72b_kv4k_b48,0,15,2,NIC (14),0.0,0.0036013542002242055
+s16_infershard_qwen72b_kv4k_b48,0,15,2,GPU (all 174),0.0,0.006399017642176877
+s16_infershard_qwen72b_kv4k_b48,0,15,2,Everything,0.0,0.006522545781951792
+s16_infershard_qwen72b_kv4k_b48,0,20,0,NIC (14),0.0,0.013199331735405743
+s16_infershard_qwen72b_kv4k_b48,0,20,0,GPU (all 174),0.0,0.013063123424276589
+s16_infershard_qwen72b_kv4k_b48,0,20,0,Everything,0.0,0.011958813655878985
+s16_infershard_qwen72b_kv8k,0,3,0,NIC (14),0.0,0.002428940568475452
+s16_infershard_qwen72b_kv8k,0,3,0,GPU (all 174),0.0,0.018071774271503933
+s16_infershard_qwen72b_kv8k,0,3,0,Everything,0.0,0.008656139868329122
+s16_infershard_qwen72b_kv8k,0,3,1,NIC (14),0.0,0.10960702405744106
+s16_infershard_qwen72b_kv8k,0,3,1,GPU (all 174),0.0,0.07494896397902204
+s16_infershard_qwen72b_kv8k,0,3,1,Everything,0.0,0.03739671321596874
+s16_infershard_qwen72b_kv8k,0,3,2,NIC (14),0.0,0.02251329402891405
+s16_infershard_qwen72b_kv8k,0,3,2,GPU (all 174),0.0,0.06957018615633837
+s16_infershard_qwen72b_kv8k,0,3,2,Everything,0.0,0.08351613283581427
+s16_infershard_qwen72b_kv8k,0,6,0,NIC (14),0.0,0.005891472868217055
+s16_infershard_qwen72b_kv8k,0,6,0,GPU (all 174),0.0,0.09538713238153067
+s16_infershard_qwen72b_kv8k,0,6,0,Everything,0.0,0.11197719187916289
+s16_infershard_qwen72b_kv8k,0,6,1,NIC (14),0.0,0.0171671546514529
+s16_infershard_qwen72b_kv8k,0,6,1,GPU (all 174),0.0,0.0721348958577153
+s16_infershard_qwen72b_kv8k,0,6,1,Everything,0.0,0.021819782369337744
+s16_infershard_qwen72b_kv8k,0,6,2,NIC (14),0.0,0.0006458266994336532
+s16_infershard_qwen72b_kv8k,0,6,2,GPU (all 174),0.0,0.01595467835317943
+s16_infershard_qwen72b_kv8k,0,6,2,Everything,0.0,0.007419366895661965
+s16_infershard_qwen72b_kv8k,0,10,0,NIC (14),0.0,0.008324804437174971
+s16_infershard_qwen72b_kv8k,0,10,0,GPU (all 174),0.0,0.03941086800254582
+s16_infershard_qwen72b_kv8k,0,10,0,Everything,0.0,0.013480791694926629
+s16_infershard_qwen72b_kv8k,0,10,1,NIC (14),0.0,0.006947161652861462
+s16_infershard_qwen72b_kv8k,0,10,1,GPU (all 174),0.0,0.015738377053677578
+s16_infershard_qwen72b_kv8k,0,10,1,Everything,0.0,0.009053776092355362
+s16_infershard_qwen72b_kv8k,0,10,2,NIC (14),0.0,0.00541911076681182
+s16_infershard_qwen72b_kv8k,0,10,2,GPU (all 174),0.0,0.009602717154915605
+s16_infershard_qwen72b_kv8k,0,10,2,Everything,0.0,0.011765596128520987
+s16_infershard_qwen72b_kv8k,0,15,0,NIC (14),0.0,0.0014377520732610158
+s16_infershard_qwen72b_kv8k,0,15,0,GPU (all 174),0.0,0.018521064391901456
+s16_infershard_qwen72b_kv8k,0,15,0,Everything,0.0,0.012604823672125218
+s16_infershard_qwen72b_kv8k,0,15,1,NIC (14),0.0,0.0019475003697390929
+s16_infershard_qwen72b_kv8k,0,15,1,GPU (all 174),0.0,0.013266529544278515
+s16_infershard_qwen72b_kv8k,0,15,1,Everything,0.0,0.006103515254125038
+s16_infershard_qwen72b_kv8k,0,15,2,NIC (14),0.0,0.007023808171575189
+s16_infershard_qwen72b_kv8k,0,15,2,GPU (all 174),0.0,0.015126101039336927
+s16_infershard_qwen72b_kv8k,0,15,2,Everything,0.0,0.00791335736286553
+s16_infershard_qwen72b_kv8k,0,20,0,NIC (14),0.0,0.0007715966253887238
+s16_infershard_qwen72b_kv8k,0,20,0,GPU (all 174),0.0,0.00676207254885112
+s16_infershard_qwen72b_kv8k,0,20,0,Everything,0.0,0.005691311569143057
+s16_infershard_qwen72b_tp8pp2,0,3,0,NIC (14),0.007751937984496124,0.01700335236771955
+s16_infershard_qwen72b_tp8pp2,0,3,0,GPU (all 174),0.0,0.0441314007318474
+s16_infershard_qwen72b_tp8pp2,0,3,0,Everything,0.0,0.03980099183638245
+s16_infershard_qwen72b_tp8pp2,0,3,1,NIC (14),0.0,0.22266814145412306
+s16_infershard_qwen72b_tp8pp2,0,3,1,GPU (all 174),0.0,0.0028443832757031003
+s16_infershard_qwen72b_tp8pp2,0,3,1,Everything,0.0,0.026708420665923674
+s16_infershard_qwen72b_tp8pp2,0,3,2,NIC (14),0.0,0.1705564244318708
+s16_infershard_qwen72b_tp8pp2,0,3,2,GPU (all 174),0.0,0.0051043100385124215
+s16_infershard_qwen72b_tp8pp2,0,3,2,Everything,0.0,0.09568315746121482
+s16_infershard_qwen72b_tp8pp2,0,6,0,NIC (14),0.0,0.025407034143642485
+s16_infershard_qwen72b_tp8pp2,0,6,0,GPU (all 174),0.0,0.006446563558905891
+s16_infershard_qwen72b_tp8pp2,0,6,0,Everything,0.0,0.0055368590469322245
+s16_infershard_qwen72b_tp8pp2,0,6,1,NIC (14),0.007751937984496124,0.24629554803176612
+s16_infershard_qwen72b_tp8pp2,0,6,1,GPU (all 174),0.015503875968992248,0.03370795503475281
+s16_infershard_qwen72b_tp8pp2,0,6,1,Everything,0.007751937984496124,0.051415712793182855
+s16_infershard_qwen72b_tp8pp2,0,6,2,NIC (14),0.0,0.028050693324962427
+s16_infershard_qwen72b_tp8pp2,0,6,2,GPU (all 174),0.0,0.00025231279378433913
+s16_infershard_qwen72b_tp8pp2,0,6,2,Everything,0.0,0.017752712698159437
+s16_infershard_qwen72b_tp8pp2,0,10,0,NIC (14),0.0,0.0011801917206215673
+s16_infershard_qwen72b_tp8pp2,0,10,0,GPU (all 174),0.0,0.004974576449562874
+s16_infershard_qwen72b_tp8pp2,0,10,0,Everything,0.0,0.0029757668832606924
+s16_infershard_qwen72b_tp8pp2,0,10,1,NIC (14),0.0,0.03902175498598082
+s16_infershard_qwen72b_tp8pp2,0,10,1,GPU (all 174),0.0,0.003920988182246437
+s16_infershard_qwen72b_tp8pp2,0,10,1,Everything,0.0,0.02324425009852264
+s16_infershard_qwen72b_tp8pp2,0,10,2,NIC (14),0.0,0.16701169357153023
+s16_infershard_qwen72b_tp8pp2,0,10,2,GPU (all 174),0.0,0.011559783762297065
+s16_infershard_qwen72b_tp8pp2,0,10,2,Everything,0.0,0.02301999176156663
+s16_infershard_qwen72b_tp8pp2,0,15,0,NIC (14),0.0,0.059210402555106685
+s16_infershard_qwen72b_tp8pp2,0,15,0,GPU (all 174),0.0,0.007318341677174951
+s16_infershard_qwen72b_tp8pp2,0,15,0,Everything,0.0,0.044040349051798426
+s16_infershard_qwen72b_tp8pp2,0,15,1,NIC (14),0.0,0.05049382350601293
+s16_infershard_qwen72b_tp8pp2,0,15,1,GPU (all 174),0.0,0.022248317014231196
+s16_infershard_qwen72b_tp8pp2,0,15,1,Everything,0.0,0.05344785546263497
+s16_infershard_qwen72b_tp8pp2,0,15,2,NIC (14),0.0,0.0018966184871469429
+s16_infershard_qwen72b_tp8pp2,0,15,2,GPU (all 174),0.0,0.0032841285656418674
+s16_infershard_qwen72b_tp8pp2,0,15,2,Everything,0.0,0.02612409849081618
+s16_infershard_qwen72b_tp8pp2,0,20,0,NIC (14),0.0,0.033241285716254204
+s16_infershard_qwen72b_tp8pp2,0,20,0,GPU (all 174),0.0,0.004670529164605781
+s16_infershard_qwen72b_tp8pp2,0,20,0,Everything,0.0,0.028174686719614928
+s16_infershard_qwen7b_kv16k_b32,0,3,0,NIC (14),0.0,0.00023555297720775385
+s16_infershard_qwen7b_kv16k_b32,0,3,0,GPU (all 174),0.0,0.1303375001932689
+s16_infershard_qwen7b_kv16k_b32,0,3,0,Everything,0.0,0.08018299257300615
+s16_infershard_qwen7b_kv16k_b32,0,3,1,NIC (14),0.0,0.004567177503347716
+s16_infershard_qwen7b_kv16k_b32,0,3,1,GPU (all 174),0.0,0.007005108366810498
+s16_infershard_qwen7b_kv16k_b32,0,3,1,Everything,0.0,0.0057446808510638325
+s16_infershard_qwen7b_kv16k_b32,0,3,2,NIC (14),0.9361702127659575,0.5450281497717833
+s16_infershard_qwen7b_kv16k_b32,0,3,2,GPU (all 174),0.0,0.22441939000740624
+s16_infershard_qwen7b_kv16k_b32,0,3,2,Everything,0.0,0.2645098178123628
+s16_infershard_qwen7b_kv16k_b32,0,6,0,NIC (14),0.0,0.0006673076533261749
+s16_infershard_qwen7b_kv16k_b32,0,6,0,GPU (all 174),0.0,0.0023004030366336097
+s16_infershard_qwen7b_kv16k_b32,0,6,0,Everything,0.0,0.0017085149647990234
+s16_infershard_qwen7b_kv16k_b32,0,6,1,NIC (14),0.0,0.016297471537722028
+s16_infershard_qwen7b_kv16k_b32,0,6,1,GPU (all 174),0.0,0.042490811873022824
+s16_infershard_qwen7b_kv16k_b32,0,6,1,Everything,0.0,0.032180719791003606
+s16_infershard_qwen7b_kv16k_b32,0,6,2,NIC (14),0.0,0.0
+s16_infershard_qwen7b_kv16k_b32,0,6,2,GPU (all 174),0.0,0.10081558629075722
+s16_infershard_qwen7b_kv16k_b32,0,6,2,Everything,0.0,0.06229336829014151
+s16_infershard_qwen7b_kv16k_b32,0,10,0,NIC (14),0.0,0.0020954425285039826
+s16_infershard_qwen7b_kv16k_b32,0,10,0,GPU (all 174),0.0,0.0012928233336762108
+s16_infershard_qwen7b_kv16k_b32,0,10,0,Everything,0.0,0.0026861446126830524
+s16_infershard_qwen7b_kv16k_b32,0,10,1,NIC (14),0.0,0.004884287967390263
+s16_infershard_qwen7b_kv16k_b32,0,10,1,GPU (all 174),0.0,0.1468766888770305
+s16_infershard_qwen7b_kv16k_b32,0,10,1,Everything,0.0,0.05001120699568187
+s16_infershard_qwen7b_kv16k_b32,0,10,2,NIC (14),0.0,0.0
+s16_infershard_qwen7b_kv16k_b32,0,10,2,GPU (all 174),0.0,0.0010179859656030714
+s16_infershard_qwen7b_kv16k_b32,0,10,2,Everything,0.0,0.0029025728866948295
+s16_infershard_qwen7b_kv16k_b32,0,15,0,NIC (14),0.0,0.0012348033433819928
+s16_infershard_qwen7b_kv16k_b32,0,15,0,GPU (all 174),0.0,0.24040887226645433
+s16_infershard_qwen7b_kv16k_b32,0,15,0,Everything,0.0,0.15169415354324783
+s16_infershard_qwen7b_kv16k_b32,0,15,1,NIC (14),0.0,0.000868638724424896
+s16_infershard_qwen7b_kv16k_b32,0,15,1,GPU (all 174),0.0,0.002853418225708853
+s16_infershard_qwen7b_kv16k_b32,0,15,1,Everything,0.0,0.0018210660740072622
+s16_infershard_qwen7b_kv16k_b32,0,15,2,NIC (14),0.0,0.014278199580500042
+s16_infershard_qwen7b_kv16k_b32,0,15,2,GPU (all 174),0.0,0.02596368378610631
+s16_infershard_qwen7b_kv16k_b32,0,15,2,Everything,0.0,0.019429172634138018
+s16_infershard_qwen7b_kv16k_b32,0,20,0,NIC (14),0.0,0.014974314026323711
+s16_infershard_qwen7b_kv16k_b32,0,20,0,GPU (all 174),0.0,0.023200541109497465
+s16_infershard_qwen7b_kv16k_b32,0,20,0,Everything,0.0,0.022367678421424734
+s16_nonml_comm,0,3,0,NIC (14),0.3488372093023256,0.44901036904097347
+s16_nonml_comm,0,3,0,GPU (all 174),0.0,0.16219386352788667
+s16_nonml_comm,0,3,0,Everything,0.0,0.24088250925964177
+s16_nonml_comm,0,3,1,NIC (14),0.023255813953488372,0.041666516910001804
+s16_nonml_comm,0,3,1,GPU (all 174),0.0,0.190906288898607
+s16_nonml_comm,0,3,1,Everything,0.0,0.16011738375613266
+s16_nonml_comm,0,3,2,NIC (14),1.0,0.9406943124856418
+s16_nonml_comm,0,3,2,GPU (all 174),1.0,0.9098557476128669
+s16_nonml_comm,0,3,2,Everything,1.0,0.8756623881714825
+s16_nonml_comm,0,6,0,NIC (14),0.3488372093023256,0.22879311301203387
+s16_nonml_comm,0,6,0,GPU (all 174),0.0,0.04772780849126603
+s16_nonml_comm,0,6,0,Everything,0.0,0.06724242264829168
+s16_nonml_comm,0,6,1,NIC (14),0.5581395348837209,0.5280071773014275
+s16_nonml_comm,0,6,1,GPU (all 174),0.0,0.11665029841872974
+s16_nonml_comm,0,6,1,Everything,0.0,0.22350007603908068
+s16_nonml_comm,0,6,2,NIC (14),0.06976744186046512,0.2129295327869552
+s16_nonml_comm,0,6,2,GPU (all 174),0.023255813953488372,0.29063833859699495
+s16_nonml_comm,0,6,2,Everything,0.06976744186046512,0.25672560770942426
+s16_nonml_comm,0,10,0,NIC (14),0.3488372093023256,0.28068134741606415
+s16_nonml_comm,0,10,0,GPU (all 174),0.046511627906976744,0.26991330512615713
+s16_nonml_comm,0,10,0,Everything,0.06976744186046512,0.32382882714661504
+s16_nonml_comm,0,10,1,NIC (14),0.3488372093023256,0.2453030573356656
+s16_nonml_comm,0,10,1,GPU (all 174),0.0,0.0759146711247343
+s16_nonml_comm,0,10,1,Everything,0.0,0.13498250802515646
+s16_nonml_comm,0,10,2,NIC (14),0.06976744186046512,0.18004865873258946
+s16_nonml_comm,0,10,2,GPU (all 174),0.06976744186046512,0.4219871142125394
+s16_nonml_comm,0,10,2,Everything,0.3023255813953488,0.493790652245945
+s16_nonml_comm,0,15,0,NIC (14),0.06976744186046512,0.17170714462521752
+s16_nonml_comm,0,15,0,GPU (all 174),0.06976744186046512,0.44521861172941835
+s16_nonml_comm,0,15,0,Everything,0.6511627906976745,0.5166321319776409
+s16_nonml_comm,0,15,1,NIC (14),0.06976744186046512,0.14268583258077325
+s16_nonml_comm,0,15,1,GPU (all 174),0.9534883720930233,0.6261771114959301
+s16_nonml_comm,0,15,1,Everything,0.9534883720930233,0.6093559819987489
+s16_nonml_comm,0,15,2,NIC (14),0.06976744186046512,0.07069433037406878
+s16_nonml_comm,0,15,2,GPU (all 174),0.0,0.05943948021510286
+s16_nonml_comm,0,15,2,Everything,0.06976744186046512,0.09412085491229934
+s16_nonml_comm,0,20,0,NIC (14),0.06976744186046512,0.14338369794819447
+s16_nonml_comm,0,20,0,GPU (all 174),0.6976744186046512,0.5274066686416679
+s16_nonml_comm,0,20,0,Everything,0.6046511627906976,0.5191344771018107
+s16_nonml_hpc,0,3,0,NIC (14),0.905982905982906,0.885324399999249
+s16_nonml_hpc,0,3,0,GPU (all 174),1.0,0.8004197498173942
+s16_nonml_hpc,0,3,0,Everything,1.0,0.8433217530818383
+s16_nonml_hpc,0,3,1,NIC (14),0.905982905982906,0.8902329190245258
+s16_nonml_hpc,0,3,1,GPU (all 174),1.0,0.8013391882643264
+s16_nonml_hpc,0,3,1,Everything,1.0,0.8392452543934625
+s16_nonml_hpc,0,3,2,NIC (14),0.7435897435897436,0.7575544165642548
+s16_nonml_hpc,0,3,2,GPU (all 174),1.0,0.7752546322544863
+s16_nonml_hpc,0,3,2,Everything,1.0,0.7470500677443787
+s16_nonml_hpc,0,6,0,NIC (14),0.0,0.005255101282654292
+s16_nonml_hpc,0,6,0,GPU (all 174),0.0,0.0021535901099570824
+s16_nonml_hpc,0,6,0,Everything,0.0,0.0013414554504270256
+s16_nonml_hpc,0,6,1,NIC (14),0.4188034188034188,0.3005914989166754
+s16_nonml_hpc,0,6,1,GPU (all 174),0.0,0.057985344851608375
+s16_nonml_hpc,0,6,1,Everything,0.0,0.12666895283009544
+s16_nonml_hpc,0,6,2,NIC (14),0.0,0.015753633648215106
+s16_nonml_hpc,0,6,2,GPU (all 174),0.0,0.006892984643424013
+s16_nonml_hpc,0,6,2,Everything,0.0,0.0036649134251618438
+s16_nonml_hpc,0,10,0,NIC (14),0.0,0.10459797174285708
+s16_nonml_hpc,0,10,0,GPU (all 174),0.0,0.01938666750757699
+s16_nonml_hpc,0,10,0,Everything,0.0,0.020327224313765664
+s16_nonml_hpc,0,10,1,NIC (14),0.05128205128205128,0.20243411246860912
+s16_nonml_hpc,0,10,1,GPU (all 174),0.0,0.07213403228316845
+s16_nonml_hpc,0,10,1,Everything,0.0,0.09623931623931624
+s16_nonml_hpc,0,10,2,NIC (14),0.0,0.007309496303998117
+s16_nonml_hpc,0,10,2,GPU (all 174),0.0,0.0015883189103783075
+s16_nonml_hpc,0,10,2,Everything,0.0,0.0015066268081254108
+s16_nonml_hpc,0,15,0,NIC (14),0.0,0.10521175617116663
+s16_nonml_hpc,0,15,0,GPU (all 174),0.0,0.008326245855384115
+s16_nonml_hpc,0,15,0,Everything,0.0,0.009060456894279433
+s16_nonml_hpc,0,15,1,NIC (14),0.0,0.1308867019440669
+s16_nonml_hpc,0,15,1,GPU (all 174),0.0,0.01039248043063386
+s16_nonml_hpc,0,15,1,Everything,0.0,0.014436241994043367
+s16_nonml_hpc,0,15,2,NIC (14),0.0,0.10475980536098425
+s16_nonml_hpc,0,15,2,GPU (all 174),0.0,0.01672001251336535
+s16_nonml_hpc,0,15,2,Everything,0.0,0.017290501314414987
+s16_nonml_hpc,0,20,0,NIC (14),0.0,0.11287643642746749
+s16_nonml_hpc,0,20,0,GPU (all 174),0.0,0.014631289965396534
+s16_nonml_hpc,0,20,0,Everything,0.0,0.01899965598955415
+s16_nonml_sat,0,3,0,NIC (14),0.9145299145299145,0.8734573776143909
+s16_nonml_sat,0,3,0,GPU (all 174),1.0,0.8746454792726535
+s16_nonml_sat,0,3,0,Everything,1.0,0.8647392623925366
+s16_nonml_sat,0,3,1,NIC (14),0.017094017094017096,0.19575674434568827
+s16_nonml_sat,0,3,1,GPU (all 174),1.0,0.6026439980301502
+s16_nonml_sat,0,3,1,Everything,1.0,0.6595844169380657
+s16_nonml_sat,0,3,2,NIC (14),0.0,0.05096209844584197
+s16_nonml_sat,0,3,2,GPU (all 174),0.0,0.0010256410256410256
+s16_nonml_sat,0,3,2,Everything,0.0,0.0002049002849002849
+s16_nonml_sat,0,6,0,NIC (14),0.7777777777777778,0.7365008370783007
+s16_nonml_sat,0,6,0,GPU (all 174),1.0,0.6284062813670372
+s16_nonml_sat,0,6,0,Everything,1.0,0.7157312864501004
+s16_nonml_sat,0,6,1,NIC (14),0.008547008547008548,0.06624899076782625
+s16_nonml_sat,0,6,1,GPU (all 174),0.0,0.004107161089830867
+s16_nonml_sat,0,6,1,Everything,0.0,0.005528347966628689
+s16_nonml_sat,0,6,2,NIC (14),0.0,0.02022513470309649
+s16_nonml_sat,0,6,2,GPU (all 174),0.0,0.010044551661969736
+s16_nonml_sat,0,6,2,Everything,0.0,0.031822764808895454
+s16_nonml_sat,0,10,0,NIC (14),0.008547008547008548,0.1525743442650755
+s16_nonml_sat,0,10,0,GPU (all 174),1.0,0.7361578098588216
+s16_nonml_sat,0,10,0,Everything,0.5726495726495726,0.5340659219409294
+s16_nonml_sat,0,10,1,NIC (14),0.7094017094017094,0.6789446261207781
+s16_nonml_sat,0,10,1,GPU (all 174),1.0,0.7852403719476344
+s16_nonml_sat,0,10,1,Everything,1.0,0.713523596712094
+s16_nonml_sat,0,10,2,NIC (14),0.0,0.005475700696780575
+s16_nonml_sat,0,10,2,GPU (all 174),0.0,0.00011396011396011397
+s16_nonml_sat,0,10,2,Everything,0.0,0.0005128205128205128
+s16_nonml_sat,0,15,0,NIC (14),0.0,0.05438169013560662
+s16_nonml_sat,0,15,0,GPU (all 174),0.0,0.00855789516085204
+s16_nonml_sat,0,15,0,Everything,0.0,0.011774557046181409
+s16_nonml_sat,0,15,1,NIC (14),0.008547008547008548,0.15431318502571245
+s16_nonml_sat,0,15,1,GPU (all 174),1.0,0.6629675249208647
+s16_nonml_sat,0,15,1,Everything,0.39316239316239315,0.5254391006580202
+s16_nonml_sat,0,15,2,NIC (14),0.0,0.009232025906759585
+s16_nonml_sat,0,15,2,GPU (all 174),0.0,0.0012267136429059261
+s16_nonml_sat,0,15,2,Everything,0.0,0.0020720945722231044
+s16_nonml_sat,0,20,0,NIC (14),0.0,0.051137155034313764
+s16_nonml_sat,0,20,0,GPU (all 174),0.0,0.012924975638615601
+s16_nonml_sat,0,20,0,Everything,0.0,0.012618473691737232
+s16_train_ddp_resnet50,1,3,0,NIC (14),0.22456140350877193,0.3486976371994748
+s16_train_ddp_resnet50,1,3,0,GPU (all 174),0.0,0.05508877775242289
+s16_train_ddp_resnet50,1,3,0,Everything,0.0,0.11004518670065692
+s16_train_ddp_resnet50,1,3,1,NIC (14),0.8,0.4888173750556964
+s16_train_ddp_resnet50,1,3,1,GPU (all 174),0.27017543859649124,0.31144810281674595
+s16_train_ddp_resnet50,1,3,1,Everything,0.3192982456140351,0.42276135026892064
+s16_train_ddp_resnet50,1,3,2,NIC (14),0.42105263157894735,0.4710046090490398
+s16_train_ddp_resnet50,1,3,2,GPU (all 174),0.0,0.104785812809042
+s16_train_ddp_resnet50,1,3,2,Everything,0.0,0.12110967691038892
+s16_train_ddp_resnet50,1,6,0,NIC (14),0.40350877192982454,0.4139206596738761
+s16_train_ddp_resnet50,1,6,0,GPU (all 174),0.0,0.06743308270676693
+s16_train_ddp_resnet50,1,6,0,Everything,0.0,0.07594206349206349
+s16_train_ddp_resnet50,1,6,1,NIC (14),0.40350877192982454,0.3989252737631509
+s16_train_ddp_resnet50,1,6,1,GPU (all 174),0.0,0.0823981259865345
+s16_train_ddp_resnet50,1,6,1,Everything,0.0,0.12363174431365474
+s16_train_ddp_resnet50,1,6,2,NIC (14),0.37894736842105264,0.3870004689540122
+s16_train_ddp_resnet50,1,6,2,GPU (all 174),0.0,0.11626936157835982
+s16_train_ddp_resnet50,1,6,2,Everything,0.0,0.1431225334173683
+s16_train_ddp_resnet50,1,10,0,NIC (14),0.8070175438596491,0.6112870422947424
+s16_train_ddp_resnet50,1,10,0,GPU (all 174),0.26666666666666666,0.27298598461722223
+s16_train_ddp_resnet50,1,10,0,Everything,0.3298245614035088,0.3908505003103995
+s16_train_ddp_resnet50,1,10,1,NIC (14),0.7894736842105263,0.4990217712158035
+s16_train_ddp_resnet50,1,10,1,GPU (all 174),0.26666666666666666,0.2638140225119393
+s16_train_ddp_resnet50,1,10,1,Everything,0.2912280701754386,0.36998262834037354
+s16_train_ddp_resnet50,1,10,2,NIC (14),0.40350877192982454,0.4242183419975959
+s16_train_ddp_resnet50,1,10,2,GPU (all 174),0.0,0.09208771131054097
+s16_train_ddp_resnet50,1,10,2,Everything,0.0,0.1626147017260732
+s16_train_ddp_resnet50,1,15,0,NIC (14),0.8035087719298246,0.5312225748613342
+s16_train_ddp_resnet50,1,15,0,GPU (all 174),0.2736842105263158,0.3719157595590247
+s16_train_ddp_resnet50,1,15,0,Everything,0.40350877192982454,0.45367060337731585
+s16_train_ddp_resnet50,1,15,1,NIC (14),0.8070175438596491,0.6815547153791361
+s16_train_ddp_resnet50,1,15,1,GPU (all 174),0.0,0.17541311028708556
+s16_train_ddp_resnet50,1,15,1,Everything,0.0035087719298245615,0.31197896221233873
+s16_train_ddp_resnet50,1,15,2,NIC (14),0.7859649122807018,0.512777455378128
+s16_train_ddp_resnet50,1,15,2,GPU (all 174),0.26666666666666666,0.30464189131348374
+s16_train_ddp_resnet50,1,15,2,Everything,0.2631578947368421,0.3401240636866846
+s16_train_ddp_resnet50,1,20,0,NIC (14),0.7894736842105263,0.5419552506189369
+s16_train_ddp_resnet50,1,20,0,GPU (all 174),0.2631578947368421,0.2620648910360567
+s16_train_ddp_resnet50,1,20,0,Everything,0.39649122807017545,0.3995890206399825
+s16_train_fsdp1b,1,3,0,NIC (14),1.0,0.9316080449939359
+s16_train_fsdp1b,1,3,0,GPU (all 174),0.49572649572649574,0.6515890475803836
+s16_train_fsdp1b,1,3,0,Everything,0.9914529914529915,0.7383125353517861
+s16_train_fsdp1b,1,3,1,NIC (14),1.0,0.9563043285999685
+s16_train_fsdp1b,1,3,1,GPU (all 174),0.49572649572649574,0.44278837159550133
+s16_train_fsdp1b,1,3,1,Everything,0.49572649572649574,0.48651077535037207
+s16_train_fsdp1b,1,3,2,NIC (14),0.9658119658119658,0.7124859120399628
+s16_train_fsdp1b,1,3,2,GPU (all 174),0.5,0.5480158219976642
+s16_train_fsdp1b,1,3,2,Everything,0.5,0.5495669869379263
+s16_train_fsdp1b,1,6,0,NIC (14),0.9316239316239316,0.7624843305323158
+s16_train_fsdp1b,1,6,0,GPU (all 174),0.48717948717948717,0.40354142467170606
+s16_train_fsdp1b,1,6,0,Everything,0.49572649572649574,0.45070071227602726
+s16_train_fsdp1b,1,6,1,NIC (14),1.0,0.9142898766376942
+s16_train_fsdp1b,1,6,1,GPU (all 174),0.48717948717948717,0.4786764919446134
+s16_train_fsdp1b,1,6,1,Everything,0.49572649572649574,0.5706655406553448
+s16_train_fsdp1b,1,6,2,NIC (14),0.9871794871794872,0.8485435712283121
+s16_train_fsdp1b,1,6,2,GPU (all 174),0.49572649572649574,0.43206110786151164
+s16_train_fsdp1b,1,6,2,Everything,0.49572649572649574,0.5116663497930686
+s16_train_fsdp1b,1,10,0,NIC (14),0.5,0.5998976350285997
+s16_train_fsdp1b,1,10,0,GPU (all 174),0.49572649572649574,0.5813200128538362
+s16_train_fsdp1b,1,10,0,Everything,0.49572649572649574,0.5739199380721042
+s16_train_fsdp1b,1,10,1,NIC (14),1.0,0.9428776926045521
+s16_train_fsdp1b,1,10,1,GPU (all 174),0.5085470085470085,0.6628831985534449
+s16_train_fsdp1b,1,10,1,Everything,1.0,0.7250454095598629
+s16_train_fsdp1b,1,10,2,NIC (14),1.0,0.9405075302857042
+s16_train_fsdp1b,1,10,2,GPU (all 174),0.9829059829059829,0.6277012496901142
+s16_train_fsdp1b,1,10,2,Everything,1.0,0.7118049593831882
+s16_train_fsdp1b,1,15,0,NIC (14),0.9914529914529915,0.8580448526992671
+s16_train_fsdp1b,1,15,0,GPU (all 174),0.5341880341880342,0.600698207928323
+s16_train_fsdp1b,1,15,0,Everything,0.9743589743589743,0.7425589314031359
+s16_train_fsdp1b,1,15,1,NIC (14),0.9914529914529915,0.8605430902632264
+s16_train_fsdp1b,1,15,1,GPU (all 174),0.5,0.6646758981388105
+s16_train_fsdp1b,1,15,1,Everything,0.6025641025641025,0.7037951250569254
+s16_train_fsdp1b,1,15,2,NIC (14),0.9914529914529915,0.8544059367418994
+s16_train_fsdp1b,1,15,2,GPU (all 174),0.5085470085470085,0.6447270428039279
+s16_train_fsdp1b,1,15,2,Everything,0.5299145299145299,0.6799693262011274
+s16_train_fsdp1b,1,20,0,NIC (14),0.9914529914529915,0.8723191364871736
+s16_train_fsdp1b,1,20,0,GPU (all 174),0.5,0.6447877105002866
+s16_train_fsdp1b,1,20,0,Everything,0.9786324786324786,0.7635929565827594
+s16_train_fsdp30b,1,3,0,NIC (14),1.0,0.9958251498422439
+s16_train_fsdp30b,1,3,0,GPU (all 174),1.0,0.9933446888556879
+s16_train_fsdp30b,1,3,0,Everything,1.0,0.997428112248625
+s16_train_fsdp30b,1,3,1,NIC (14),1.0,0.9930140420119355
+s16_train_fsdp30b,1,3,1,GPU (all 174),1.0,0.8239760700589318
+s16_train_fsdp30b,1,3,1,Everything,1.0,0.9255862649133272
+s16_train_fsdp30b,1,3,2,NIC (14),1.0,0.9832565575772425
+s16_train_fsdp30b,1,3,2,GPU (all 174),1.0,0.9959152117271777
+s16_train_fsdp30b,1,3,2,Everything,1.0,0.9976463792431357
+s16_train_fsdp30b,1,6,0,NIC (14),1.0,0.8911198665161698
+s16_train_fsdp30b,1,6,0,GPU (all 174),0.02564102564102564,0.2618245643676182
+s16_train_fsdp30b,1,6,0,Everything,0.03418803418803419,0.3350114251719987
+s16_train_fsdp30b,1,6,1,NIC (14),1.0,0.9966170729133692
+s16_train_fsdp30b,1,6,1,GPU (all 174),1.0,0.9134367600193034
+s16_train_fsdp30b,1,6,1,Everything,1.0,0.9595290970555261
+s16_train_fsdp30b,1,6,2,NIC (14),1.0,0.8452095228770795
+s16_train_fsdp30b,1,6,2,GPU (all 174),1.0,0.8263141334650409
+s16_train_fsdp30b,1,6,2,Everything,1.0,0.8503983689722815
+s16_train_fsdp30b,1,10,0,NIC (14),1.0,0.9988687623829534
+s16_train_fsdp30b,1,10,0,GPU (all 174),0.017094017094017096,0.3527324829217241
+s16_train_fsdp30b,1,10,0,Everything,0.7948717948717948,0.5257637696757861
+s16_train_fsdp30b,1,10,1,NIC (14),1.0,0.9977413765252919
+s16_train_fsdp30b,1,10,1,GPU (all 174),1.0,0.7632806688917149
+s16_train_fsdp30b,1,10,1,Everything,1.0,0.8958713705433894
+s16_train_fsdp30b,1,10,2,NIC (14),1.0,0.9803289392003742
+s16_train_fsdp30b,1,10,2,GPU (all 174),1.0,0.9183883354914915
+s16_train_fsdp30b,1,10,2,Everything,1.0,0.9260754161240051
+s16_train_fsdp30b,1,15,0,NIC (14),1.0,0.9998575049889057
+s16_train_fsdp30b,1,15,0,GPU (all 174),0.02564102564102564,0.41367561098321887
+s16_train_fsdp30b,1,15,0,Everything,1.0,0.637531837501717
+s16_train_fsdp30b,1,15,1,NIC (14),1.0,0.9997530936691664
+s16_train_fsdp30b,1,15,1,GPU (all 174),0.9829059829059829,0.5400348317221275
+s16_train_fsdp30b,1,15,1,Everything,1.0,0.6433571544189894
+s16_train_fsdp30b,1,15,2,NIC (14),1.0,0.9996710600650058
+s16_train_fsdp30b,1,15,2,GPU (all 174),0.042735042735042736,0.462130458969342
+s16_train_fsdp30b,1,15,2,Everything,1.0,0.5902629299631684
+s16_train_fsdp30b,1,20,0,NIC (14),1.0,0.9998092263732334
+s16_train_fsdp30b,1,20,0,GPU (all 174),0.02564102564102564,0.40730780345413714
+s16_train_fsdp30b,1,20,0,Everything,1.0,0.6420727523455753
+s16_train_fsdp7b,1,3,0,NIC (14),1.0,0.9993774291528394
+s16_train_fsdp7b,1,3,0,GPU (all 174),1.0,0.7199796631873676
+s16_train_fsdp7b,1,3,0,Everything,1.0,0.8471950438565965
+s16_train_fsdp7b,1,3,1,NIC (14),1.0,0.9362253160546218
+s16_train_fsdp7b,1,3,1,GPU (all 174),0.15217391304347827,0.4788229525762194
+s16_train_fsdp7b,1,3,1,Everything,1.0,0.6120508724491569
+s16_train_fsdp7b,1,3,2,NIC (14),1.0,0.988352956500835
+s16_train_fsdp7b,1,3,2,GPU (all 174),1.0,0.749558786366762
+s16_train_fsdp7b,1,3,2,Everything,1.0,0.8033442288346084
+s16_train_fsdp7b,1,6,0,NIC (14),1.0,0.9526356967436577
+s16_train_fsdp7b,1,6,0,GPU (all 174),1.0,0.9086390333822238
+s16_train_fsdp7b,1,6,0,Everything,1.0,0.9340441213664407
+s16_train_fsdp7b,1,6,1,NIC (14),1.0,0.8397973948156054
+s16_train_fsdp7b,1,6,1,GPU (all 174),0.043478260869565216,0.2960411138260819
+s16_train_fsdp7b,1,6,1,Everything,0.17391304347826086,0.48994902137803703
+s16_train_fsdp7b,1,6,2,NIC (14),1.0,0.9842606459421133
+s16_train_fsdp7b,1,6,2,GPU (all 174),1.0,0.9241732606221358
+s16_train_fsdp7b,1,6,2,Everything,1.0,0.9281547798642494
+s16_train_fsdp7b,1,10,0,NIC (14),1.0,0.9771129819517594
+s16_train_fsdp7b,1,10,0,GPU (all 174),1.0,0.8888860110145226
+s16_train_fsdp7b,1,10,0,Everything,1.0,0.9321195931291136
+s16_train_fsdp7b,1,10,1,NIC (14),1.0,0.9892870148843961
+s16_train_fsdp7b,1,10,1,GPU (all 174),1.0,0.7750286192137144
+s16_train_fsdp7b,1,10,1,Everything,1.0,0.8542081377454516
+s16_train_fsdp7b,1,10,2,NIC (14),1.0,0.9613376272440829
+s16_train_fsdp7b,1,10,2,GPU (all 174),1.0,0.9189366780444873
+s16_train_fsdp7b,1,10,2,Everything,1.0,0.9249387985642532
+s16_train_fsdp7b,1,15,0,NIC (14),1.0,0.9991510968911427
+s16_train_fsdp7b,1,15,0,GPU (all 174),1.0,0.9965584406017658
+s16_train_fsdp7b,1,15,0,Everything,1.0,0.9971988303211338
+s16_train_fsdp7b,1,15,1,NIC (14),1.0,0.9994563477812966
+s16_train_fsdp7b,1,15,1,GPU (all 174),1.0,0.9960375422510177
+s16_train_fsdp7b,1,15,1,Everything,1.0,0.9975168907644284
+s16_train_fsdp7b,1,15,2,NIC (14),1.0,0.9993011978303797
+s16_train_fsdp7b,1,15,2,GPU (all 174),1.0,0.9959266103461559
+s16_train_fsdp7b,1,15,2,Everything,1.0,0.9956845239198795
+s16_train_fsdp7b,1,20,0,NIC (14),1.0,0.9994775873754264
+s16_train_fsdp7b,1,20,0,GPU (all 174),1.0,0.9958323551618583
+s16_train_fsdp7b,1,20,0,Everything,1.0,0.9958140615700771
+s16_train_fsdp7b_seq2k,1,3,0,NIC (14),0.9743589743589743,0.6949657765892296
+s16_train_fsdp7b_seq2k,1,3,0,GPU (all 174),0.9487179487179487,0.7273962221432294
+s16_train_fsdp7b_seq2k,1,3,0,Everything,0.9487179487179487,0.7389186717772225
+s16_train_fsdp7b_seq2k,1,3,1,NIC (14),0.9487179487179487,0.7675158125337128
+s16_train_fsdp7b_seq2k,1,3,1,GPU (all 174),0.9487179487179487,0.8342874902874903
+s16_train_fsdp7b_seq2k,1,3,1,Everything,0.9487179487179487,0.810890232574443
+s16_train_fsdp7b_seq2k,1,3,2,NIC (14),1.0,0.8233059436201093
+s16_train_fsdp7b_seq2k,1,3,2,GPU (all 174),1.0,0.526797238063818
+s16_train_fsdp7b_seq2k,1,3,2,Everything,0.9743589743589743,0.5286185876297257
+s16_train_fsdp7b_seq2k,1,6,0,NIC (14),0.9743589743589743,0.6090650745132168
+s16_train_fsdp7b_seq2k,1,6,0,GPU (all 174),0.9487179487179487,0.672134016523488
+s16_train_fsdp7b_seq2k,1,6,0,Everything,0.9487179487179487,0.734580491185479
+s16_train_fsdp7b_seq2k,1,6,1,NIC (14),0.9743589743589743,0.7092253238015214
+s16_train_fsdp7b_seq2k,1,6,1,GPU (all 174),0.0,0.31141066530317374
+s16_train_fsdp7b_seq2k,1,6,1,Everything,0.0,0.34022346449765445
+s16_train_fsdp7b_seq2k,1,6,2,NIC (14),0.9743589743589743,0.6098669239058934
+s16_train_fsdp7b_seq2k,1,6,2,GPU (all 174),0.9487179487179487,0.6608428044745016
+s16_train_fsdp7b_seq2k,1,6,2,Everything,0.9487179487179487,0.6702467614434682
+s16_train_fsdp7b_seq2k,1,10,0,NIC (14),0.9743589743589743,0.8318589449588734
+s16_train_fsdp7b_seq2k,1,10,0,GPU (all 174),0.9743589743589743,0.8008232146310126
+s16_train_fsdp7b_seq2k,1,10,0,Everything,0.9743589743589743,0.8813495902215076
+s16_train_fsdp7b_seq2k,1,10,1,NIC (14),0.9743589743589743,0.5950712953916015
+s16_train_fsdp7b_seq2k,1,10,1,GPU (all 174),0.9487179487179487,0.7463277566144638
+s16_train_fsdp7b_seq2k,1,10,1,Everything,0.9487179487179487,0.7119212989876975
+s16_train_fsdp7b_seq2k,1,10,2,NIC (14),0.9743589743589743,0.7943257190194477
+s16_train_fsdp7b_seq2k,1,10,2,GPU (all 174),0.9487179487179487,0.540395108756444
+s16_train_fsdp7b_seq2k,1,10,2,Everything,0.9230769230769231,0.5113893012535026
+s16_train_fsdp7b_seq2k,1,15,0,NIC (14),0.9743589743589743,0.811789633715561
+s16_train_fsdp7b_seq2k,1,15,0,GPU (all 174),0.9743589743589743,0.7989688668362166
+s16_train_fsdp7b_seq2k,1,15,0,Everything,0.9743589743589743,0.8019020334598087
+s16_train_fsdp7b_seq2k,1,15,1,NIC (14),0.9743589743589743,0.7538359896083617
+s16_train_fsdp7b_seq2k,1,15,1,GPU (all 174),0.9743589743589743,0.768923933271119
+s16_train_fsdp7b_seq2k,1,15,1,Everything,0.9743589743589743,0.8002123710248641
+s16_train_fsdp7b_seq2k,1,15,2,NIC (14),0.9743589743589743,0.7554018430106925
+s16_train_fsdp7b_seq2k,1,15,2,GPU (all 174),0.9743589743589743,0.7650038361809413
+s16_train_fsdp7b_seq2k,1,15,2,Everything,0.9743589743589743,0.7708189630050652
+s16_train_fsdp7b_seq2k,1,20,0,NIC (14),0.9743589743589743,0.7809711447218677
+s16_train_fsdp7b_seq2k,1,20,0,GPU (all 174),0.9743589743589743,0.775371699898598
+s16_train_fsdp7b_seq2k,1,20,0,Everything,0.9743589743589743,0.7630742891364707

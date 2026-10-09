@@ -1,0 +1,540 @@
+<title>Training Talks Both Ways</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column (~66ch) with wider "instrument" panels for the interactive figures; tx/rx colour pair carries meaning throughout. */
+:root {
+  --paper: #f5f6f8;
+  --panel: #ffffff;
+  --ink: #17202b;
+  --muted: #5a6474;
+  --line: #d8dde5;
+  --tx: #0d7a8a;          /* bytes sent */
+  --rx: #c4620c;          /* bytes received */
+  --train: #3d48c4;       /* called training */
+  --good: #2c8553;
+  --bad: #c03a2b;
+  --idle: #c9cfd8;
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Newsreader", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #10151c; --panel: #171e27; --ink: #e5e9ef; --muted: #9aa4b2; --line: #2b3441;
+    --tx: #3cc3d3; --rx: #f2a14c; --train: #8e98ff; --good: #4fbf7f; --bad: #f0715f; --idle: #3a4554;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #10151c; --panel: #171e27; --ink: #e5e9ef; --muted: #9aa4b2; --line: #2b3441;
+  --tx: #3cc3d3; --rx: #f2a14c; --train: #8e98ff; --good: #4fbf7f; --bad: #f0715f; --idle: #3a4554;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 19px; line-height: 1.6; padding-inline: 20px; padding-block: 0 64px; }
+main { max-width: 1040px; margin: 0 auto; }
+.col { max-width: 680px; margin: 0 auto; min-width: 0; width: 100%; }
+section > *, .stack > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.12; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.4rem, 6vw, 4.2rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.6rem, 3.4vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.05rem; font-weight: 700; }
+p { margin: 0; }
+.stack { display: flex; flex-direction: column; gap: 18px; }
+section { padding-block: 56px 8px; display: flex; flex-direction: column; gap: 26px; }
+.eyebrow { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 1.22rem; color: var(--ink); }
+.small { font-size: 0.86rem; color: var(--muted); line-height: 1.5; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.tx { color: var(--tx); font-weight: 500; } .rx { color: var(--rx); font-weight: 500; }
+b, strong { font-weight: 600; }
+a { color: var(--train); }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 22px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 10px; }
+.figwrap { overflow-x: auto; min-width: 0; max-width: 100%; }
+@media (max-width: 700px) { .figwrap svg { min-width: 640px; } }
+svg { display: block; max-width: 100%; height: auto; }
+svg text { font-family: var(--mono); fill: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { font-family: var(--display); font-size: 0.86rem; font-weight: 500; border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.chip:focus-visible, input:focus-visible { outline: 2px solid var(--train); outline-offset: 2px; }
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; }
+.ro { border-top: 2px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.ro .k { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.ro .v { font-family: var(--display); font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.verdict { font-family: var(--display); font-weight: 700; }
+.v-train { color: var(--train); } .v-clear { color: var(--muted); } .v-good { color: var(--good); } .v-bad { color: var(--bad); }
+.note { font-size: 0.95rem; color: var(--muted); border-left: 2px solid var(--line); padding-left: 14px; }
+.hero { padding-block: 64px 12px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 36px; align-items: center; }
+.hero .stack { gap: 22px; }
+.hero canvas { width: 100%; aspect-ratio: 5 / 4; max-width: 100%; display: block; border-radius: 10px; background: var(--panel); border: 1px solid var(--line); }
+@media (max-width: 820px) { .hero { grid-template-columns: 1fr; } }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+.card { border: 1px solid var(--line); border-radius: 10px; padding: 18px; background: var(--panel); display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.card .big { font-family: var(--display); font-size: 2rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+td.num, th.num { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.matrix td.cell { text-align: center; font-family: var(--mono); font-size: 0.85rem; font-variant-numeric: tabular-nums; border-left: 2px solid var(--panel); border-bottom: 2px solid var(--panel); }
+.matrix td.name { font-family: var(--display); font-size: 0.9rem; }
+.matrix tr.group td { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); padding-top: 16px; }
+.slider { display: grid; grid-template-columns: 170px minmax(0, 1fr) 80px; gap: 12px; align-items: center; }
+.slider label { font-family: var(--display); font-size: 0.92rem; }
+.slider output { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--train); }
+@media (max-width: 520px) { .slider { grid-template-columns: 1fr 64px; } .slider label { grid-column: 1 / -1; } body { font-size: 17px; } }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 4px; border-radius: 2px; display: inline-block; }
+.swb { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+footer { padding-block: 56px 0; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<main>
+  <header class="hero">
+    <div class="stack">
+      <div class="eyebrow">SPAR · hidden-training detection · October 2026</div>
+      <h1>Training talks both ways.</h1>
+      <p class="lede">When a model trains across machines, each machine sends as many bytes as it receives. A network card's two byte counters can see that, without looking inside the job. This page explains how far that idea goes, where it breaks, and why it works best next to GPU telemetry.</p>
+      <p class="small">Data: Robi's two-node GCP corpus (94 workloads, 42 families, 10,059 thirty-second windows) and Long's Nebius InfiniBand corpus (16 workloads, 48 jobs). Every result below is measured unless marked illustrative.</p>
+    </div>
+    <canvas id="hero" width="1000" height="800" aria-label="Animation: two nodes exchanging equal traffic in both directions during gradient averaging"></canvas>
+  </header>
+
+  <section class="col">
+    <div class="eyebrow">1 · The idea</div>
+    <h2>Why gradient averaging is symmetric</h2>
+    <p>Data-parallel training ends every step the same way. Each machine has computed gradients on its own slice of data, and the machines average them so they all take the same step. The standard way to do this, an <b>all-reduce</b>, has every machine pass along as much as it takes in. Over a few seconds, a node's <span class="tx">sent</span> and <span class="rx">received</span> byte counts come out nearly equal.</p>
+    <p>Most other work across machines is lopsided. Serving a model split across machines pushes activations one way, and a client uploading data pushes bytes one way. So the detector measures one number per node, per 30-second window:</p>
+    <p class="mono" style="font-size:1.05rem; text-align:center;">symmetry = min(<span class="tx">sent</span>, <span class="rx">received</span>) ÷ max(<span class="tx">sent</span>, <span class="rx">received</span>)</p>
+    <p>A value of 1 means perfectly balanced, and 0 means all traffic flows one way. The rule was frozen on 24 September, before the data below was collected:</p>
+    <div class="two">
+      <div class="card"><div class="eyebrow">Active</div><p>Average traffic (sent + received) is at least <b class="mono">1 MiB/s</b> on each node: about 50 times the idle background.</p></div>
+      <div class="card"><div class="eyebrow">Training</div><p>Active, and symmetry is at least <b class="mono">0.8</b>. All-reduce traffic reads 0.95–1.0.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">2 · What the network card sees</div>
+      <h2>Six jobs, as two byte counters</h2>
+      <p>Pick a workload. The chart shows node 0's <span class="tx">sent</span> and <span class="rx">received</span> rate for five minutes on a log scale, cut into ten 30-second windows. The strip under the chart shows what the rule calls each window.</p>
+    </div>
+    <div class="panel">
+      <div class="chips" role="group" aria-label="Workload" id="patchips"></div>
+      <div class="figwrap"><svg id="trace" viewBox="0 0 960 330" role="img" aria-label="Sent and received rate over five minutes"></svg></div>
+      <div class="legend"><span><i class="sw" style="background:var(--tx)"></i>sent</span><span><i class="sw" style="background:var(--rx)"></i>received</span><span><i class="swb" style="background:var(--train)"></i>called training</span><span><i class="swb" style="background:var(--idle)"></i>not called</span></div>
+      <div class="readouts" id="patro"></div>
+      <p class="note" id="patnote"></p>
+      <p class="small">Illustrative traces, shaped to each workload's measured medians in the corpus (median rate and median symmetry per window). The measured share of windows the rule called training is shown under "In the corpus".</p>
+    </div>
+  </section>
+
+  <section class="col">
+    <div class="eyebrow">3 · A test set in advance</div>
+    <h2>The rule predicted 118 of 120 new jobs</h2>
+    <p>Before Robi collected his diversity round, we wrote down what the frozen rule would call each new workload, including four false alarms predicted from the mechanism. Every predicted call held, apart from two jobs that never ran.</p>
+    <div class="figwrap"><table>
+      <thead><tr><th>New workloads</th><th>Predicted</th><th class="num">Jobs matching</th></tr></thead>
+      <tbody id="prereg"></tbody>
+    </table></div>
+    <p class="small">The two misses are 70B adversarial pipeline runs whose GPUs sat at 0% the whole time. They never trained, so there was nothing to see.</p>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">4 · Where it breaks</div>
+      <h2>Two blind spots, both predictable</h2>
+      <p>Over all 94 workloads, the rule catches 84% of training windows with 14.5% false alarms. Every error falls into one of two classes, and both follow directly from the mechanism.</p>
+    </div>
+    <div class="two">
+      <div class="card">
+        <div class="eyebrow">Balanced, but not training</div>
+        <h3>False alarms</h3>
+        <p>Recommendation-model serving (DLRM), sharded FFT, stencil halo exchange and the NCCL bandwidth sweep all exchange data evenly in both directions. The rule calls <b>100%</b> of their windows training. On Nebius, expert-parallel MoE serving does the same.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Training, but not balanced</div>
+        <h3>Misses</h3>
+        <p>In actor–learner reinforcement learning (IMPALA, Ape-X), 200–1,800 times more bytes flow one way than the other: <b>0%</b> caught. LocalSGD that syncs every few minutes is silent most of the time. Training kept inside one machine never touches the network at all.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">5 · Training that goes quiet</div>
+      <h2>DiLoCo and LocalSGD: how often does a sync show up?</h2>
+      <p>DiLoCo-style training syncs only every H local steps. Between syncs the network is silent, so some 30-second windows contain nothing. A sync burst of <i>b</i> seconds every <i>T</i> seconds lands in a share min(1, (30 + <i>b</i>) / <i>T</i>) of windows. Robi's runs confirm it: the dots are measured, and the curve is the formula.</p>
+    </div>
+    <div class="panel">
+      <div class="slider"><label for="sT">Sync every T seconds</label><input id="sT" type="range" min="20" max="900" step="1" value="170"><output id="oT" for="sT">170 s</output></div>
+      <div class="slider"><label for="sB">Each sync lasts b seconds</label><input id="sB" type="range" min="1" max="60" step="1" value="14"><output id="oB" for="sB">14 s</output></div>
+      <div class="figwrap"><svg id="strip" viewBox="0 0 960 120" role="img" aria-label="Twenty minutes of 30-second windows, highlighting those containing a sync"></svg></div>
+      <div class="readouts" id="dilro"></div>
+      <div class="figwrap"><svg id="cov" viewBox="0 0 960 300" role="img" aria-label="Share of windows containing a sync as the sync interval grows, with measured LocalSGD runs"></svg></div>
+      <p class="small">Measured runs: LocalSGD H = 1, 50, 50 with 4-bit quantisation, 50 with top-k 1%, 200 and 500 (unshaped link). Prediction and measurement agree within 6 points. A per-job majority vote misses once (30 + b) / T drops below one half: about T ≥ 90 s for 14-second bursts. Calling a job training if any window fires caught every run.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">6 · Two channels</div>
+      <h2>The network and the GPUs miss different jobs</h2>
+      <p>Each row is a family of workloads, scored by models that never saw any job from that family. The cell is the share of windows called training. Green means right and red means wrong: high is right for training, low is right for everything else.</p>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="chips" role="group" aria-label="Rows">
+          <button class="chip" id="fDis" aria-pressed="true">Where they disagree</button>
+          <button class="chip" id="fAll" aria-pressed="false">All 42 families</button>
+        </div>
+        <span class="small mono">GPU, Both = random forests · Two-stage = section 7</span>
+      </div>
+      <div class="figwrap"><table class="matrix"><thead><tr><th>Family</th><th class="num">Jobs</th><th style="text-align:center">Rule</th><th style="text-align:center">GPU</th><th style="text-align:center">Both</th><th style="text-align:center">Two-stage</th></tr></thead><tbody id="mat"></tbody></table></div>
+    </div>
+    <div class="col stack">
+      <p><b>The network wins on</b> LoRA fine-tuning, DDP, FSDP and pipeline training: a GPU-only model misses 93% of LoRA's windows, while the rule catches 92%. <b>The GPUs win on</b> one-way RL and sparse LocalSGD, and they clear the NCCL sweep and half of DLRM and FFT. Throwing every feature into one model loses some of this (LoRA falls to 38%), because the two channels disagree on exactly these families.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">7 · Combining them by design</div>
+      <h2>A two-stage detector</h2>
+      <p>Let the network rule go first, since it is fitted to nothing and its failures are known. Then use GPU telemetry for exactly the cases the rule cannot decide.</p>
+    </div>
+    <div class="panel">
+      <div class="figwrap"><svg id="flow" viewBox="0 0 960 300" role="img" aria-label="Flow: rule fires, then a stage-2 GPU model checks; rule silent, then a GPU model alone decides"></svg></div>
+      <div class="figwrap"><svg id="designs" viewBox="0 0 960 300" role="img" aria-label="Balanced accuracy of seven detector designs on unseen families"></svg></div>
+      <p class="small">Balanced accuracy is the average of the detection rate and the clearance rate; 0.5 is chance. Scores are leave-one-family-out on the GCP corpus.</p>
+    </div>
+    <div class="col stack">
+      <h3>What stage 2 looks at</h3>
+      <p>Among windows where the rule fires, training has a rhythm that bulk-synchronous HPC does not. Forward, backward and optimiser phases make memory bandwidth and power swing within a window. FFT, stencil, DLRM and the NCCL sweep run flat. Stage 2's top features are all memory-utilisation spread and power spread:</p>
+      <div class="figwrap"><svg id="s2" viewBox="0 0 680 210" role="img" aria-label="Median memory-utilisation spread for training families versus balanced non-training families"></svg></div>
+      <p class="small">Median, across a family's rule-positive windows, of the standard deviation of GPU memory utilisation within the window (percentage points). Stage 2 still calls stencil training when stencil is held out, because only five balanced non-training families exist to learn from.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">8 · Variety beats cleverness</div>
+      <h2>More workload families, better detectors</h2>
+      <p>In September the corpus had 7 families, and every learned model collapsed on a family it hadn't seen (0.21–0.59). Now there are 42. To separate "more families" from "different families", we held out 8 random families and trained on 4, 8, 16 or all 34 of the rest, repeating this with 8 random draws.</p>
+    </div>
+    <div class="panel">
+      <div class="figwrap"><svg id="div" viewBox="0 0 960 320" role="img" aria-label="Held-out-family balanced accuracy as the number of training families grows"></svg></div>
+      <p class="small" id="divnote"></p>
+    </div>
+  </section>
+
+  <section>
+    <div class="col stack">
+      <div class="eyebrow">9 · A different cluster</div>
+      <h2>InfiniBand: trained on one cloud, tested on another</h2>
+      <p>Long's Nebius runs use 2 × 8 H100 on InfiniBand, a completely different network from Robi's TCP setup on GCP. The new round adds tensor-parallel, pipeline (1F1B), PowerSGD, supervised fine-tuning and expert-parallel MoE <i>training</i>.</p>
+    </div>
+    <div class="two" id="nebcards"></div>
+    <div class="panel">
+      <div class="figwrap"><table><thead><tr><th>Nebius workload</th><th>Class</th><th class="num">Rule</th><th class="num">Model trained on GCP</th></tr></thead><tbody id="nebtab"></tbody></table></div>
+      <p class="small">Share of windows called training. The model is a random forest on GPU and network features, fitted only on Robi's GCP corpus.</p>
+    </div>
+    <div class="col stack" id="nebtext"></div>
+  </section>
+
+  <section class="col">
+    <div class="eyebrow">10 · So what</div>
+    <h2>What this means for verification</h2>
+    <div class="stack">
+      <p><b>Network telemetry is worth collecting.</b> On families a detector has never seen, adding it to GPU telemetry raises balanced accuracy from 0.83 to 0.90. A two-stage design reaches 0.94. Five balance features carry most of the gain.</p>
+      <p><b>It is not enough alone.</b> Balanced HPC traffic looks like training, and training that keeps its traffic one-way or inside one machine leaves no symmetric trace.</p>
+      <p><b>What we need next:</b> more balanced non-training workloads (stage 2 learns from only five), hour-long runs on a 100 Mbps link, and a third network fabric.</p>
+    </div>
+  </section>
+
+  <footer class="col small">
+    <p>SPAR Fall 2026 · Parsa Salimi with Long Yi · mentor Will Fowler. Corpora by Robi (GCP) and Long (Nebius). Full numbers and methods are in the report "How Much Does Interconnect Telemetry Matter for Detecting Training?".</p>
+  </footer>
+</main>
+
+<script>
+(() => {
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (parent) parent.appendChild(e); return e; };
+const fmtRate = v => v >= 1000 ? (v / 1000).toFixed(1) + ' GiB/s' : v >= 1 ? v.toFixed(0) + ' MiB/s' : v.toFixed(3) + ' MiB/s';
+const pct = v => Math.round(v * 100) + '%';
+function rng(seed) { let s = seed >>> 0; return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+
+/* ---------- hero animation ---------- */
+const cv = document.getElementById('hero'), cx = cv.getContext('2d');
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pk = []; const R = rng(7);
+for (let i = 0; i < 46; i++) pk.push({ dir: i % 2 ? 1 : -1, t: R(), lane: R(), sp: 0.0025 + R() * 0.002 });
+function drawHero(tick) {
+  const W = cv.width, H = cv.height;
+  cx.clearRect(0, 0, W, H);
+  const tx = css('--tx'), rx = css('--rx'), ink = css('--ink'), line = css('--line'), muted = css('--muted');
+  const nodeW = 210, nodeH = 360, y0 = 190, xa = 70, xb = W - 70 - nodeW;
+  [[xa, 'node 0'], [xb, 'node 1']].forEach(([x, name]) => {
+    cx.strokeStyle = line; cx.lineWidth = 3; cx.strokeRect(x, y0, nodeW, nodeH);
+    for (let g = 0; g < 8; g++) { cx.fillStyle = line; cx.fillRect(x + 22 + (g % 2) * 92, y0 + 26 + Math.floor(g / 2) * 70, 74, 50); }
+    cx.fillStyle = ink; cx.font = '600 30px ' + css('--display'); cx.fillText(name, x, y0 - 22);
+  });
+  const l0 = xa + nodeW + 14, l1 = xb - 14, laneTop = y0 + 90, laneH = 180;
+  pk.forEach(p => {
+    if (!reduce) p.t = (p.t + p.sp) % 1;
+    const u = p.dir > 0 ? p.t : 1 - p.t;
+    const x = l0 + (l1 - l0) * u;
+    const y = p.dir > 0 ? laneTop + p.lane * (laneH / 2 - 14) : laneTop + laneH / 2 + 14 + p.lane * (laneH / 2 - 14);
+    cx.fillStyle = p.dir > 0 ? tx : rx; cx.fillRect(x - 9, y - 4, 18, 8);
+  });
+  cx.font = '500 26px ' + css('--mono'); cx.fillStyle = tx; cx.fillText('sent 1.30 GiB/s →', 70, 640);
+  cx.fillStyle = rx; cx.fillText('← received 1.30 GiB/s', 70, 684);
+  cx.fillStyle = ink; cx.font = '700 40px ' + css('--display'); cx.fillText('symmetry 0.999', 70, 750);
+  cx.fillStyle = muted; cx.font = '500 22px ' + css('--mono'); cx.fillText('all-reduce, node 0', 70, 120);
+  if (!reduce) requestAnimationFrame(drawHero);
+}
+drawHero();
+
+/* ---------- section 2: traffic lab ---------- */
+const PATS = [
+  { id: 'ddp', name: 'DDP training', kind: 'training', tx: 1300, rx: 1290, burst: null, sym: 0.98, rate: 1292, corpus: 0.94,
+    note: 'Gradient all-reduce: sent and received track each other second by second. Every window is active and balanced.' },
+  { id: 'serve', name: 'Pipeline serving', kind: 'not training', tx: 128, rx: 0.6, burst: null, sym: 0.005, rate: 129, corpus: 0.0,
+    note: 'A model split across two machines (vLLM). Activations flow forward from node 0 to node 1; almost nothing comes back. Busy, but lopsided.' },
+  { id: 'rep', name: 'Replicated inference', kind: 'not training', tx: 0.001, rx: 0.001, burst: null, sym: 0.6, rate: 0.002, corpus: 0.0,
+    note: 'Each machine serves its own copy of the model. The network carries only background chatter, about 0.002 MiB/s, far below the 1 MiB/s floor.' },
+  { id: 'impala', name: 'IMPALA RL (miss)', kind: 'training', tx: 430, rx: 0.4, burst: null, sym: 0.001, rate: 434, corpus: 0.0,
+    note: 'Actor–learner reinforcement learning: one node streams to the other, about 1,000 times more bytes in one direction. This is real training that the rule misses.' },
+  { id: 'dlrm', name: 'DLRM serving (false alarm)', kind: 'not training', tx: 3000, rx: 2995, burst: null, sym: 0.999, rate: 5955, corpus: 1.0,
+    note: 'Recommendation-model serving shuffles embeddings all-to-all, evenly in both directions. The rule calls it training. This false alarm was predicted in writing beforehand.' },
+  { id: 'lsgd', name: 'LocalSGD, H = 200', kind: 'training', tx: 3800, rx: 3790, burst: { T: 170, b: 14, phase: 40 }, sym: 0.83, rate: 0.002, corpus: 0.19,
+    note: 'Syncs every 200 local steps, here one 14-second burst every 170 seconds. The windows with a burst are balanced and caught; the rest are silent.' },
+];
+const chipsBox = document.getElementById('patchips');
+let cur = PATS[0];
+PATS.forEach(p => { const b = document.createElement('button'); b.className = 'chip'; b.textContent = p.name; b.id = 'pat-' + p.id; b.setAttribute('aria-pressed', p === cur); b.onclick = () => { cur = p; chipsBox.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', c === b)); drawTrace(); }; chipsBox.appendChild(b); });
+function series(p) {
+  const r = rng(p.id.length * 97 + p.tx | 0); const n = 300; const tx = [], rx = [];
+  for (let s = 0; s < n; s++) {
+    let a = p.tx, c = p.rx;
+    if (p.burst) { const inB = ((s - p.burst.phase) % p.burst.T + p.burst.T) % p.burst.T < p.burst.b; if (!inB) { a = 0.0012; c = 0.0011; } }
+    const j = () => Math.exp((r() - 0.5) * 0.5);
+    tx.push(a * j()); rx.push(c * j());
+  }
+  return { tx, rx };
+}
+function drawTrace() {
+  const svg = document.getElementById('trace'); svg.innerHTML = '';
+  const L = 70, Rr = 940, T0 = 20, B = 250, n = 300;
+  const lo = Math.log10(0.0005), hi = Math.log10(20000);
+  const y = v => B - (Math.log10(Math.max(v, 0.0005)) - lo) / (hi - lo) * (B - T0);
+  const x = s => L + (Rr - L) * s / n;
+  [0.001, 0.01, 0.1, 1, 10, 100, 1000, 10000].forEach(v => {
+    el('line', { x1: L, x2: Rr, y1: y(v), y2: y(v), stroke: css('--line'), 'stroke-width': v === 1 ? 1.5 : 1, 'stroke-dasharray': v === 1 ? '5 4' : '' }, svg);
+    const t = el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 11 }, svg); t.textContent = v >= 1 ? v.toLocaleString('en-US') : v;
+  });
+  const t1 = el('text', { x: L + 6, y: y(1) - 6, 'font-size': 11 }, svg); t1.textContent = '1 MiB/s activity floor';
+  const yl = el('text', { x: 14, y: (T0 + B) / 2, 'font-size': 11, transform: `rotate(-90 14 ${(T0 + B) / 2})`, 'text-anchor': 'middle' }, svg); yl.textContent = 'MiB/s (log)';
+  const s = series(cur);
+  [['tx', '--tx'], ['rx', '--rx']].forEach(([k, c]) => {
+    const d = s[k].map((v, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+    el('path', { d, fill: 'none', stroke: css(c), 'stroke-width': 1.8, 'stroke-opacity': 0.9 }, svg);
+  });
+  let called = 0;
+  for (let w = 0; w < 10; w++) {
+    let a = 0, c = 0; for (let i = w * 30; i < w * 30 + 30; i++) { a += s.tx[i]; c += s.rx[i]; }
+    const mean = (a + c) / 30, sym = Math.min(a, c) / Math.max(a, c);
+    const train = mean >= 1 && sym >= 0.8; if (train) called++;
+    el('rect', { x: x(w * 30) + 1, y: 270, width: (Rr - L) / 10 - 2, height: 16, rx: 2, fill: train ? css('--train') : css('--idle') }, svg);
+    const lab = el('text', { x: x(w * 30 + 15), y: 304, 'text-anchor': 'middle', 'font-size': 10 }, svg); lab.textContent = mean >= 1 ? sym.toFixed(2) : 'idle';
+    el('line', { x1: x(w * 30), x2: x(w * 30), y1: T0, y2: B, stroke: css('--line'), 'stroke-opacity': 0.6 }, svg);
+  }
+  const ax = el('text', { x: L, y: 324, 'font-size': 10 }, svg); ax.textContent = 'window symmetry (or idle) · each window 30 s';
+  const ro = document.getElementById('patro');
+  const verdict = called >= 5 ? 'training' : 'not training';
+  const right = (verdict === 'training') === (cur.kind === 'training');
+  ro.innerHTML = `
+    <div class="ro"><span class="k">Median rate</span><span class="v mono">${fmtRate(cur.rate)}</span></div>
+    <div class="ro"><span class="k">Median symmetry</span><span class="v mono">${cur.rate < 1 && !cur.burst ? '—' : cur.sym.toFixed(3)}</span></div>
+    <div class="ro"><span class="k">Windows called here</span><span class="v mono">${called} / 10</span></div>
+    <div class="ro"><span class="k">In the corpus</span><span class="v mono">${pct(cur.corpus)}</span></div>
+    <div class="ro"><span class="k">Truth → rule (majority)</span><span class="v verdict ${right ? 'v-good' : 'v-bad'}">${right ? 'Right' : 'Wrong'}</span></div>`;
+  document.getElementById('patnote').textContent = cur.note;
+}
+drawTrace();
+
+/* ---------- section 3: pre-registered ---------- */
+const PRE = [
+  ['LoRA fine-tuning (1B, 7B)', 'training', '8 / 8'], ['Contrastive', 'training', '4 / 4'], ['Diffusion', 'training', '4 / 4'],
+  ['Pipeline training, 7B', 'training', '4 / 4'], ['Adversarial pipeline 1B / 70B', 'training', '11 / 13'],
+  ['DLRM serving (all-to-all)', 'false alarm', '8 / 8'], ['Sharded FFT', 'false alarm', '8 / 8'], ['Stencil halo exchange', 'false alarm', '4 / 4'], ['NCCL bandwidth sweep', 'false alarm', '4 / 4'],
+  ['Replicated inference (6 models)', 'no call', '23 / 23'], ['Single-node sharded Qwen 72B', 'no call', '6 / 6'], ['Pipeline serving (vLLM)', 'cleared', '34 / 34']];
+document.getElementById('prereg').innerHTML = PRE.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td class="num">${r[2]}</td></tr>`).join('');
+
+/* ---------- section 5: DiLoCo ---------- */
+const MEAS = [{ n: 'H=1', T: 29, b: 28, m: 1.0, dx: 9, dy: 16 }, { n: 'H=50', T: 53, b: 14, m: 0.846, dx: -48, dy: -6 }, { n: 'q4', T: 56, b: 17, m: 0.821, dx: 10, dy: 4 }, { n: 'top-k', T: 54, b: 15, m: 0.767, dx: 10, dy: 14 }, { n: 'H=200', T: 170, b: 14, m: 0.233, dx: 10, dy: -8 }, { n: 'H=500', T: 397, b: 8, m: 0.106, dx: 10, dy: -8 }];
+const sT = document.getElementById('sT'), sB = document.getElementById('sB');
+function drawDiloco() {
+  const T = +sT.value, b = +sB.value; document.getElementById('oT').textContent = T + ' s'; document.getElementById('oB').textContent = b + ' s';
+  const strip = document.getElementById('strip'); strip.innerHTML = '';
+  const span = 1200, L = 20, Rr = 940, x = t => L + (Rr - L) * t / span;
+  const bursts = []; for (let t = 25; t < span; t += T) bursts.push(t);
+  let hit = 0, tot = 0;
+  for (let w = 0; w + 30 <= span; w += 15) {
+    const has = bursts.some(t => t < w + 30 && t + b > w); tot++; if (has) hit++;
+    const row = (w / 15) % 2;
+    el('rect', { x: x(w) + 0.5, y: 14 + row * 22, width: x(30) - x(0) - 1, height: 18, rx: 2, fill: has ? css('--train') : css('--idle'), 'fill-opacity': has ? 0.85 : 0.6 }, strip);
+  }
+  bursts.forEach(t => el('rect', { x: x(t), y: 66, width: Math.max(2, x(t + b) - x(t)), height: 18, fill: css('--tx') }, strip));
+  el('line', { x1: L, x2: Rr, y1: 92, y2: 92, stroke: css('--line') }, strip);
+  [0, 300, 600, 900, 1200].forEach(t => { const tt = el('text', { x: x(t), y: 110, 'font-size': 11, 'text-anchor': t === 0 ? 'start' : t === 1200 ? 'end' : 'middle' }, strip); tt.textContent = (t / 60) + ' min'; });
+  const pred = Math.min(1, (30 + b) / T), sim = hit / tot;
+  const obs = 720, anyCaught = T <= obs;
+  document.getElementById('dilro').innerHTML = `
+    <div class="ro"><span class="k">Predicted coverage</span><span class="v mono">${pct(pred)}</span></div>
+    <div class="ro"><span class="k">Windows above with a sync</span><span class="v mono">${hit} / ${tot}</span></div>
+    <div class="ro"><span class="k">Majority vote</span><span class="v verdict ${pred > 0.5 ? 'v-good' : 'v-bad'}">${pred > 0.5 ? 'Caught' : 'Missed'}</span></div>
+    <div class="ro"><span class="k">Any window (12-min run)</span><span class="v verdict ${anyCaught ? 'v-good' : 'v-bad'}">${anyCaught ? 'Caught' : 'Missed'}</span></div>`;
+  const cov = document.getElementById('cov'); cov.innerHTML = '';
+  const cl = 70, cr = 930, ct = 40, cb = 250, Tmin = 20, Tmax = 900;
+  const cxp = t => cl + (cr - cl) * (Math.log(t) - Math.log(Tmin)) / (Math.log(Tmax) - Math.log(Tmin));
+  const cyp = v => cb - v * (cb - ct);
+  [0, 0.25, 0.5, 0.75, 1].forEach(v => { el('line', { x1: cl, x2: cr, y1: cyp(v), y2: cyp(v), stroke: css('--line'), 'stroke-dasharray': v === 0.5 ? '5 4' : '' }, cov); const t = el('text', { x: cl - 8, y: cyp(v) + 4, 'text-anchor': 'end', 'font-size': 11 }, cov); t.textContent = pct(v); });
+  const mj = el('text', { x: cr, y: cyp(0.5) - 6, 'text-anchor': 'end', 'font-size': 11 }, cov); mj.textContent = 'majority-vote line';
+  [20, 30, 60, 120, 300, 600, 900].forEach(t => { const tt = el('text', { x: cxp(t), y: cb + 20, 'text-anchor': 'middle', 'font-size': 11 }, cov); tt.textContent = t + ' s'; });
+  const xl = el('text', { x: (cl + cr) / 2, y: cb + 42, 'text-anchor': 'middle', 'font-size': 11 }, cov); xl.textContent = 'sync interval T (log scale)';
+  let d = ''; for (let i = 0; i <= 200; i++) { const t = Tmin * Math.pow(Tmax / Tmin, i / 200); d += (i ? 'L' : 'M') + cxp(t).toFixed(1) + ',' + cyp(Math.min(1, (30 + b) / t)).toFixed(1); }
+  el('path', { d, fill: 'none', stroke: css('--train'), 'stroke-width': 2.5 }, cov);
+  MEAS.forEach(m => { el('circle', { cx: cxp(m.T), cy: cyp(m.m), r: 6, fill: css('--rx'), stroke: css('--panel'), 'stroke-width': 2 }, cov); const t = el('text', { x: cxp(m.T) + m.dx, y: cyp(m.m) + m.dy, 'font-size': 11 }, cov); t.textContent = m.n; });
+  el('circle', { cx: cxp(T), cy: cyp(pred), r: 7, fill: 'none', stroke: css('--ink'), 'stroke-width': 2 }, cov);
+  const lg = el('text', { x: cl, y: 16, 'font-size': 11 }, cov); lg.textContent = `curve: formula with b = ${b} s · dots: measured LocalSGD (each at its own b) · ring: your setting`;
+}
+sT.oninput = drawDiloco; sB.oninput = drawDiloco; drawDiloco();
+
+/* ---------- section 6: family matrix ---------- */
+const FAM = [["inferasr_whisper",0,0.0,0.0,0.0,0.0,4],["infercnn_rn",0,0.0,0.35,0.0,0.35,2],["inferdiff_sdxl",0,0.0,0.41,0.0,0.41,4],["inferembed_bge",0,0.0,0.0,0.0,0.0,4],["inferembed_clip",0,0.0,0.0,0.0,0.0,4],["inferhf_qwen",0,0.0,0.05,0.0,0.05,3],["inferhf_shard",0,0.0,0.04,0.0,0.04,6],["infermem_qwen",0,0.0,0.0,0.0,0.0,5],["inferrec_dlrm",0,1.0,0.5,0.51,0.5,8],["inferrep_qwen",0,0.0,0.0,0.0,0.0,2],["inferserve_bursty",0,0.0,0.0,0.0,0.0,4],["inferserve_chunked",0,0.0,0.0,0.0,0.0,4],["inferserve_decode",0,0.0,0.0,0.0,0.0,4],["inferserve_poisson",0,0.0,0.0,0.0,0.0,8],["inferserve_prefill",0,0.0,0.0,0.0,0.0,5],["inferserve_saturate",0,0.0,0.0,0.0,0.0,4],["infershard_qwen",0,0.0,0.05,0.11,0.05,43],["infervis_vitl",0,0.0,0.0,0.0,0.0,2],["nonml_comm",0,0.07,0.0,0.0,0.0,2],["nonml_fftshard",0,1.0,0.49,0.5,0.0,8],["nonml_himem",0,0.0,0.0,0.0,0.0,2],["nonml_hpc",0,0.0,0.0,0.01,0.0,4],["nonml_hpl",0,0.0,0.05,0.07,0.05,1],["nonml_lowpower",0,0.0,0.0,0.0,0.0,14],["nonml_nccl",0,1.0,0.0,0.0,0.0,4],["nonml_sat",0,0.0,0.0,0.0,0.0,3],["nonml_stencil",0,1.0,0.0,0.0,1.0,4],["train_apexrl",1,0.0,1.0,1.0,1.0,1],["train_contrastive",1,1.0,1.0,1.0,1.0,4],["train_ddp",1,0.96,0.4,0.97,0.97,11],["train_decoupdiloco",1,0.86,1.0,1.0,1.0,2],["train_diffusion",1,1.0,1.0,1.0,1.0,4],["train_fsdp",1,1.0,0.74,0.94,1.0,29],["train_impala",1,0.31,1.0,1.0,1.0,3],["train_localsgd",1,0.43,0.87,0.64,0.9,9],["train_lora",1,0.92,0.07,0.38,0.96,8],["train_moe",1,1.0,1.0,1.0,1.0,3],["train_pipe",1,0.9,0.6,0.9,0.9,4],["train_ppodist",1,0.97,1.0,1.0,1.0,1],["train_streamdiloco",1,0.9,1.0,1.0,1.0,4],["train_swarm",1,0.13,0.53,0.28,0.54,4],["train_tp",1,1.0,1.0,1.0,1.0,2]];
+const NAMES = { inferasr_whisper: 'Whisper speech recognition, replicated', infercnn_rn: 'ResNet-50 inference, replicated', inferdiff_sdxl: 'SDXL image generation, replicated', inferembed_bge: 'BGE embeddings, replicated', inferembed_clip: 'CLIP embeddings, replicated', inferhf_qwen: 'Qwen 7B (Hugging Face), replicated', inferhf_shard: 'Qwen 72B sharded inside one node', infermem_qwen: 'Qwen serving, memory sweep', inferrec_dlrm: 'DLRM recommendation serving', inferrep_qwen: 'Qwen 1.5B replicas', inferserve_bursty: 'vLLM serving, bursty load', inferserve_chunked: 'vLLM serving, chunked prefill', inferserve_decode: 'vLLM serving, decode-heavy', inferserve_poisson: 'vLLM serving, Poisson arrivals', inferserve_prefill: 'vLLM serving, prefill-heavy', inferserve_saturate: 'vLLM serving, saturated', infershard_qwen: 'Qwen sharded across nodes', infervis_vitl: 'ViT-L vision, replicated', nonml_comm: 'Collective loop, quiet network', nonml_fftshard: 'Sharded FFT (all-to-all)', nonml_himem: 'Memory-bound kernel', nonml_hpc: 'HPC compute', nonml_hpl: 'HPL (Linpack)', nonml_lowpower: 'Low-power compute sweep', nonml_nccl: 'NCCL bandwidth sweep', nonml_sat: 'GPU saturation', nonml_stencil: 'Stencil, halo exchange', train_apexrl: 'Ape-X RL with replay', train_contrastive: 'Contrastive training', train_ddp: 'DDP (ResNet-50)', train_decoupdiloco: 'Decoupled DiLoCo', train_diffusion: 'Diffusion training', train_fsdp: 'FSDP, 1B–70B', train_impala: 'IMPALA RL', train_localsgd: 'LocalSGD', train_lora: 'LoRA fine-tuning', train_moe: 'Mixture-of-experts', train_pipe: 'Pipeline (GPipe 7B)', train_ppodist: 'Distributed PPO', train_streamdiloco: 'Streaming DiLoCo', train_swarm: 'SWARM', train_tp: 'Tensor-parallel' };
+let showAll = false;
+function cellBg(v, isTrain) {
+  const right = isTrain ? v : 1 - v;
+  const c = right >= 0.5 ? css('--good') : css('--bad');
+  const strength = Math.abs(right - 0.5) * 2;
+  return `background: color-mix(in srgb, ${c} ${Math.round(12 + 50 * strength)}%, transparent)`;
+}
+function drawMatrix() {
+  const rows = FAM.filter(r => showAll || Math.max(r[2], r[3], r[4], r[5]) - Math.min(r[2], r[3], r[4], r[5]) >= 0.2);
+  const groups = [[1, 'Training (want high)'], [0, 'Not training (want low)']];
+  let h = '';
+  groups.forEach(([t, label]) => {
+    h += `<tr class="group"><td colspan="6">${label}</td></tr>`;
+    rows.filter(r => r[1] === t).sort((a, b) => (a[2] - b[2])).forEach(r => {
+      h += `<tr><td class="name">${NAMES[r[0]] || r[0]}</td><td class="num">${r[6]}</td>` + [2, 3, 4, 5].map(k => `<td class="cell" style="${cellBg(r[k], t === 1)}">${pct(r[k])}</td>`).join('') + '</tr>';
+    });
+  });
+  document.getElementById('mat').innerHTML = h;
+}
+const fDis = document.getElementById('fDis'), fAll = document.getElementById('fAll');
+fDis.onclick = () => { showAll = false; fDis.setAttribute('aria-pressed', 'true'); fAll.setAttribute('aria-pressed', 'false'); drawMatrix(); };
+fAll.onclick = () => { showAll = true; fAll.setAttribute('aria-pressed', 'true'); fDis.setAttribute('aria-pressed', 'false'); drawMatrix(); };
+drawMatrix();
+
+/* ---------- section 7: flow + designs + stage-2 ---------- */
+function box(svg, x, y, w, h, title, sub, fill) {
+  el('rect', { x, y, width: w, height: h, rx: 8, fill: fill || css('--panel'), stroke: css('--line'), 'stroke-width': 1.5 }, svg);
+  const t = el('text', { x: x + 14, y: y + 26, 'font-size': 14, style: 'font-family: var(--display); font-weight: 700; fill: var(--ink)' }, svg); t.textContent = title;
+  sub.forEach((s, i) => { const u = el('text', { x: x + 14, y: y + 48 + i * 17, 'font-size': 11.5 }, svg); u.textContent = s; });
+}
+function arrow(svg, x1, y1, x2, y2, label) {
+  el('path', { d: `M${x1},${y1} L${x2},${y2}`, stroke: css('--muted'), 'stroke-width': 1.6, fill: 'none', 'marker-end': 'url(#ah)' }, svg);
+  if (label) { const t = el('text', { x: (x1 + x2) / 2 + 6, y: (y1 + y2) / 2 - 6, 'font-size': 11.5, style: 'fill: var(--ink)' }, svg); t.textContent = label; }
+}
+function drawFlow() {
+  const svg = document.getElementById('flow'); svg.innerHTML = '';
+  const defs = el('defs', {}, svg); const m = el('marker', { id: 'ah', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, defs); el('path', { d: 'M0,0 L10,5 L0,10 z', fill: css('--muted') }, m);
+  box(svg, 10, 110, 190, 80, '30-s window', ['NIC sent/received', 'GPU telemetry']);
+  box(svg, 250, 110, 200, 80, 'Network rule', ['active ≥ 1 MiB/s', 'and symmetry ≥ 0.8?']);
+  box(svg, 520, 20, 230, 96, 'Stage 2 (GPU model)', ['trained only on windows', 'where the rule fires:', 'is this balanced traffic training?']);
+  box(svg, 520, 184, 230, 96, 'GPU model', ['trained on all windows:', 'training with no', 'balanced traffic?']);
+  box(svg, 800, 110, 150, 80, 'Verdict', ['training /', 'not training']);
+  arrow(svg, 200, 150, 248, 150);
+  arrow(svg, 450, 135, 518, 70); { const t = el('text', { x: 462, y: 92, 'font-size': 11.5, style: 'fill: var(--ink)' }, svg); t.textContent = 'fires'; }
+  arrow(svg, 450, 165, 518, 230); { const t = el('text', { x: 462, y: 222, 'font-size': 11.5, style: 'fill: var(--ink)' }, svg); t.textContent = 'silent'; }
+  arrow(svg, 750, 70, 800, 130);
+  arrow(svg, 750, 230, 800, 170);
+}
+drawFlow();
+const DES = [['Rule alone', 0.847, 0.84, 0.145], ['GPU model alone', 0.812, 0.70, 0.080], ['One model, both channels', 0.880, 0.84, 0.083], ['Rule AND GPU', 0.767, 0.58, 0.048], ['Rule OR GPU', 0.892, 0.96, 0.178], ['Rule, then stage 2', 0.893, 0.83, 0.048], ['Two-stage', 0.938, 0.96, 0.081]];
+function drawDesigns() {
+  const svg = document.getElementById('designs'); svg.innerHTML = '';
+  const L = 200, Rr = 660, top0 = 14, rh = 38, x = v => L + (Rr - L) * v;
+  [0, 0.25, 0.5, 0.75, 1].forEach(v => { el('line', { x1: x(v), x2: x(v), y1: top0 - 4, y2: top0 + rh * DES.length, stroke: css('--line'), 'stroke-dasharray': v === 0.5 ? '4 4' : '' }, svg); const t = el('text', { x: x(v), y: top0 + rh * DES.length + 16, 'text-anchor': 'middle', 'font-size': 11 }, svg); t.textContent = v.toFixed(2); });
+  DES.forEach((d, i) => {
+    const yy = top0 + i * rh; const best = d[0] === 'Two-stage';
+    const n = el('text', { x: L - 12, y: yy + 22, 'text-anchor': 'end', 'font-size': 12.5, style: `font-family: var(--display); fill: var(--ink); font-weight: ${best ? 700 : 500}` }, svg); n.textContent = d[0];
+    el('rect', { x: L, y: yy + 8, width: x(d[1]) - L, height: 20, rx: 3, fill: best ? css('--train') : css('--idle') }, svg);
+    const v = el('text', { x: x(d[1]) + 8, y: yy + 23, 'font-size': 12, style: 'fill: var(--ink)' }, svg); v.textContent = d[1].toFixed(2);
+    const s = el('text', { x: Rr + 50, y: yy + 23, 'font-size': 11 }, svg); s.textContent = `detects ${pct(d[2])} · FA ${(d[3] * 100).toFixed(1)}%`;
+  });
+}
+drawDesigns();
+const S2 = [['DDP', 22.66, 1], ['Pipeline', 20.0, 1], ['Diffusion', 13.66, 1], ['LocalSGD', 11.12, 1], ['LoRA', 10.88, 1], ['Streaming DiLoCo', 8.04, 1], ['MoE', 6.34, 1], ['IMPALA', 5.07, 1], ['Tensor-parallel', 3.83, 1], ['FSDP', 3.08, 1], ['Contrastive', 3.04, 1], ['SWARM', 0.84, 1], ['Sharded FFT', 0.54, 0], ['Collective loop', 0.44, 0], ['Stencil', 0.44, 0], ['DLRM', 0.43, 0], ['NCCL sweep', 0.15, 0]];
+function drawS2() {
+  const svg = document.getElementById('s2'); svg.innerHTML = '';
+  const L = 20, Rr = 660, y0 = 70, lo = Math.log10(0.1), hi = Math.log10(30);
+  const x = v => L + (Rr - L) * (Math.log10(v) - lo) / (hi - lo);
+  [0.1, 0.3, 1, 3, 10, 30].forEach(v => { el('line', { x1: x(v), x2: x(v), y1: 30, y2: 150, stroke: css('--line') }, svg); const t = el('text', { x: x(v), y: 168, 'text-anchor': 'middle', 'font-size': 11 }, svg); t.textContent = v; });
+  const xl = el('text', { x: (L + Rr) / 2, y: 192, 'text-anchor': 'middle', 'font-size': 11 }, svg); xl.textContent = 'spread of memory utilisation within a window, percentage points (log)';
+  S2.forEach((d, i) => {
+    const yy = d[2] ? y0 + 30 : y0 - 22;
+    el('circle', { cx: x(d[1]), cy: yy + ((i % 3) - 1) * 9, r: 6, fill: d[2] ? css('--train') : css('--rx'), 'fill-opacity': 0.85 }, svg);
+  });
+  const a = el('text', { x: L, y: 22, 'font-size': 11.5, style: 'fill: var(--rx)' }, svg); a.textContent = '● balanced, not training (DLRM, FFT, stencil, NCCL, collective loop)';
+  const b = el('text', { x: L, y: 145, 'font-size': 11.5, style: 'fill: var(--train)' }, svg); b.textContent = '● training families';
+}
+drawS2();
+
+/* ---------- section 8: diversity ---------- */
+const DIV = [{"fs":"Both (188)","k":4,"BalAcc":0.606},{"fs":"Both (188)","k":8,"BalAcc":0.663},{"fs":"Both (188)","k":16,"BalAcc":0.722},{"fs":"Both (188)","k":34,"BalAcc":0.833},{"fs":"GPU (174)","k":4,"BalAcc":0.561},{"fs":"GPU (174)","k":8,"BalAcc":0.594},{"fs":"GPU (174)","k":16,"BalAcc":0.659},{"fs":"GPU (174)","k":34,"BalAcc":0.792},{"fs":"Network (14)","k":4,"BalAcc":0.621},{"fs":"Network (14)","k":8,"BalAcc":0.68},{"fs":"Network (14)","k":16,"BalAcc":0.75},{"fs":"Network (14)","k":34,"BalAcc":0.817},{"fs":"rule","k":4,"BalAcc":0.79},{"fs":"rule","k":8,"BalAcc":0.79},{"fs":"rule","k":16,"BalAcc":0.79},{"fs":"rule","k":34,"BalAcc":0.79}];
+function drawDiv() {
+  const svg = document.getElementById('div'); svg.innerHTML = '';
+  const L = 70, Rr = 760, T0 = 20, B = 270, ks = [...new Set(DIV.map(r => r.k))].sort((a, b) => a - b);
+  const x = k => L + (Rr - L) * (Math.log(k) - Math.log(ks[0])) / (Math.log(ks.at(-1)) - Math.log(ks[0]));
+  const lo = 0.5, hi = 1.0, y = v => B - (v - lo) / (hi - lo) * (B - T0);
+  [0.5, 0.6, 0.7, 0.8, 0.9, 1.0].forEach(v => { el('line', { x1: L, x2: Rr, y1: y(v), y2: y(v), stroke: css('--line') }, svg); const t = el('text', { x: L - 8, y: y(v) + 4, 'text-anchor': 'end', 'font-size': 11 }, svg); t.textContent = v.toFixed(1); });
+  ks.forEach(k => { const t = el('text', { x: x(k), y: B + 20, 'text-anchor': 'middle', 'font-size': 11 }, svg); t.textContent = k; });
+  const xl = el('text', { x: (L + Rr) / 2, y: B + 42, 'text-anchor': 'middle', 'font-size': 11 }, svg); xl.textContent = 'training families seen (log scale) · 8 held-out families per draw';
+  const series = [['Both (188)', '--train', 3], ['GPU (174)', '--muted', 2], ['Network (14)', '--tx', 2], ['rule', '--rx', 2]];
+  const ends = series.map(([fs]) => DIV.filter(r => r.fs === fs).sort((a, b) => a.k - b.k).at(-1)).filter(Boolean).sort((a, b) => b.BalAcc - a.BalAcc);
+  const labY = {}; let prev = -1e9; ends.forEach(e => { const yy = Math.max(y(e.BalAcc) + 4, prev + 15); labY[e.fs] = yy; prev = yy; });
+  series.forEach(([fs, c, w]) => {
+    const pts = DIV.filter(r => r.fs === fs).sort((a, b) => a.k - b.k);
+    if (!pts.length) return;
+    const d = pts.map((r, i) => (i ? 'L' : 'M') + x(r.k) + ',' + y(r.BalAcc)).join(' ');
+    el('path', { d, fill: 'none', stroke: css(c), 'stroke-width': w, 'stroke-dasharray': fs === 'rule' ? '6 4' : '' }, svg);
+    pts.forEach(r => { const ci = el('circle', { cx: x(r.k), cy: y(r.BalAcc), r: 4, fill: css(c) }, svg); const tt = el('title', {}, ci); tt.textContent = `${fs}, ${r.k} families: ${r.BalAcc.toFixed(2)}`; });
+    const e = pts.at(-1); const lb = el('text', { x: Rr + 10, y: labY[fs], 'font-size': 12, style: `fill: ${css(c)}` }, svg); lb.textContent = `${fs === 'rule' ? 'Rule (unfitted)' : fs} ${e.BalAcc.toFixed(2)}`;
+  });
+}
+drawDiv();
+document.getElementById('divnote').textContent = 'Mean balanced accuracy on 8 held-out families over 8 random draws (random forests). Every learned model is still climbing at 34 families. With few families, the 14 network features generalise better than the 174 GPU features; the unfitted rule beats every learned model until about 34. Spread across draws is large (standard deviation 0.12 to 0.30).';
+
+/* ---------- section 9: Nebius ---------- */
+const NEB = {"cards": [{"k": "Rule on Nebius, unchanged", "v": "0.79", "s": "Catches every new PR #3 training workload, flags expert-parallel serving, and cannot see FSDP kept inside each node."}, {"k": "GPU + network model trained only on GCP", "v": "0.96", "s": "Detects 92% of Nebius training windows with no false alarms, including expert-parallel serving."}, {"k": "Network-only model trained on GCP", "v": "0.56", "s": "Learned network thresholds do not carry over from one TCP card to 8-port InfiniBand. The rule does, because it encodes the mechanism."}], "rows": [["OLMoE expert-parallel serving", 0, 1.0, 0.0], ["Disaggregated prefill/decode", 0, 0.0, 0.0], ["Qwen tensor-parallel decode", 0, 0.0, 0.0], ["Local Qwen inference", 0, 0.0, 0.0], ["MoE expert-parallel training (new)", 1, 1.0, 1.0], ["TP = 8 × FSDP = 2 (new)", 1, 1.0, 1.0], ["PP = 2 × TP = 8, 1F1B (new)", 1, 1.0, 1.0], ["PowerSGD DDP (new)", 1, 1.0, 1.0], ["Short SFT, Qwen2.5-7B (new)", 1, 1.0, 1.0], ["FSDP across nodes", 1, 1.0, 1.0], ["Dense DDP", 1, 0.93, 0.87], ["DDP, gradient accumulation", 1, 1.0, 1.0], ["LoRA DDP", 1, 1.0, 1.0], ["FSDP inside each node", 1, 0.0, 1.0], ["DiLoCo", 1, 0.44, 0.61], ["Streaming DiLoCo", 1, 0.27, 0.68]], "text": ["<b>Expert-parallel training and serving look alike on the wire.</b> Both route tokens all-to-all, so both are balanced, and the rule calls both training. Training moves about 100 times more bytes, but that reflects this cluster's batch sizes. GPU telemetry, trained only on GCP, separates them cleanly. Sampling the network ten times a second does not: traffic-shape features separate them at 0.63 to 0.70 balanced accuracy.", "<b>The two-stage design does not carry over here.</b> Its stage 2 learned what balanced non-training traffic looks like from flat HPC jobs on GCP, and expert-parallel serving looks different, so stage 2 lets it through (0.87 on Nebius). The single model on both channels is best on this cluster (0.95). Both results point at the same gap: too few balanced non-training workloads to learn from."]};
+document.getElementById('nebcards').innerHTML = NEB.cards.map(c => `<div class="card"><div class="eyebrow">${c.k}</div><div class="big">${c.v}</div><p class="small">${c.s}</p></div>`).join('');
+document.getElementById('nebtab').innerHTML = NEB.rows.map(r => `<tr><td>${r[0]}</td><td>${r[1] ? 'training' : 'not training'}</td><td class="num" style="${cellBg(r[2], r[1] === 1)}">${pct(r[2])}</td><td class="num" style="${cellBg(r[3], r[1] === 1)}">${pct(r[3])}</td></tr>`).join('');
+document.getElementById('nebtext').innerHTML = NEB.text.map(t => `<p>${t}</p>`).join('');
+
+const mq = window.matchMedia('(prefers-color-scheme: dark)');
+const redraw = () => { drawTrace(); drawDiloco(); drawMatrix(); drawFlow(); drawDesigns(); drawS2(); drawDiv(); if (reduce) drawHero(); };
+mq.addEventListener && mq.addEventListener('change', redraw);
+new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+})();
+</script>

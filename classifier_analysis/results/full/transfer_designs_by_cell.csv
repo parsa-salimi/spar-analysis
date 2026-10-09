@@ -1,0 +1,17 @@
+is_train,cell,rule,GPU,"one model, both channels",rule -> stage 2,two-stage
+0,neb_disagg_prefill_decode,0.0,0.0,0.0,0.0,0.0
+0,neb_local_qwen_infer,0.0,0.0,0.0,0.0,0.0
+0,neb_olmoe_ep_mixed,1.0,0.0,0.0,1.0,1.0
+0,neb_qwen_tp_decode,0.0,0.0,0.0,0.0,0.0
+1,neb_ddp_grad_accum,1.0,1.0,1.0,1.0,1.0
+1,neb_dense_ddp,0.93,0.37,0.85,0.93,0.93
+1,neb_diloco,0.44,0.55,0.56,0.44,0.65
+1,neb_diloco_streaming,0.27,0.98,0.5,0.27,0.98
+1,neb_fsdp_1n8_ibquiet,0.0,1.0,1.0,0.0,1.0
+1,neb_fsdp_2n8,1.0,1.0,1.0,1.0,1.0
+1,neb_lora_only_ddp,1.0,1.0,1.0,1.0,1.0
+1,neb_moe_ep_train_titan,1.0,1.0,1.0,1.0,1.0
+1,neb_powersgd_ddp,1.0,0.2,1.0,1.0,1.0
+1,neb_pp_1f1b_train,1.0,1.0,1.0,1.0,1.0
+1,neb_sft_short,1.0,1.0,1.0,1.0,1.0
+1,neb_tp_dp_train,1.0,1.0,1.0,1.0,1.0

@@ -21,7 +21,7 @@ import pandas as pd
 from . import common as C
 from network_detector import rule as R
 
-SEEDS = {"run": [0, 1, 2], "workload": [0, 1, 2], "family": [0]}
+SEEDS = {"run": [0], "workload": [0, 1, 2], "family": [0]}
 KEEP = ["cell", "rid", "w", "family", "is_train"]
 
 

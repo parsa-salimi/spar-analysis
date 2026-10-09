@@ -1,0 +1,5 @@
+hz,model,windows,train_windows,ep_windows,TPR_cellavg,FPR,BalAcc
+10,Logistic,647,588,59,0.776,0.525,0.625
+10,RandomForest,647,588,59,0.962,0.567,0.698
+1,Logistic,647,589,58,0.837,0.479,0.679
+1,RandomForest,647,589,58,0.928,0.939,0.494

@@ -1,0 +1,8 @@
+held_out,feature,threshold
+inferrep_qwen,sym,0.9152534604072571
+infershard_qwen,sym,0.9561626017093658
+nonml_comm,sym,0.9561626017093658
+nonml_hpc,sym,0.9152534604072571
+nonml_sat,sym,0.9142087399959564
+train_ddp,sym,0.9561626017093658
+train_fsdp,sym,0.9152534604072571
