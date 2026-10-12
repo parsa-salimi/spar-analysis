@@ -1,0 +1,2 @@
+design,TPR,FPR,AUC,BalAcc,TPR_job,FPR_job
+network (learned),0.616,0.662,0.492,0.477,0.629,0.716

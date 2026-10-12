@@ -100,7 +100,7 @@ footer { padding-block: 56px 0; }
     <div class="stack">
       <div class="eyebrow">SPAR · hidden-training detection · October 2026</div>
       <h1>Training talks both ways.</h1>
-      <p class="lede">When a model trains across machines, each machine sends as many bytes as it receives. A network card's two byte counters can see that, without looking inside the job. This page explains how far that idea goes, where it breaks, and why it works best next to GPU telemetry.</p>
+      <p class="lede">When a model trains across machines, each machine sends as many bytes as it receives. A network card's two byte counters can see that, without looking inside the job. This page explains how far that idea goes, where it breaks, what GPU telemetry adds, and where learned detectors still fall over.</p>
       <p class="small">Data: Robi's two-node GCP corpus (94 workloads, 42 families, 10,059 thirty-second windows) and Long's Nebius InfiniBand corpus (16 workloads, 48 jobs). Every result below is measured unless marked illustrative.</p>
     </div>
     <canvas id="hero" width="1000" height="800" aria-label="Animation: two nodes exchanging equal traffic in both directions during gradient averaging"></canvas>
@@ -186,7 +186,7 @@ footer { padding-block: 56px 0; }
     <div class="col stack">
       <div class="eyebrow">6 · Two channels</div>
       <h2>The network and the GPUs miss different jobs</h2>
-      <p>Each row is a family of workloads, scored by models that never saw any job from that family. The cell is the share of windows called training. Green means right and red means wrong: high is right for training, low is right for everything else.</p>
+      <p>Each row is a family of workloads, scored by models that never saw any job from that family (though usually a close relative; section 8 removes those too). The cell is the share of windows called training. Green means right and red means wrong: high is right for training, low is right for everything else.</p>
     </div>
     <div class="panel">
       <div class="panel-head">
@@ -207,12 +207,12 @@ footer { padding-block: 56px 0; }
     <div class="col stack">
       <div class="eyebrow">7 · Combining them by design</div>
       <h2>A two-stage detector</h2>
-      <p>Let the network rule go first, since it is fitted to nothing and its failures are known. Then use GPU telemetry for exactly the cases the rule cannot decide.</p>
+      <p>Let the network rule go first, since it is fitted to nothing and its failures are known. Then use GPU telemetry for exactly the cases the rule cannot decide. On held-out families this is the best design we tried. Section 8 shows that the score depends on the detector having seen a relative of each job.</p>
     </div>
     <div class="panel">
       <div class="figwrap"><svg id="flow" viewBox="0 0 960 300" role="img" aria-label="Flow: rule fires, then a stage-2 GPU model checks; rule silent, then a GPU model alone decides"></svg></div>
       <div class="figwrap"><svg id="designs" viewBox="0 0 960 300" role="img" aria-label="Balanced accuracy of seven detector designs on unseen families"></svg></div>
-      <p class="small">Balanced accuracy is the average of the detection rate and the clearance rate; 0.5 is chance. Scores are leave-one-family-out on the GCP corpus.</p>
+      <p class="small">Balanced accuracy is the average of the detection rate and the clearance rate; 0.5 is chance. Scores are leave-one-family-out on the GCP corpus. The two-stage design was chosen after seeing these results, so it has not yet had an out-of-sample test on GCP.</p>
     </div>
     <div class="col stack">
       <h3>What stage 2 looks at</h3>
@@ -224,9 +224,20 @@ footer { padding-block: 56px 0; }
 
   <section>
     <div class="col stack">
-      <div class="eyebrow">8 · Variety beats cleverness</div>
-      <h2>More workload families, better detectors</h2>
-      <p>In September the corpus had 7 families, and every learned model collapsed on a family it hadn't seen (0.21–0.59). Now there are 42. To separate "more families" from "different families", we held out 8 random families and trained on 4, 8, 16 or all 34 of the rest, repeating this with 8 random draws.</p>
+      <div class="eyebrow">8 · How new is new?</div>
+      <h2>Learned detectors only generalise to jobs like ones they've seen</h2>
+      <p>Robi's families are fine-grained. Hold out LocalSGD and the model still trains on streaming and decoupled DiLoCo. Hold out one vLLM serving setup and five others stay in. So "unseen family" usually means "unseen variant of something familiar".</p>
+      <p>A harder test holds out whole <b>mechanisms</b>: all all-reduce training at once, all LLM serving at once, and so on, in eight groups. The rule is fitted to nothing, so its score doesn't move. The learned models fall below chance.</p>
+    </div>
+    <div class="panel">
+      <div class="figwrap"><svg id="mechbars" viewBox="0 0 960 250" role="img" aria-label="Balanced accuracy when a family is held out versus when a whole mechanism is held out"></svg></div>
+      <div class="legend"><span><i class="swb" style="background:var(--idle)"></i>family held out (a relative was seen)</span><span><i class="swb" style="background:var(--train)"></i>whole mechanism held out</span></div>
+      <div class="figwrap"><table class="matrix"><thead><tr><th>Mechanism held out</th><th style="text-align:center">Rule</th><th style="text-align:center">GPU</th><th style="text-align:center">Both</th><th style="text-align:center">Two-stage</th></tr></thead><tbody id="mech"></tbody></table></div>
+      <p class="small">Share of windows called training when every family in that group is held out at once (GCP corpus, random forests). Where stage 2 has no balanced non-training jobs left to learn from, the two-stage design defers to the rule.</p>
+    </div>
+    <div class="col stack">
+      <p><b>The clearest case for the network is here.</b> With all-reduce training (DDP, FSDP, LoRA and similar) held out, the GPU model catches 11% of it; the rule catches 98%. With all LLM serving held out, the GPU model calls 94% of it training; the rule calls none of it.</p>
+      <p><b>More families still help the learned models</b>, because each one becomes a relative for something unseen. Holding out 8 random families and training on 4, 8, 16 or all 34 of the rest, every model is still improving at 34 (chart below). That is coverage, not understanding: a new mechanism still breaks them.</p>
     </div>
     <div class="panel">
       <div class="figwrap"><svg id="div" viewBox="0 0 960 320" role="img" aria-label="Held-out-family balanced accuracy as the number of training families grows"></svg></div>
@@ -252,9 +263,10 @@ footer { padding-block: 56px 0; }
     <div class="eyebrow">10 · So what</div>
     <h2>What this means for verification</h2>
     <div class="stack">
-      <p><b>Network telemetry is worth collecting.</b> On families a detector has never seen, adding it to GPU telemetry raises balanced accuracy from 0.83 to 0.90. A two-stage design reaches 0.94. Five balance features carry most of the gain.</p>
-      <p><b>It is not enough alone.</b> Balanced HPC traffic looks like training, and training that keeps its traffic one-way or inside one machine leaves no symmetric trace.</p>
-      <p><b>What we need next:</b> more balanced non-training workloads (stage 2 learns from only five), hour-long runs on a 100 Mbps link, and a third network fabric.</p>
+      <p><b>The rule is the robust core.</b> It was frozen before the data arrived, it predicted 118 of 120 new jobs, it carries over from TCP to InfiniBand, and its score doesn't depend on what it has seen. Its failures are known: balanced non-training traffic, and training that is one-way, rare or kept inside one machine.</p>
+      <p><b>GPU telemetry adds a lot, but only for familiar kinds of job.</b> On held-out families, combining it with the network reaches 0.90 to 0.94. On a genuinely new mechanism the learned models fall below chance, while the rule holds at 0.85.</p>
+      <p><b>The two-stage design is promising, not proven.</b> It was chosen after seeing the results, it flags 6.5% of innocent jobs (31% if any single window counts), and nobody has yet tried an attacker who pads traffic one way to silence the rule while hiding training from the GPU model.</p>
+      <p><b>What we need next:</b> freeze the two-stage design and test it on the next data round, as we did the rule; collect many more balanced non-training workloads; red-team the padding-plus-filler attack; run hour-long jobs on a 100 Mbps link; and get a third network fabric.</p>
     </div>
   </section>
 
@@ -501,7 +513,32 @@ function drawS2() {
 }
 drawS2();
 
-/* ---------- section 8: diversity ---------- */
+/* ---------- section 8: mechanism holdout ---------- */
+const MECHBARS = [['Rule (unfitted)', 0.847, 0.847], ['GPU model', 0.812, 0.331], ['One model, both channels', 0.880, 0.350], ['Two-stage', 0.938, 0.606]];
+const MECH = [['All-reduce training (DDP, FSDP, LoRA, …)', 1, 0.98, 0.11, 0.11, 0.97], ['Model-parallel training (TP, pipeline, MoE)', 1, 0.95, 0.68, 0.96, 0.95], ['Low-communication training (LocalSGD, DiLoCo, SWARM)', 1, 0.51, 0.79, 0.67, 0.84], ['Reinforcement learning (IMPALA, Ape-X, PPO)', 1, 0.38, 1.0, 1.0, 1.0],
+  ['LLM serving (vLLM, sharded, replicas)', 0, 0.0, 0.94, 0.89, 0.94], ['Balanced HPC and DLRM', 0, 0.96, 0.84, 0.96, 1.0], ['Replicated inference (vision, speech, embeddings)', 0, 0.0, 0.18, 0.02, 0.18], ['Other compute (HPC, Linpack, low-power)', 0, 0.0, 0.05, 0.02, 0.05]];
+function drawMech() {
+  const svg = document.getElementById('mechbars'); svg.innerHTML = '';
+  const L = 220, Rr = 860, top0 = 10, rh = 54, x = v => L + (Rr - L) * v;
+  [0, 0.25, 0.5, 0.75, 1].forEach(v => { el('line', { x1: x(v), x2: x(v), y1: top0, y2: top0 + rh * MECHBARS.length, stroke: css('--line'), 'stroke-dasharray': v === 0.5 ? '4 4' : '' }, svg); const t = el('text', { x: x(v), y: top0 + rh * MECHBARS.length + 16, 'text-anchor': 'middle', 'font-size': 11 }, svg); t.textContent = v === 0.5 ? '0.50 chance' : v.toFixed(2); });
+  MECHBARS.forEach((d, i) => {
+    const yy = top0 + i * rh;
+    const n = el('text', { x: L - 12, y: yy + 26, 'text-anchor': 'end', 'font-size': 12.5, style: 'font-family: var(--display); fill: var(--ink); font-weight: 600' }, svg); n.textContent = d[0];
+    [[d[1], css('--idle'), 6], [d[2], css('--train'), 26]].forEach(([v, c, off]) => {
+      el('rect', { x: L, y: yy + off, width: x(v) - L, height: 17, rx: 3, fill: c }, svg);
+      const t = el('text', { x: x(v) + 8, y: yy + off + 13, 'font-size': 11.5, style: 'fill: var(--ink)' }, svg); t.textContent = v.toFixed(2);
+    });
+  });
+  let h = '';
+  [[1, 'Training (want high)'], [0, 'Not training (want low)']].forEach(([t, label]) => {
+    h += `<tr class="group"><td colspan="5">${label}</td></tr>`;
+    MECH.filter(r => r[1] === t).forEach(r => { h += `<tr><td class="name">${r[0]}</td>` + [2, 3, 4, 5].map(k => `<td class="cell" style="${cellBg(r[k], t === 1)}">${pct(r[k])}</td>`).join('') + '</tr>'; });
+  });
+  document.getElementById('mech').innerHTML = h;
+}
+drawMech();
+
+/* ---------- section 8b: diversity ---------- */
 const DIV = [{"fs":"Both (188)","k":4,"BalAcc":0.606},{"fs":"Both (188)","k":8,"BalAcc":0.663},{"fs":"Both (188)","k":16,"BalAcc":0.722},{"fs":"Both (188)","k":34,"BalAcc":0.833},{"fs":"GPU (174)","k":4,"BalAcc":0.561},{"fs":"GPU (174)","k":8,"BalAcc":0.594},{"fs":"GPU (174)","k":16,"BalAcc":0.659},{"fs":"GPU (174)","k":34,"BalAcc":0.792},{"fs":"Network (14)","k":4,"BalAcc":0.621},{"fs":"Network (14)","k":8,"BalAcc":0.68},{"fs":"Network (14)","k":16,"BalAcc":0.75},{"fs":"Network (14)","k":34,"BalAcc":0.817},{"fs":"rule","k":4,"BalAcc":0.79},{"fs":"rule","k":8,"BalAcc":0.79},{"fs":"rule","k":16,"BalAcc":0.79},{"fs":"rule","k":34,"BalAcc":0.79}];
 function drawDiv() {
   const svg = document.getElementById('div'); svg.innerHTML = '';
@@ -527,13 +564,13 @@ drawDiv();
 document.getElementById('divnote').textContent = 'Mean balanced accuracy on 8 held-out families over 8 random draws (random forests). Every learned model is still climbing at 34 families. With few families, the 14 network features generalise better than the 174 GPU features; the unfitted rule beats every learned model until about 34. Spread across draws is large (standard deviation 0.12 to 0.30).';
 
 /* ---------- section 9: Nebius ---------- */
-const NEB = {"cards": [{"k": "Rule on Nebius, unchanged", "v": "0.79", "s": "Catches every new PR #3 training workload, flags expert-parallel serving, and cannot see FSDP kept inside each node."}, {"k": "GPU + network model trained only on GCP", "v": "0.96", "s": "Detects 92% of Nebius training windows with no false alarms, including expert-parallel serving."}, {"k": "Network-only model trained on GCP", "v": "0.56", "s": "Learned network thresholds do not carry over from one TCP card to 8-port InfiniBand. The rule does, because it encodes the mechanism."}], "rows": [["OLMoE expert-parallel serving", 0, 1.0, 0.0], ["Disaggregated prefill/decode", 0, 0.0, 0.0], ["Qwen tensor-parallel decode", 0, 0.0, 0.0], ["Local Qwen inference", 0, 0.0, 0.0], ["MoE expert-parallel training (new)", 1, 1.0, 1.0], ["TP = 8 × FSDP = 2 (new)", 1, 1.0, 1.0], ["PP = 2 × TP = 8, 1F1B (new)", 1, 1.0, 1.0], ["PowerSGD DDP (new)", 1, 1.0, 1.0], ["Short SFT, Qwen2.5-7B (new)", 1, 1.0, 1.0], ["FSDP across nodes", 1, 1.0, 1.0], ["Dense DDP", 1, 0.93, 0.87], ["DDP, gradient accumulation", 1, 1.0, 1.0], ["LoRA DDP", 1, 1.0, 1.0], ["FSDP inside each node", 1, 0.0, 1.0], ["DiLoCo", 1, 0.44, 0.61], ["Streaming DiLoCo", 1, 0.27, 0.68]], "text": ["<b>Expert-parallel training and serving look alike on the wire.</b> Both route tokens all-to-all, so both are balanced, and the rule calls both training. Training moves about 100 times more bytes, but that reflects this cluster's batch sizes. GPU telemetry, trained only on GCP, separates them cleanly. Sampling the network ten times a second does not: traffic-shape features separate them at 0.63 to 0.70 balanced accuracy.", "<b>The two-stage design does not carry over here.</b> Its stage 2 learned what balanced non-training traffic looks like from flat HPC jobs on GCP, and expert-parallel serving looks different, so stage 2 lets it through (0.87 on Nebius). The single model on both channels is best on this cluster (0.95). Both results point at the same gap: too few balanced non-training workloads to learn from."]};
+const NEB = {"cards": [{"k": "Rule on Nebius, unchanged", "v": "0.79", "s": "Catches every new PR #3 training workload, flags expert-parallel serving, and cannot see FSDP kept inside each node."}, {"k": "GPU + network model trained only on GCP", "v": "0.96", "s": "Detects 92% of Nebius training windows with no false alarms, including expert-parallel serving."}, {"k": "Network-only model trained on GCP", "v": "0.56", "s": "Learned network thresholds do not carry over from one TCP card to 8-port InfiniBand. The rule does, because it encodes the mechanism."}], "rows": [["OLMoE expert-parallel serving", 0, 1.0, 0.0], ["Disaggregated prefill/decode", 0, 0.0, 0.0], ["Qwen tensor-parallel decode", 0, 0.0, 0.0], ["Local Qwen inference", 0, 0.0, 0.0], ["MoE expert-parallel training (new)", 1, 1.0, 1.0], ["TP = 8 × FSDP = 2 (new)", 1, 1.0, 1.0], ["PP = 2 × TP = 8, 1F1B (new)", 1, 1.0, 1.0], ["PowerSGD DDP (new)", 1, 1.0, 1.0], ["Short SFT, Qwen2.5-7B (new)", 1, 1.0, 1.0], ["FSDP across nodes", 1, 1.0, 1.0], ["Dense DDP", 1, 0.93, 0.87], ["DDP, gradient accumulation", 1, 1.0, 1.0], ["LoRA DDP", 1, 1.0, 1.0], ["FSDP inside each node", 1, 0.0, 1.0], ["DiLoCo", 1, 0.44, 0.61], ["Streaming DiLoCo", 1, 0.27, 0.68]], "text": ["<b>A new cluster, but mostly familiar jobs.</b> Nearly every Nebius workload has a close relative in Robi's corpus (DDP, FSDP, LoRA, tensor-parallel, pipeline, MoE). So this tests whether the detector survives new hardware and a new network, not whether it recognises new kinds of training.", "<b>Expert-parallel training and serving look alike on the wire.</b> Both route tokens all-to-all, so both are balanced, and the rule calls both training. Training moves about 100 times more bytes, but that reflects this cluster's batch sizes. GPU telemetry, trained only on GCP, separates them cleanly. Sampling the network ten times a second does not: traffic-shape features separate them at 0.63 to 0.70 balanced accuracy.", "<b>The two-stage design does not carry over here.</b> Its stage 2 learned what balanced non-training traffic looks like from flat HPC jobs on GCP, and expert-parallel serving looks different, so stage 2 lets it through (0.87 on Nebius). The single model on both channels is best on this cluster (0.95). Both results point at the same gap: too few balanced non-training workloads to learn from."]};
 document.getElementById('nebcards').innerHTML = NEB.cards.map(c => `<div class="card"><div class="eyebrow">${c.k}</div><div class="big">${c.v}</div><p class="small">${c.s}</p></div>`).join('');
 document.getElementById('nebtab').innerHTML = NEB.rows.map(r => `<tr><td>${r[0]}</td><td>${r[1] ? 'training' : 'not training'}</td><td class="num" style="${cellBg(r[2], r[1] === 1)}">${pct(r[2])}</td><td class="num" style="${cellBg(r[3], r[1] === 1)}">${pct(r[3])}</td></tr>`).join('');
 document.getElementById('nebtext').innerHTML = NEB.text.map(t => `<p>${t}</p>`).join('');
 
 const mq = window.matchMedia('(prefers-color-scheme: dark)');
-const redraw = () => { drawTrace(); drawDiloco(); drawMatrix(); drawFlow(); drawDesigns(); drawS2(); drawDiv(); if (reduce) drawHero(); };
+const redraw = () => { drawMech(); drawTrace(); drawDiloco(); drawMatrix(); drawFlow(); drawDesigns(); drawS2(); drawDiv(); if (reduce) drawHero(); };
 mq.addEventListener && mq.addEventListener('change', redraw);
 new MutationObserver(redraw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 })();
