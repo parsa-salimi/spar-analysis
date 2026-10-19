@@ -1064,8 +1064,17 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         "A serving job loads weights in the first 30 seconds, which is fallback's startup "
         "jump, and the wire stays quiet. One of them stays under 68 GB. The other is a real "
         "server whose weights and cache sit between 68 and 78 GB, so the jump and the "
-        "footprint cut point opposite ways. No row is an allocation with no training step "
-        "and no server.",
+        "footprint cut point opposite ways. Neither of those two requires the memory "
+        "utilization to move. The last blue row does. The same server loads weights inside "
+        "the first 30 samples, and its own requests move memory utilization by more than "
+        "4.2 points, about 3.4 GB on an 80 GB GPU: vary the batch, or alternate prefill and "
+        "decode. Stay under 68 GB, so the footprint cut is not also fighting the jump. "
+        "Run it with the wire quiet. Fallback then sees the jump and the spread, and both "
+        "are on the training side. Fallback's own spread cut is about 2.1 points. "
+        "Run it again with the server's own balanced collective, not an extra fake "
+        "all-reduce. Stage 2 is asked, and the spread is the cut that matters. That half "
+        "is the same shape as the blue rows of Table 3. The quiet half is the one those "
+        "jobs do not contain: there the rule fired, and fallback was ignored.",
         st["body"]))
 
     design_header = ["Cell", "Asked", "Do this", "Called training", "Called not training"]
@@ -1108,6 +1117,13 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
          "The same server. Weights and cache themselves sit between 68 and 78 GB. Nothing is allocated beside the server.",
          "The jump wins over the footprint cut.",
          "The footprint cut wins. The two questions in Table 2 that point opposite ways have been put on one job."],
+        ["Serving, spread and jump",
+         "both, one run each",
+         "A real server, under 68 GB. Capture from process start, so the weight load is the jump. "
+         "The requests move memory utilization by more than 4.2 points. "
+         "Once with no cross-node traffic. Once with the server's own balanced collective.",
+         "Both forests were given the training side of the cut they lead with. The quiet run is the new one.",
+         "The jump plus the spread is not enough. The quiet run says what fallback still needs. The rule-on run says stage 2 can refuse a server that moves."],
     ]
     design = [[_p(h, st["cellh"]) for h in design_header]]
     for r in design_rows:
@@ -1117,7 +1133,7 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
     design_tbl.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), HexColor(PALE)),
         ("BACKGROUND", (0, 1), (-1, 5), HexColor("#F8EFEA")),
-        ("BACKGROUND", (0, 6), (-1, 7), HexColor("#E7F0F7")),
+        ("BACKGROUND", (0, 6), (-1, 8), HexColor("#E7F0F7")),
         ("GRID", (0, 0), (-1, -1), 0.3, HexColor(LINE)),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 3),
