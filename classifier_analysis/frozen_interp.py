@@ -164,6 +164,230 @@ def analyze(model) -> tuple[pd.DataFrame, dict]:
     return df, meta
 
 
+# One recorded window from each side of the gate, walked through one tree.
+# Recomputed from the published parquet on 19 Oct 2026. Tree indexes are into
+# the frozen estimators_ list. Thresholds are read back from the joblib when
+# the figure is drawn, and checked against these.
+STAGE_WALK = dict(
+    tree=30, root="mem_utilization_pct_std",
+    cell="Qwen serving plus a fake all-reduce",
+    values={
+        "mem_utilization_pct_std": 4.711552508385713,
+        "mem_used_mb_kurt": 0.0,
+        "mem_used_mb_max": 68990.0,
+    },
+    votes=187, proba=0.937, other_proba=0.318, mibps=81.4, sym=1.0,
+)
+FALL_WALK = dict(
+    tree=0, root="first_30s_mem_ratio",
+    cell="Training with InfiniBand off",
+    values={
+        "first_30s_mem_ratio": 10508.0,
+        "pcie_rx_mbps_p95": 438.20544010404205,
+        "mem_clock_mhz_p50": 2619.0,
+        "temperature_c_mean": 67.97777777777779,
+        "temperature_c_p75": 68.15833333333333,
+    },
+    votes=127, proba=0.626, mibps=0.0,
+)
+
+SHORT = {
+    "mem_utilization_pct_std": "util spread",
+    "mem_used_mb_mean": "memory, mean",
+    "mem_used_mb_max": "memory in use",
+    "mem_used_mb_kurt": "memory kurtosis",
+    "sm_clock_mhz_p75": "SM clock",
+    "temperature_c_p25": "temperature",
+    "temperature_c_mean": "temperature",
+    "temperature_c_p75": "temperature",
+    "pcie_rx_mbps_p95": "PCIe receive",
+    "pcie_tx_mbps_std": "PCIe transmit spread",
+    "mem_util_per_gpu_util_p95": "mem / GPU util",
+    "first_30s_mem_ratio": "startup peak / start",
+    "mem_clock_mhz_p50": "memory clock",
+    "acf10_power": "power correlation",
+}
+
+
+def _cut_text(feature: str, thr: float) -> str:
+    if "kurt" in feature:
+        return f"{thr:.1f}"
+    if feature.startswith("mem_used_mb"):
+        return f"{thr / 1024:.1f} GB"
+    if feature == "first_30s_mem_ratio":
+        return f"{thr:.1f}×"
+    if "pct" in feature:
+        return f"{thr:.1f} pts"
+    if "temperature" in feature:
+        return f"{thr:.0f} C"
+    if "clock" in feature:
+        return f"{thr:.0f} MHz"
+    if "mbps" in feature:
+        return f"{thr:.0f} MB/s"
+    if feature == "acf10_power":
+        return f"{thr:.2f}"
+    return f"{thr:.2g}"
+
+
+def _val_text(feature: str, val: float) -> str:
+    if "kurt" in feature:
+        return f"{val:.1f}"
+    if feature.startswith("mem_used_mb"):
+        return f"{val / 1024:.0f} GB"
+    if feature == "first_30s_mem_ratio":
+        return f"{val:.0f}×"
+    if "pct" in feature:
+        return f"{val:.1f}"
+    if "temperature" in feature:
+        return f"{val:.0f} C"
+    if "clock" in feature:
+        return f"{val:.0f}"
+    if "mbps" in feature:
+        return f"{val:.0f}"
+    return f"{val:.2g}"
+
+
+def _tree_nodes(model, tree_index: int, max_depth: int | None, expect_root: str):
+    cols = list(pd.read_parquet(HERE / "frozen" / "gpu_cols.parquet").col)
+    t = model.estimators_[tree_index].tree_
+    root = cols[int(t.feature[0])]
+    if root != expect_root:
+        raise RuntimeError(f"tree {tree_index} root is {root}, expected {expect_root}")
+    nodes = {}
+
+    def walk(i, depth):
+        f = int(t.feature[i])
+        v = np.asarray(t.value[i]).reshape(-1)
+        node = dict(
+            id=i, depth=depth, leaf=f < 0,
+            feature=None if f < 0 else cols[f],
+            thr=None if f < 0 else float(t.threshold[i]),
+            left=None if f < 0 else int(t.children_left[i]),
+            right=None if f < 0 else int(t.children_right[i]),
+            p=float(v[1] / v.sum()), n=int(t.n_node_samples[i]),
+        )
+        nodes[i] = node
+        if f >= 0 and (max_depth is None or depth < max_depth):
+            walk(node["left"], depth + 1)
+            walk(node["right"], depth + 1)
+    walk(0, 0)
+    return nodes
+
+
+def _follow(nodes, values):
+    """Node ids from the root, following values. Stops at a leaf or at a missing value."""
+    path = [0]
+    while not nodes[path[-1]]["leaf"]:
+        n = nodes[path[-1]]
+        if n["feature"] not in values:
+            break
+        child = n["left"] if values[n["feature"]] <= n["thr"] else n["right"]
+        if child not in nodes:
+            path.append(child)  # child exists in the real tree but was not drawn
+            break
+        path.append(child)
+    return path
+
+
+def _layout(nodes):
+    xs = {}
+    cursor = [0.0]
+
+    def place(i):
+        n = nodes[i]
+        kids = [c for c in (n["left"], n["right"]) if c in nodes]
+        if not kids:
+            xs[i] = cursor[0]
+            cursor[0] += 1.0
+            return
+        for c in kids:
+            place(c)
+        xs[i] = 0.5 * (xs[kids[0]] + xs[kids[-1]])
+    place(0)
+    return xs
+
+
+def _draw_tree(nodes, path, values, path_out, stub_at, figsize):
+    """stub_at: node id -> extra line, for a path that continues below the drawing."""
+    xs = _layout(nodes)
+    depths = [n["depth"] for n in nodes.values()]
+    fig, ax = plt.subplots(figsize=figsize, dpi=160)
+    ax.set_xlim(min(xs.values()) - 0.62, max(xs.values()) + 0.62)
+    ax.set_ylim(max(depths) + (1.25 if stub_at else 0.55), -0.55)
+    ax.axis("off")
+    path_set = set(path)
+
+    def center(i):
+        return xs[i], nodes[i]["depth"]
+
+    for i, n in nodes.items():
+        for c, word in ((n["left"], "below"), (n["right"], "above")):
+            if c not in nodes:
+                continue
+            on = i in path_set and c in path_set
+            ax.plot([xs[i], xs[c]], [n["depth"], nodes[c]["depth"]],
+                    color=STAGE if on else "#D9DEE5", lw=2.0 if on else 0.7,
+                    solid_capstyle="round", zorder=1)
+            if on:
+                mx = 0.55 * xs[i] + 0.45 * xs[c]
+                my = 0.55 * n["depth"] + 0.45 * nodes[c]["depth"]
+                ax.text(mx, my, word, color=STAGE, fontsize=6.5,
+                        ha="center", va="center", zorder=2,
+                        bbox=dict(boxstyle="round,pad=0.04", fc="white", ec="none"))
+
+    for i, n in nodes.items():
+        on = i in path_set
+        if n["leaf"]:
+            train = n["p"] >= 0.5
+            face = "#1F7A4D" if on and train else ("#E7F6EE" if train else "#F3F4F6")
+            edge = "#1F7A4D" if train else "#9AA5B1"
+            ink = "white" if on and train else (GREEN if train else MUTED)
+            label = "training" if train else "not training"
+            text = f"{label}\n{n['n']} windows"
+        else:
+            face = "#1B4F72" if on else "white"
+            edge = "#1B4F72"
+            ink = "white" if on else INK
+            name = SHORT.get(n["feature"], n["feature"])
+            text = f"{name}\n≤ {_cut_text(n['feature'], n['thr'])}"
+            if on and n["feature"] in values:
+                text += f"\nwindow {_val_text(n['feature'], values[n['feature']])}"
+        ax.text(xs[i], n["depth"], text, ha="center", va="center", fontsize=6.2,
+                color=ink, zorder=3, linespacing=1.15,
+                bbox=dict(boxstyle="round,pad=0.28", fc=face, ec=edge, lw=0.8))
+        if i in stub_at:
+            ax.plot([xs[i], xs[i]], [n["depth"] + 0.34, n["depth"] + 0.52],
+                    color=STAGE, lw=1.3, zorder=2)
+            ax.text(xs[i], n["depth"] + 0.56, stub_at[i], ha="center", va="top",
+                    fontsize=6.5, color=STAGE, zorder=3)
+    fig.tight_layout()
+    fig.savefig(path_out, bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+
+def fig_stage_tree(model, path: Path):
+    nodes = _tree_nodes(model, STAGE_WALK["tree"], None, STAGE_WALK["root"])
+    taken = _follow(nodes, STAGE_WALK["values"])
+    if nodes[taken[-1]]["leaf"] is not True or nodes[taken[-1]]["p"] < 0.5:
+        raise RuntimeError(f"stage walk ended unexpectedly at {taken[-1]}")
+    _draw_tree(nodes, taken, STAGE_WALK["values"], path, {}, (7.3, 4.6))
+    return taken
+
+
+def fig_fallback_top(model, path: Path):
+    # Three levels only. The example continues past the drawing.
+    nodes = _tree_nodes(model, FALL_WALK["tree"], 2, FALL_WALK["root"])
+    full = _tree_nodes(model, FALL_WALK["tree"], None, FALL_WALK["root"])
+    taken_full = _follow(full, FALL_WALK["values"])
+    taken = [i for i in taken_full if i in nodes]
+    extra = len(taken_full) - len(taken)
+    stub = {}
+    if extra > 0:
+        stub[taken[-1]] = f"{extra} more questions\nthen a training leaf"
+    _draw_tree(nodes, taken, FALL_WALK["values"], path, stub, (7.3, 3.6))
+    return taken_full
+
+
 def _style_ax(ax):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -682,6 +906,60 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         f"{int(stage.impurity.rank(ascending=False)[stage.feature == 'gpu_utilization_pct_mean'].iloc[0])}.",
         st["body"]))
 
+    story.append(_p("One stage 2 tree, and one window walking through it", st["h2"]))
+    story.append(_p(
+        "Stage 2 is 200 trees, not one tree. "
+        f"The drawing is tree {STAGE_WALK['tree']}, one of the 17 whose first question is the "
+        f"spread of memory utilization. It has 10 leaves. A number of windows on a leaf is how "
+        f"many training-fit windows reached it. The blue path is one 30-second window of "
+        f"{STAGE_WALK['cell']}. Its spread is "
+        f"{STAGE_WALK['values']['mem_utilization_pct_std']:.1f} points, its memory kurtosis is "
+        f"{STAGE_WALK['values']['mem_used_mb_kurt']:.0f}, and its memory in use is "
+        f"{STAGE_WALK['values']['mem_used_mb_max'] / 1024:.0f} GB. The rule has fired on this "
+        f"window: about {STAGE_WALK['mibps']:.0f} MiB/s, symmetry {STAGE_WALK['sym']:.2f}.",
+        st["body"]))
+    story.append(_img(paths["stage_tree"]))
+    story.append(_p(
+        "Figure 6. Every node of stage 2 tree "
+        f"{STAGE_WALK['tree']}. Below means the measured value is under the cut, above means "
+        "it is over the cut. The window takes the blue path and ends in the training leaf "
+        "that holds most of the windows this tree saw. The cuts on this one tree are not the "
+        "typical cuts in Table 1. This tree asks about memory in use at 5.8 GB. The typical "
+        "cut across all 200 trees is about 10 GB.",
+        st["cap"]))
+    story.append(_p(
+        f"The kurtosis question peels off only a few dozen windows. Almost every window with "
+        f"spread above 1.2 points continues, and a memory footprint above 5.8 GB is then called "
+        f"training. On this window, {STAGE_WALK['votes']} of the 200 trees vote training "
+        f"(probability {STAGE_WALK['proba']:.2f}). Fallback's probability on the same window "
+        f"is {STAGE_WALK['other_proba']:.2f}, and it is not asked, because the rule fired.",
+        st["body"]))
+
+    story.append(_p("One fallback tree, the first three levels", st["h2"]))
+    story.append(_p(
+        f"A fallback tree has about {fm['mean_leaves']:.0f} leaves, so the whole tree does not "
+        f"fit on a page. This is tree {FALL_WALK['tree']}, one of the 15 whose first question "
+        f"is the startup peak divided by the start. Only the first three levels are drawn. "
+        f"The blue path is one 30-second window of {FALL_WALK['cell']}. The ratio is "
+        f"{FALL_WALK['values']['first_30s_mem_ratio']:.0f}, because the feature floors the "
+        f"starting memory at 1 MB and this run's first samples are near empty while the peak "
+        f"is about 10 GB. The rule is silent: about {FALL_WALK['mibps']:.0f} MiB/s on the wire, "
+        f"so this forest is the one that gets asked.",
+        st["body"]))
+    story.append(_img(paths["fall_tree"]))
+    story.append(_p(
+        "Figure 7. The top of fallback tree "
+        f"{FALL_WALK['tree']}. The window goes above the startup cut, then below the PCIe cut, "
+        "then through three more questions (memory clock, then temperature twice) and reaches "
+        "a leaf that says training. Those three questions are the kind of fine split a deep "
+        "tree grows. They are not the questions the forest leads with.",
+        st["cap"]))
+    story.append(_p(
+        f"On this window, {FALL_WALK['votes']} of the 200 fallback trees vote training "
+        f"(probability {FALL_WALK['proba']:.2f}). One tree reaching a training leaf is not the "
+        f"forest's vote. The vote is how many of the 200 agree.",
+        st["body"]))
+
     story.append(KeepTogether([
         _p("What that does to the gate", st["h2"]),
         _p(
@@ -735,12 +1013,14 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         "never split on in either forest. Those columns are constant in the training corpus.",
         st["body"]))
 
-    story.append(_p("What this note is not", st["h2"]))
-    story.append(_p(
-        "A question on memory spread means the saved trees separate the two classes there. "
-        "It does not mean that changing the spread would turn a window into training. "
-        "We did not run that experiment.",
-        st["body"]))
+    story.append(KeepTogether([
+        _p("What this note is not", st["h2"]),
+        _p(
+            "A question on memory spread means the saved trees separate the two classes there. "
+            "It does not mean that changing the spread would turn a window into training. "
+            "We did not run that experiment.",
+            st["body"]),
+    ]))
     story.append(_p(
         "Spread, range, and the interquartile range are one measurement stored three times. "
         "Figure 2 adds them, with the startup jump, into the memory bar. Tables 1 and 2 list "
@@ -790,6 +1070,8 @@ def main():
         "fall": FIG / "fallback.png",
         "foot": FIG / "footprint.png",
         "gate": FIG / "gate.png",
+        "stage_tree": FIG / "stage_tree.png",
+        "fall_tree": FIG / "fall_tree.png",
     }
     fig_groups(stage, fall, paths["groups"])
     fig_features(stage, "stage2", STAGE, paths["stage"])
@@ -800,6 +1082,8 @@ def main():
         paths["foot"],
     )
     fig_gate(paths["gate"])
+    fig_stage_tree(stage2, paths["stage_tree"])
+    fig_fallback_top(fallback, paths["fall_tree"])
     pdf_path = OUT / "frozen_forest_interp.pdf"
     build_pdf(stage, fall, sm, fm, paths, pdf_path)
     print(f"wrote {pdf_path}")
