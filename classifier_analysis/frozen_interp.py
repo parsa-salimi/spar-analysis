@@ -284,6 +284,8 @@ def _styles():
                                  textColor=HexColor(INK))
     s["foot"] = ParagraphStyle("foot", fontName="Helvetica", fontSize=8, leading=10.5,
                                 textColor=HexColor(MUTED))
+    s["formula"] = ParagraphStyle("formula", fontName="Courier", fontSize=9, leading=12,
+                                   textColor=HexColor(INK), alignment=1)
     return s
 
 
@@ -358,11 +360,9 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
     story.append(_p(
         f"Each forest is 200 trees, minimum 2 samples in a leaf, {sm['max_features']} features "
         f"drawn at each split, class weights balanced, seed 0. For every split we kept the "
-        f"feature, the threshold, and which side receives the training vote. A split's weight "
-        f"is the impurity it removes. That is the same weight as sklearn's feature importance: "
-        f"the two agree to {max(sm['importance_gap'], fm['importance_gap']):.4f}. "
-        f"Standard deviation, range, and interquartile range of one column are one measurement "
-        f"written three times, so the shares are also added up by source.",
+        f"feature, the threshold, and which side receives the training vote. How much a split "
+        f"counts, and why Figure 2 has five bars instead of 174, is spelled out under "
+        f"\"Where the impurity goes\".",
         st["body"]))
     story.append(_p(
         "This is not a permutation test. Shuffling a column on held-out jobs needs the training "
@@ -406,13 +406,85 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         "which is the rest of this note.",
         st["body"]))
 
-    story.append(CondPageBreak(4.2 * inch))
+    story.append(CondPageBreak(3.2 * inch))
     story.append(_p("Where the impurity goes", st["h2"]))
-    story.append(_img(paths["groups"]))
     story.append(_p(
-        "Figure 2. Share of impurity removed, added up by the physical source of the column. "
-        "Video-codec columns never vary in this corpus, so both forests ignore them.",
-        st["cap"]))
+        "Each tree is a stack of yes/no questions. A question looks at one column "
+        "(\"is the spread of memory utilization above 1.2?\") and sends the window left or right.",
+        st["body"]))
+    story.append(_p(
+        "Before the question, training and not-training are mixed together. Gini measures that "
+        "mix. With two classes it is 2p(1-p), where p is the share of the weight that is "
+        "training. It equals 0.5 when the two classes are even, and 0 when every window on "
+        "that side is the same class. A useful question is one that makes the mix drop. The "
+        "drop at a node is",
+        st["body"]))
+    formula = Table(
+        [[_p("N * Gini  -  N_left * Gini_left  -  N_right * Gini_right", st["formula"])]],
+        colWidths=[7.1 * inch],
+    )
+    formula.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, -1), HexColor(PALE)),
+        ("TOPPADDING", (0, 0), (-1, -1), 7),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
+        ("LEFTPADDING", (0, 0), (-1, -1), 6),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+        ("BOX", (0, 0), (-1, -1), 0.4, HexColor(LINE)),
+    ]))
+    story.append(formula)
+    story.append(Spacer(1, 6))
+    story.append(_p(
+        "N is not a count of windows. The forest was fit with balanced class weights, so the "
+        "scarcer class pulls harder than its share of the rows, and N is that weight, already "
+        "stored on the node. We add the drop over every question in all 200 trees and give the "
+        "sum to the column the question used. Divide by the total drop. That percentage is the "
+        f"bar. It is the same number sklearn calls feature importance. Recomputing it from the "
+        f"nodes matches sklearn to {max(sm['importance_gap'], fm['importance_gap']):.4f}.",
+        st["body"]))
+    story.append(_p(
+        "The bars are not 174 separate columns. The spread, the range, and the interquartile "
+        "range of memory utilization are one measurement saved three times. Drawn separately, "
+        "one fact would look like three. Columns that come from the same place are added:",
+        st["body"]))
+    groups = [
+        ["Bar", "Which columns go into it"],
+        ["Memory", "The name contains \"mem\": utilization, megabytes in use, and the jump in the first 30 samples."],
+        ["Power and temperature", "The name contains \"power\" or \"temperature\"."],
+        ["PCIe", "The name starts with \"pcie\"."],
+        ["Compute", "Whatever is left: GPU utilization, SM clock, idle fraction, tensor activity."],
+        ["Video", "Encoder and decoder. Those columns do not vary here, so the share is zero."],
+    ]
+    gdata = [[_p(groups[0][0], st["cellh"]), _p(groups[0][1], st["cellh"])]]
+    for name, desc in groups[1:]:
+        gdata.append([_p(name, st["cell"]), _p(desc, st["cell"])])
+    gtbl = Table(gdata, colWidths=[1.7 * inch, 5.4 * inch])
+    gtbl.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), HexColor(PALE)),
+        ("GRID", (0, 0), (-1, -1), 0.3, HexColor(LINE)),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    story.append(gtbl)
+    story.append(Spacer(1, 6))
+    story.append(_p(
+        f"A column scores only at questions where the tree actually picked it. Each question "
+        f"is shown {sm['max_features']} of the {sm['n_features']} columns, so a twin that was "
+        f"not shown gets nothing for that question. And stage 2's memory bar of "
+        f"{sg.get('Memory', 0) * 100:.0f}% does not mean memory caused the call. The startup "
+        f"jump and the utilization wobble are both inside that bar. Figure 2 is the total. "
+        f"Figures 3 and 4 take the bar apart.",
+        st["body"]))
+    story.append(KeepTogether([
+        _img(paths["groups"]),
+        _p(
+            "Figure 2. Of all the mix a forest removed, the share removed by questions about "
+            f"each source. Stage 2's memory bar is {sg.get('Memory', 0) * 100:.0f}%: that share "
+            "of the mix it removed came from a split on a column whose name contains \"mem\".",
+            st["cap"]),
+    ]))
     s_pow_share = float(sg.get("Power & thermal", 0)) * 100
     f_pow_share = float(fg.get("Power & thermal", 0)) * 100
     story.append(_p(
@@ -510,12 +582,14 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         f"{f_util.vote_gap:+.2f}. A GPU has to be pinned before this column counts.",
         st["body"]))
 
-    story.append(_p("What that does to the gate", st["h2"]))
-    story.append(_p(
-        "On the 93 Nebius jobs already scored with this frozen detector, the pattern matches "
-        "the cuts. Those jobs were not used to choose features or to move the 0.5 cutoff. "
-        "Probabilities below are the mean over the job's windows.",
-        st["body"]))
+    story.append(KeepTogether([
+        _p("What that does to the gate", st["h2"]),
+        _p(
+            "On the 93 Nebius jobs already scored with this frozen detector, the pattern matches "
+            "the cuts. Those jobs were not used to choose features or to move the 0.5 cutoff. "
+            "Probabilities below are the mean over the job's windows.",
+            st["body"]),
+    ]))
 
     header = ["Workload", "Rule", "Stage 2", "Fallback", "Call"]
     raw = [
