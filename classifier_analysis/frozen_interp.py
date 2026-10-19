@@ -628,7 +628,8 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         "run. If it did, the window is called training. Two of fallback's later questions point "
         "the other way: a GPU that is nearly full, and a memory bus that is busy while the "
         "processors are not. The tables list each question, where it sits in the tree, and "
-        "which side is called training.",
+        "which side is called training. The last section turns those cuts into adversarial "
+        "workloads: each job is built to sit on the side that hurts the detector.",
         st["body"]))
     story.append(HRFlowable(width="100%", thickness=0.6, color=HexColor(LINE), spaceAfter=8))
 
@@ -1014,15 +1015,22 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         st["body"]))
 
     story.append(KeepTogether([
-        _p("Cells these cuts have not seen", st["h2"]),
+        _p("Adversarial workloads read off these trees", st["h2"]),
         _p(
-            "Designs, not scores. None of these jobs has been captured. They are not a reason "
-            "to move the 0.5 cutoff or to refit either forest. Do not add them to a training "
-            "set and then score them: a tree that has seen the cell can memorize it. "
-            "The point of running each one once, against this freeze, is to see which cut decides.",
+            "These are adversarial jobs designed from the interpretation above, not a fresh "
+            "sample of ordinary workloads and not a rerun of Table 3. Each row takes one cut "
+            "the saved trees actually use and puts the job on the side of that cut that hurts "
+            "the detector. Orange rows are training, pushed onto the not-training side of a "
+            "fallback cut so the job is missed. Blue rows are not training, pushed onto the "
+            "training side of a stage 2 or fallback cut so the job is called training. "
+            "None of them has been captured. They are not a reason to move the 0.5 cutoff or "
+            "to refit either forest. Do not add them to a training set and then score them: "
+            "a tree that has seen the cell can memorize it. Run each one once, against this "
+            "freeze, to see whether the cut it was aimed at is the cut that decides.",
             st["body"]),
     ]))
     story.append(_p(
+        "The orange rows are built from two fallback facts in this note. "
         "The startup feature reads the first 30 samples of the capture, about 30 seconds, and "
         "every later window reuses that same prefix. A jump after sample 30 never enters the "
         "feature. Sleeping 40 seconds and then allocating does hide the jump. It also sets "
@@ -1034,14 +1042,25 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         "Those are different cells.",
         st["body"]))
     story.append(_p(
-        "One more fallback question still points at a real training step even when both of "
-        "those are hidden. Memory utilization minus GPU utilization is cut at about -23 points. "
+        "Two later fallback questions are what the large and small orange rows are set against. "
+        "Memory utilization minus GPU utilization is cut at about -23 points. "
         "The high side is not training. A step that pins the processors and barely touches "
         "the memory bus sits on the training side. A model that fills the GPU does not: "
         "memory utilization is high too, so the difference is the other side of -23. "
         "The 68 GB footprint cut is the same shape. Above it, fallback votes not-training. "
         "A small model is on the training side of that cut. A held buffer between 68 and 78 GB "
-        "is the single change that crosses it.",
+        "is the single change that crosses it. The large warm-attach row is training placed "
+        "on the not-training side of both of these, with the startup jump already hidden.",
+        st["body"]))
+    story.append(_p(
+        "The blue rows are the other direction, built from the same tables. "
+        "Empty wobble is not training. It fires the rule, then sits on the training side of two "
+        "Table 1 cuts: memory in use above 10 GB, and memory utilization moving by more than "
+        "4.2 points. The two weight-load rows are not training either. They take fallback's "
+        "startup jump, which votes training, and then split on the 68 GB cut, which votes the "
+        "other way. Separately, the flat-counter row is training held on the "
+        "not-training side of every stage 2 cut in Table 1, so that forest is forced to "
+        "veto or to admit that some other column is carrying the vote.",
         st["body"]))
 
     design_header = ["Cell", "Asked", "Do this", "Called training", "Called not training"]
@@ -1109,7 +1128,8 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
     ]))
     story.append(design_tbl)
     story.append(_p(
-        "Table 4. Orange rows are training. Blue rows are not. "
+        "Table 4. Adversarial jobs designed from the cuts in Tables 1 and 2. "
+        "Orange rows are training aimed at a miss. Blue rows are not training aimed at a false alarm. "
         "\"Asked\" is the forest that speaks if the wire does what the row says. "
         "The last two columns are how to read the call. They are not predictions.",
         st["cap"]))
