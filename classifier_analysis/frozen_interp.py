@@ -1018,15 +1018,17 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         _p("Adversarial workloads read off these trees", st["h2"]),
         _p(
             "These are adversarial jobs designed from the interpretation above, not a fresh "
-            "sample of ordinary workloads and not a rerun of Table 3. Each row takes one cut "
-            "the saved trees actually use and puts the job on the side of that cut that hurts "
-            "the detector. Orange rows are training, pushed onto the not-training side of a "
-            "fallback cut so the job is missed. Blue rows are not training, pushed onto the "
-            "training side of a stage 2 or fallback cut so the job is called training. "
-            "None of them has been captured. They are not a reason to move the 0.5 cutoff or "
-            "to refit either forest. Do not add them to a training set and then score them: "
-            "a tree that has seen the cell can memorize it. Run each one once, against this "
-            "freeze, to see whether the cut it was aimed at is the cut that decides.",
+            "sample of ordinary workloads and not a rerun of Table 3. The job itself is a "
+            "training step or an inference server. A spare allocation with no step does not "
+            "count. The rows we want are the orange ones: real training, placed on the "
+            "not-training side of a cut the saved trees use, so the detector calls the job "
+            "not training. That call is this detector's inference call. Blue rows are the "
+            "other way, real inference placed so the detector calls it training, and they "
+            "are not the target. None of them has been captured. They are not a reason to "
+            "move the 0.5 cutoff or to refit either forest. Do not add them to a training "
+            "set and then score them: a tree that has seen the cell can memorize it. "
+            "Run each orange row once, against this freeze, to see whether the cut it was "
+            "aimed at is the cut that decides.",
             st["body"]),
     ]))
     story.append(_p(
@@ -1048,19 +1050,22 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         "the memory bus sits on the training side. A model that fills the GPU does not: "
         "memory utilization is high too, so the difference is the other side of -23. "
         "The 68 GB footprint cut is the same shape. Above it, fallback votes not-training. "
-        "A small model is on the training side of that cut. A held buffer between 68 and 78 GB "
-        "is the single change that crosses it. The large warm-attach row is training placed "
-        "on the not-training side of both of these, with the startup jump already hidden.",
+        "A small model is on the training side of that cut. Crossing it has to be the training "
+        "step itself, model plus optimizer state plus activations, sitting between 68 and 78 GB. "
+        "A buffer allocated beside the step is not a training workload, and it is not one of "
+        "these rows. The large warm-attach row is that real step, placed on the not-training "
+        "side of both questions, with the startup jump already hidden.",
         st["body"]))
     story.append(_p(
-        "The blue rows are the other direction, built from the same tables. "
-        "Empty wobble is not training. It fires the rule, then sits on the training side of two "
-        "Table 1 cuts: memory in use above 10 GB, and memory utilization moving by more than "
-        "4.2 points. The two weight-load rows are not training either. They take fallback's "
-        "startup jump, which votes training, and then split on the 68 GB cut, which votes the "
-        "other way. Separately, the flat-counter row is training held on the "
-        "not-training side of every stage 2 cut in Table 1, so that forest is forced to "
-        "veto or to admit that some other column is carrying the vote.",
+        "The flat-counter row is the orange row that still looks like training on the wire. "
+        "The step is real, the all-reduce is real, and the GPU counters are held on the "
+        "not-training side of every stage 2 cut in Table 1, so that forest has to veto or "
+        "the call stays training. The blue rows are real inference, not the target. "
+        "A serving job loads weights in the first 30 seconds, which is fallback's startup "
+        "jump, and the wire stays quiet. One of them stays under 68 GB. The other is a real "
+        "server whose weights and cache sit between 68 and 78 GB, so the jump and the "
+        "footprint cut point opposite ways. No row is an allocation with no training step "
+        "and no server.",
         st["body"]))
 
     design_header = ["Cell", "Asked", "Do this", "Called training", "Called not training"]
@@ -1068,12 +1073,12 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         ["Warm attach, large",
          "fallback",
          "InfiniBand off. Start the sampler only after memory has been flat for a minute. "
-         "Hold one extra buffer so memory stays between 68 and 78 GB.",
+         "The training step itself uses 68 to 78 GB. If it does not, drop the row.",
          "The jump was not what caught the orange rows. Name the column that still votes training.",
          "Once the jump is gone, the full-GPU cut is enough. This is the sharpest miss the cuts allow."],
         ["Warm attach, small",
          "fallback",
-         "Same late sampler, same quiet wire. Plateau under 10 GB. No held buffer. Compare only to the large row.",
+         "Same late sampler, same quiet wire, same kind of step. Plateau under 10 GB. Compare only to the large row.",
          "A small footprint is still enough for fallback, or the processors-versus-memory question is.",
          "Hiding the jump is enough even under 10 GB. The 68 GB cut was not required."],
         ["Sleep, then allocate",
@@ -1092,21 +1097,15 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
          "stage 2",
          "Same all-reduce and the same small model. Ordinary clocks, ordinary allocator. Do not hold the counters flat.",
          "A real step does not live on the not-training side of Table 1. Record which cut it crossed.",
-         "Small training already evades, with no costume."],
-        ["Empty wobble",
-         "stage 2",
-         "No model. Hold about 12 GB. In every window, move memory utilization by more than 4.2 points, about 3.4 GB on an 80 GB GPU. "
-         "Balanced all-reduce of a few MiB/s for the whole capture, not one burst.",
-         "The rule, the 10 GB footprint, and the wobble are sufficient. The blue rows in Table 3 are this shape.",
-         "Those jobs are tripping a column that is not in Table 1."],
-        ["Weight load, quiet wire",
+         "Small training already gets called not training, with no costume."],
+        ["Serving, quiet wire",
          "fallback",
-         "Capture from process start. Load weights in the first 30 seconds. Stay under 68 GB. No cross-node traffic.",
+         "A real server. Capture from process start. Load weights in the first 30 seconds, then serve. Stay under 68 GB. No cross-node traffic.",
          "A weight load and the optimizer jump look the same to fallback.",
          "Fallback already separates them. The 93 jobs do not show it: their inference false alarms all have the rule on, and fallback was ignored."],
-        ["Weight load past 68 GB",
+        ["Serving past 68 GB",
          "fallback",
-         "Same weight load, same quiet wire. Plateau between 68 and 78 GB, and nothing else changes.",
+         "The same server. Weights and cache themselves sit between 68 and 78 GB. Nothing is allocated beside the server.",
          "The jump wins over the footprint cut.",
          "The footprint cut wins. The two questions in Table 2 that point opposite ways have been put on one job."],
     ]
@@ -1118,7 +1117,7 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
     design_tbl.setStyle(TableStyle([
         ("BACKGROUND", (0, 0), (-1, 0), HexColor(PALE)),
         ("BACKGROUND", (0, 1), (-1, 5), HexColor("#F8EFEA")),
-        ("BACKGROUND", (0, 6), (-1, 8), HexColor("#E7F0F7")),
+        ("BACKGROUND", (0, 6), (-1, 7), HexColor("#E7F0F7")),
         ("GRID", (0, 0), (-1, -1), 0.3, HexColor(LINE)),
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("LEFTPADDING", (0, 0), (-1, -1), 3),
@@ -1128,8 +1127,8 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
     ]))
     story.append(design_tbl)
     story.append(_p(
-        "Table 4. Adversarial jobs designed from the cuts in Tables 1 and 2. "
-        "Orange rows are training aimed at a miss. Blue rows are not training aimed at a false alarm. "
+        "Table 4. Adversarial jobs read off Tables 1 and 2. Every row is a real training step or a real server. "
+        "Orange rows are training aimed at a not-training call. Blue rows are inference aimed at a training call, and they are not the target. "
         "\"Asked\" is the forest that speaks if the wire does what the row says. "
         "The last two columns are how to read the call. They are not predictions.",
         st["cap"]))
