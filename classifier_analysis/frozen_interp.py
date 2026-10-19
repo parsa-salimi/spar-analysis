@@ -90,6 +90,7 @@ def analyze(model) -> tuple[pd.DataFrame, dict]:
         raise RuntimeError(f"feature list is {len(cols)} long, forest has {n}")
     dec = np.zeros(n)
     dec_d0 = np.zeros(n)
+    depth_m = np.zeros(n)
     nsplit = np.zeros(n, dtype=int)
     nroot = np.zeros(n, dtype=int)
     dir_w = np.zeros(n)
@@ -121,6 +122,7 @@ def analyze(model) -> tuple[pd.DataFrame, dict]:
             if d < 0:
                 d = 0.0
             dec[f] += d
+            depth_m[f] += d * int(depth[i])
             nsplit[f] += 1
             if int(depth[i]) == 0:
                 dec_d0[f] += d
@@ -146,6 +148,8 @@ def analyze(model) -> tuple[pd.DataFrame, dict]:
             impurity=dec[j] / total,
             root_share=dec_d0[j] / float(dec_d0.sum()),
             n_splits=int(nsplit[j]), n_roots=int(nroot[j]),
+            mean_depth=(depth_m[j] / dec[j]) if dec[j] else float("nan"),
+            root_frac=(dec_d0[j] / dec[j]) if dec[j] else float("nan"),
             vote_gap=direction, threshold=wmed,
         ))
     df = pd.DataFrame(rows)
@@ -203,10 +207,9 @@ def fig_features(df: pd.DataFrame, title: str, color_pos: str, path: Path, n=8):
     ax.set_yticks(y)
     ax.set_yticklabels(labels)
     ax.set_xlabel("Share of impurity removed  (%)")
-    ax.set_xlim(0, max(top.impurity.values) * 100 * 1.38)
-    for i, (imp, gap, roots) in enumerate(zip(top.impurity, top.vote_gap, top.n_roots)):
-        side = "high side votes training" if gap > 0 else "high side votes not training"
-        ax.text(imp * 100 + 0.15, i, f"{imp * 100:.1f}    gap {gap:+.2f}    {int(roots)} roots",
+    ax.set_xlim(0, max(12, max(top.impurity.values) * 100 * 1.55))
+    for i, (imp, roots) in enumerate(zip(top.impurity, top.n_roots)):
+        ax.text(imp * 100 + 0.25, i, f"{int(roots)} trees ask this first",
                 va="center", ha="left", color=INK, fontsize=7.5)
     _style_ax(ax)
     fig.tight_layout()
@@ -282,6 +285,10 @@ def _styles():
                                 textColor=HexColor(INK))
     s["cellh"] = ParagraphStyle("cellh", fontName="Helvetica-Bold", fontSize=7.6, leading=9.6,
                                  textColor=HexColor(INK))
+    s["q"] = ParagraphStyle("q", fontName="Helvetica", fontSize=8, leading=10.6,
+                             textColor=HexColor(INK))
+    s["qh"] = ParagraphStyle("qh", fontName="Helvetica-Bold", fontSize=8, leading=10.6,
+                              textColor=HexColor(INK))
     s["foot"] = ParagraphStyle("foot", fontName="Helvetica", fontSize=8, leading=10.5,
                                 textColor=HexColor(MUTED))
     s["formula"] = ParagraphStyle("formula", fontName="Courier", fontSize=9, leading=12,
@@ -291,6 +298,56 @@ def _styles():
 
 def _p(text, style):
     return Paragraph(text, style)
+
+
+def _feat(frame, name):
+    return frame.loc[frame.feature == name].iloc[0]
+
+
+def _where(row) -> str:
+    n = int(row.n_roots)
+    frac = float(row.root_frac)
+    depth = float(row.mean_depth)
+    if n == 0:
+        return f"Never the first question. It shows up about {depth:.0f} steps down."
+    head = f"First question in {n} of 200 trees."
+    if frac >= 0.35:
+        return head + (f" {frac * 100:.0f}% of the mix this column removes "
+                       "comes from that first question.")
+    if depth < 2.5:
+        return head + " Most of the mix it removes comes from one or two questions later."
+    return head + f" Most of the mix it removes is about {depth:.0f} steps down."
+
+
+def _above(row) -> str:
+    g = float(row.vote_gap)
+    if g >= 0.8:
+        return (f"Training. Above the cut, the training share is {g:.2f} higher "
+                "than below it, so the two sides are nearly pure.")
+    if g >= 0.25:
+        return (f"Training. Above the cut, the training share is {g:.2f} higher "
+                "than below it.")
+    if g <= -0.25:
+        return (f"Not training. Above the cut, the training share is {abs(g):.2f} lower "
+                "than below it.")
+    return f"The two sides barely differ. The training share differs by {g:+.2f}."
+
+
+def _qtable(st, rows):
+    data = [[_p(h, st["qh"]) for h in ("The question", "Where in the tree", "Above the cut")]]
+    for question, where, above in rows:
+        data.append([_p(question, st["q"]), _p(where, st["q"]), _p(above, st["q"])])
+    tbl = Table(data, colWidths=[2.55 * inch, 2.35 * inch, 2.2 * inch])
+    tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), HexColor(PALE)),
+        ("GRID", (0, 0), (-1, -1), 0.3, HexColor(LINE)),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 3),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+    ]))
+    return tbl
 
 
 def _img(path: Path, width=7.15 * inch):
@@ -341,6 +398,14 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         "A reading of the two random forests frozen on 12 October 2026. "
         "The trees were opened and counted. They were not retrained.",
         st["deck"]))
+    story.append(_p(
+        "Stage 2 asks whether memory utilization or power is moving. If it is, the window is "
+        "called training. Fallback asks whether memory jumped in the first 30 samples of the "
+        "run. If it did, the window is called training. Two of fallback's later questions point "
+        "the other way: a GPU that is nearly full, and a memory bus that is busy while the "
+        "processors are not. The tables list each question, where it sits in the tree, and "
+        "which side is called training.",
+        st["body"]))
     story.append(HRFlowable(width="100%", thickness=0.6, color=HexColor(LINE), spaceAfter=8))
 
     story.append(_p("What we did", st["h2"]))
@@ -359,18 +424,11 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         st["cap"]))
     story.append(_p(
         f"Each forest is 200 trees, minimum 2 samples in a leaf, {sm['max_features']} features "
-        f"drawn at each split, class weights balanced, seed 0. For every split we kept the "
-        f"feature, the threshold, and which side receives the training vote. How much a split "
-        f"counts, and why Figure 2 has five bars instead of 174, is spelled out under "
-        f"\"Where the impurity goes\".",
-        st["body"]))
-    story.append(_p(
-        "This is not a permutation test. Shuffling a column on held-out jobs needs the training "
-        "table, and that table is not what this note uses. The vote gap below is the tree's own "
-        "class fraction on the high side of a cut, minus the fraction on the low side, averaged "
-        "with the impurity weights. A gap near +1 means the high side votes training and the "
-        "low side does not. Thresholds are impurity-weighted medians of many split points, not "
-        "a single rule.",
+        f"drawn at each split, class weights balanced, seed 0. The stage 2 and fallback "
+        f"sections list the questions those trees ask. A cut quoted there is the typical "
+        f"threshold, the median "
+        f"of many split points weighted by how much mix each split removed. "
+        f"\"Where the impurity goes\" says how the bar chart counts those questions.",
         st["body"]))
 
     story.append(_p("The two forests are not the same size", st["h2"]))
@@ -408,6 +466,10 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
 
     story.append(CondPageBreak(3.2 * inch))
     story.append(_p("Where the impurity goes", st["h2"]))
+    story.append(_p(
+        "Skip ahead to Stage 2 if you want the questions first. This section is only how "
+        "the bar lengths were counted.",
+        st["body"]))
     story.append(_p(
         "Each tree is a stack of yes/no questions. A question looks at one column "
         "(\"is the spread of memory utilization above 1.2?\") and sends the window left or right.",
@@ -475,7 +537,7 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         f"not shown gets nothing for that question. And stage 2's memory bar of "
         f"{sg.get('Memory', 0) * 100:.0f}% does not mean memory caused the call. The startup "
         f"jump and the utilization wobble are both inside that bar. Figure 2 is the total. "
-        f"Figures 3 and 4 take the bar apart.",
+        f"The two tables below split that bar into the actual questions.",
         st["body"]))
     story.append(KeepTogether([
         _img(paths["groups"]),
@@ -487,99 +549,137 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
     ]))
     s_pow_share = float(sg.get("Power & thermal", 0)) * 100
     f_pow_share = float(fg.get("Power & thermal", 0)) * 100
-    story.append(_p(
-        f"Stage 2 puts {sg.get('Memory', 0) * 100:.0f}% on memory and "
-        f"{s_pow_share:.0f}% on power and temperature. "
-        f"PCIe is {sg.get('PCIe', 0) * 100:.0f}%. Compute, which is where GPU utilization "
-        f"and SM clock live, is {sg.get('Compute', 0) * 100:.0f}%, and none of that is at the "
-        f"root. GPU-utilization mean is rank "
-        f"{int(stage.impurity.rank(ascending=False)[stage.feature == 'gpu_utilization_pct_mean'].iloc[0])} "
-        f"and removes essentially no impurity.",
-        st["body"]))
-    story.append(_p(
-        f"Fallback is still {fg.get('Memory', 0) * 100:.0f}% memory, but the memory it uses "
-        f"is the allocation at the start of the run. Compute rises to "
-        f"{fg.get('Compute', 0) * 100:.0f}%, PCIe to {fg.get('PCIe', 0) * 100:.0f}%, and power "
-        f"falls to {f_pow_share:.0f}%.",
-        st["body"]))
+    story.append(KeepTogether([
+        _p(
+            f"Stage 2 puts {sg.get('Memory', 0) * 100:.0f}% on memory and "
+            f"{s_pow_share:.0f}% on power and temperature. "
+            f"PCIe is {sg.get('PCIe', 0) * 100:.0f}%. Compute, which is where GPU utilization "
+            f"and SM clock live, is {sg.get('Compute', 0) * 100:.0f}%, and none of that is at the "
+            f"root. GPU-utilization mean is rank "
+            f"{int(stage.impurity.rank(ascending=False)[stage.feature == 'gpu_utilization_pct_mean'].iloc[0])} "
+            f"and removes essentially no impurity.",
+            st["body"]),
+        _p(
+            f"Fallback is still {fg.get('Memory', 0) * 100:.0f}% memory, but the memory it uses "
+            f"is the allocation at the start of the run. Compute rises to "
+            f"{fg.get('Compute', 0) * 100:.0f}%, PCIe to {fg.get('PCIe', 0) * 100:.0f}%, and power "
+            f"falls to {f_pow_share:.0f}%.",
+            st["body"]),
+    ]))
 
-    story.append(_p("Stage 2: a moving trace votes training", st["h2"]))
-    story.append(_img(paths["stage"]))
+    story.append(_p("Stage 2: is memory or power moving?", st["h2"]))
     story.append(_p(
-        "Figure 3. The eight heaviest features in stage 2. Green means the high side of the "
-        "cut votes training. Several of these bars are one column: spread, range, and the "
-        "interquartile range of memory utilization. "
-        f"Those three are the root of {int(spread.n_roots.sum())} of the 200 trees. "
-        f"Each split is shown only {sm['max_features']} of the {sm['n_features']} features, "
-        "so a measurement that takes the root about as often as it is offered is one the "
-        "tree actually prefers.",
+        f"Stage 2 trained only on windows where the network rule had already fired: "
+        f"3,019 training windows and 939 others. The forest is short, average depth "
+        f"{sm['mean_depth']:.1f}, about {sm['mean_leaves']:.0f} leaves per tree. "
+        f"The not-training windows in that fit are HPC jobs with balanced traffic and a flat "
+        f"GPU trace. Inference was not in the fit. A serving window whose memory utilization "
+        f"moves lands on the training side of every question below, which is why stage 2 "
+        f"never grew a leaf that recognizes inference.",
+        st["body"]))
+    s_iqr = _feat(stage, "mem_utilization_pct_iqr")
+    story.append(_qtable(st, [
+        (f"Is the spread of memory utilization above {s_std.threshold:.1f} percentage points?",
+         _where(s_std), _above(s_std)),
+        (f"Is the range of that same utilization above { _feat(stage, 'mem_utilization_pct_range').threshold:.1f} "
+         f"percentage points? Same measurement, stored again.",
+         _where(_feat(stage, "mem_utilization_pct_range")),
+         _above(_feat(stage, "mem_utilization_pct_range"))),
+        (f"Is the interquartile range of that same utilization above {s_iqr.threshold:.1f} "
+         f"percentage points? Same measurement, a third copy.",
+         _where(s_iqr), _above(s_iqr)),
+        (f"Is the spread of power above {s_pow.threshold:.0f} W?",
+         _where(s_pow), _above(s_pow)),
+        (f"Is GPU memory in use above {s_mem.threshold / 1024:.0f} GB?",
+         _where(s_mem), _above(s_mem)),
+        (f"Does memory take longer than {s_plat.threshold:.0f} samples to reach its plateau? "
+         f"A slow climb is above this cut.",
+         _where(s_plat), _above(s_plat)),
+    ]))
+    story.append(_p(
+        "Table 1. Stage 2's questions. \"Above the cut\" is the side where the measured value "
+        "is higher. The training-share difference is the tree's own class mix on the high side "
+        "minus the mix on the low side, weighted by how much mix the split removed. "
+        "A difference of 1 would mean one side is all training and the other side is all "
+        "not-training. Depth 0 is the first question in a tree.",
         st["cap"]))
-    story.append(KeepTogether([_p(
-        f"The cuts are monotone. Memory-utilization spread above about "
-        f"{s_std.threshold:.1f} percentage points (vote gap {s_std.vote_gap:+.2f}). "
-        f"Power spread above about {s_pow.threshold:.0f} W (gap {s_pow.vote_gap:+.2f}). "
-        f"Memory in use above about {s_mem.threshold / 1024:.0f} GB (gap {s_mem.vote_gap:+.2f}). "
-        f"Time to the memory plateau longer than about {s_plat.threshold:.0f} samples "
-        f"(gap {s_plat.vote_gap:+.2f}). The startup-allocation features that dominate fallback "
-        f"rank between "
+    story.append(_p(
+        f"The startup jump that dominates fallback ranks between "
         f"{int(stage.impurity.rank(ascending=False)[stage.feature == 'first_30s_mem_ratio'].iloc[0])} "
         f"and "
         f"{int(stage.impurity.rank(ascending=False)[stage.feature == 'first_30s_mem_delta_mb'].iloc[0])} "
-        f"here.",
-        st["body"])]))
-    story.append(_p(
-        "The not-training windows in this fit are jobs with balanced traffic and a flat GPU "
-        "trace. In the corpus those are HPC jobs, not inference. A serving window whose memory "
-        "utilization moves is on the training side of every large cut. Stage 2 has no leaf "
-        "whose job is to recognize inference.",
+        f"here, so stage 2 barely asks it. GPU-utilization mean ranks "
+        f"{int(stage.impurity.rank(ascending=False)[stage.feature == 'gpu_utilization_pct_mean'].iloc[0])}. "
+        f"Spread, range, and interquartile range together are the first question in "
+        f"{int(spread.n_roots.sum())} of the 200 trees. Each split is shown only "
+        f"{sm['max_features']} of the {sm['n_features']} columns, so a measurement that is the "
+        f"first question about as often as it is offered is one the tree actually prefers.",
         st["body"]))
-
-    story.append(CondPageBreak(4.4 * inch))
-    story.append(_p("Fallback: a startup allocation votes training", st["h2"]))
-    story.append(_img(paths["fall"]))
+    story.append(_img(paths["stage"]))
     story.append(_p(
-        "Figure 4. The eight heaviest features in fallback. Green: high side votes training. "
-        "Red: high side votes not training. Gray: the two sides barely disagree. "
-        "The first three bars are the same event. "
-        f"Together they are {startup.impurity.sum() * 100:.0f}% of the impurity and "
-        f"{startup.root_share.sum() * 100:.0f}% of the root weight.",
+        "Figure 3. The same stage 2 columns, sized by how much mix they remove. "
+        "Green means above the cut is training. Several bars are one measurement: "
+        "spread, range, and the interquartile range of memory utilization.",
         st["cap"]))
+
+    story.append(CondPageBreak(3.4 * inch))
+    story.append(_p("Fallback: did memory jump at startup?", st["h2"]))
     story.append(_p(
-        "In the feature code these columns read the first 30 samples of the run, as far as "
-        "the current window is allowed to see. After those 30 samples, later windows of the "
-        "same job all see the same jump. The comment on the function says it was written to "
-        "catch optimizer state allocated at startup, on the order of 6 GB, which an inference "
-        "process was not expected to do.",
+        f"Fallback trained on every honest window. It is a deeper forest, average depth "
+        f"{fm['mean_depth']:.1f}, about {fm['mean_leaves']:.0f} leaves per tree. "
+        f"Its first questions read the first 30 samples of the run, and only as far as the "
+        f"current window is allowed to see. Once those 30 samples have passed, later windows "
+        f"of the same job all see the same jump. The three startup rows below are that one "
+        f"jump written three ways. Together they are {startup.impurity.sum() * 100:.0f}% of "
+        f"the mix fallback removes, and {startup.root_share.sum() * 100:.0f}% of the weight "
+        f"of first questions. The code comment says the feature was written to catch optimizer "
+        f"state allocated at startup, on the order of 6 GB.",
         st["body"]))
+    f_pcie = _feat(fall, "pcie_tx_mbps_range")
+    story.append(_qtable(st, [
+        (f"Did memory rise by more than {f_d.threshold / 1024:.1f} GB in those first 30 samples?",
+         _where(f_d), _above(f_d)),
+        (f"Is the peak in those samples more than {f_r.threshold:.0f} times the starting value? "
+         f"Same jump, as a ratio.",
+         _where(f_r), _above(f_r)),
+        (f"Is that rise more than {f_f.threshold * 100:.0f}% of the GPU's memory? "
+         f"Same jump, as a fraction of capacity.",
+         _where(f_f), _above(f_f)),
+        (f"Is memory utilization minus GPU utilization above {f_diff.threshold:.0f} points? "
+         f"Above this, the memory bus is busy relative to the processors.",
+         _where(f_diff), _above(f_diff)),
+        (f"Is GPU memory in use above {f_mem.threshold / 1024:.0f} GB? "
+         f"Stage 2's cut on this same column is {s_mem.threshold / 1024:.0f} GB, and there the high side is training.",
+         _where(f_mem), _above(f_mem)),
+        (f"Is the range of PCIe transmit above {f_pcie.threshold:.0f} MB/s?",
+         _where(f_pcie), _above(f_pcie)),
+    ]))
     story.append(_p(
-        f"Typical cuts: an increase above about {f_d.threshold / 1024:.1f} GB "
-        f"(gap {f_d.vote_gap:+.2f}), a peak/start ratio above about {f_r.threshold:.0f} "
-        f"(gap {f_r.vote_gap:+.2f}), or an increase above "
-        f"{f_f.threshold:.2f} of capacity (gap {f_f.vote_gap:+.2f}).",
-        st["body"]))
-    story.append(_p(
-        f"The next cuts point the other way. Memory utilization minus GPU utilization has "
-        f"vote gap {f_diff.vote_gap:+.2f} and a typical cut near {f_diff.threshold:.0f} "
-        f"percentage points: when the memory bus is busy relative to the SMs, the tree votes "
-        f"not training. Absolute footprint flips relative to stage 2. Fallback's typical cut "
-        f"on the maximum memory in use is {f_mem.threshold / 1024:.0f} GB, and the high side "
-        f"votes not training (gap {f_mem.vote_gap:+.2f}). Stage 2's cut on the same column is "
-        f"{s_mem.threshold / 1024:.0f} GB, high side training.",
-        st["body"]))
+        "Table 2. Fallback's questions, read the same way as Table 1. "
+        "The fourth and fifth rows point the other way: above the cut is not training.",
+        st["cap"]))
     story.append(KeepTogether([
         _img(paths["foot"]),
         _p(
-            "Figure 5. The same column, two forests, two directions. Stage 2 only ever saw "
-            "balanced-traffic windows, where a footprint past about 10 GB separated training from "
-            "flat HPC. Fallback also saw large serving jobs, and past about 68 GB it votes the "
-            "other way. Both numbers are weighted medians of split points, not class medians.",
+            "Figure 5. One column, two forests. Stage 2, which only saw balanced-traffic "
+            f"windows, calls training above about {s_mem.threshold / 1024:.0f} GB. "
+            f"Fallback, which also saw large serving jobs, calls not-training above about "
+            f"{f_mem.threshold / 1024:.0f} GB. Both cuts are weighted medians of split points.",
             st["cap"]),
     ]))
+    story.append(_img(paths["fall"]))
     story.append(_p(
-        f"GPU utilization is not the feature either forest leads with. In fallback its mean "
-        f"is rank {int(fall.impurity.rank(ascending=False)[fall.feature == 'gpu_utilization_pct_mean'].iloc[0])}, "
-        f"the typical cut is {f_util.threshold:.1f}%, and the vote gap is only "
-        f"{f_util.vote_gap:+.2f}. A GPU has to be pinned before this column counts.",
+        "Figure 4. The same fallback columns, sized by how much mix they remove. "
+        "Green: above the cut is training. Red: above the cut is not training. "
+        "Gray: the two sides barely differ. The first three bars are one jump.",
+        st["cap"]))
+    story.append(_p(
+        f"GPU utilization is not one of these questions. In fallback its mean ranks "
+        f"{int(fall.impurity.rank(ascending=False)[fall.feature == 'gpu_utilization_pct_mean'].iloc[0])}, "
+        f"and the typical cut is {f_util.threshold:.1f}%, so only a pinned GPU registers. "
+        f"The training share above that cut is {f_util.vote_gap:.2f} higher than below it, "
+        f"a weak split. In stage 2 this column ranks "
+        f"{int(stage.impurity.rank(ascending=False)[stage.feature == 'gpu_utilization_pct_mean'].iloc[0])}.",
         st["body"]))
 
     story.append(KeepTogether([
@@ -618,7 +718,7 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
     ]))
     story.append(tbl)
     story.append(_p(
-        "Table 1. Orange rows are decided by fallback, because the rule is silent. Blue rows "
+        "Table 3. Orange rows are decided by fallback, because the rule is silent. Blue rows "
         "are decided by stage 2, because the rule fired. Fallback's probability on the blue "
         "rows is below 0.5 and is ignored.",
         st["cap"]))
@@ -637,12 +737,22 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
 
     story.append(_p("What this note is not", st["h2"]))
     story.append(_p(
-        "It does not say that memory spread causes a window to be training. It says that is "
-        "the cut the saved trees use. Correlated copies of one signal share the impurity, "
-        "which is why Figure 2 is the total to quote and Figures 3 and 4 are the detail. "
-        "Nothing here refits a forest, adds the October campaigns, or retunes 0.5. "
-        "The counting script is classifier_analysis/frozen_interp.py. "
-        "Run it with scikit-learn 1.8 so the joblib files load as the same trees.",
+        "A question on memory spread means the saved trees separate the two classes there. "
+        "It does not mean that changing the spread would turn a window into training. "
+        "We did not run that experiment.",
+        st["body"]))
+    story.append(_p(
+        "Spread, range, and the interquartile range are one measurement stored three times. "
+        "Figure 2 adds them, with the startup jump, into the memory bar. Tables 1 and 2 list "
+        "the questions one by one. That is where stage 2's memory questions turn out to be "
+        "about utilization moving, and fallback's turn out to be about the jump at startup.",
+        st["body"]))
+    story.append(_p(
+        "Nothing here trains a new forest, adds the October campaigns, or moves the 0.5 cutoff. "
+        "Shuffling a column on held-out jobs was not done either; that would need the training "
+        "table. The questions and the probabilities are the freeze from 12 October 2026. "
+        "The script is classifier_analysis/frozen_interp.py. Run it with scikit-learn 1.8 so "
+        "the saved trees load unchanged.",
         st["body"]))
 
     def _page(canvas, doc_):
