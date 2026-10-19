@@ -882,21 +882,21 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         "Table 2. Fallback's questions, read the same way as Table 1. "
         "The fourth and fifth rows point the other way: above the cut is not training.",
         st["cap"]))
+    story.append(_img(paths["fall"]))
+    story.append(_p(
+        "Figure 4. The same fallback columns as Table 2, sized by how much mix they remove. "
+        "Green: above the cut is training. Red: above the cut is not training. "
+        "Gray: the two sides barely differ. The first three bars are one jump, written three ways.",
+        st["cap"]))
     story.append(KeepTogether([
         _img(paths["foot"]),
         _p(
-            "Figure 5. One column, two forests. Stage 2, which only saw balanced-traffic "
-            f"windows, calls training above about {s_mem.threshold / 1024:.0f} GB. "
-            f"Fallback, which also saw large serving jobs, calls not-training above about "
-            f"{f_mem.threshold / 1024:.0f} GB. Both cuts are weighted medians of split points.",
+            "Figure 5. One column from Table 2, the two forests disagree on it. "
+            f"Stage 2 calls training above about {s_mem.threshold / 1024:.0f} GB. "
+            f"Fallback calls not-training above about {f_mem.threshold / 1024:.0f} GB. "
+            "Both cuts are weighted medians of split points.",
             st["cap"]),
     ]))
-    story.append(_img(paths["fall"]))
-    story.append(_p(
-        "Figure 4. The same fallback columns, sized by how much mix they remove. "
-        "Green: above the cut is training. Red: above the cut is not training. "
-        "Gray: the two sides barely differ. The first three bars are one jump.",
-        st["cap"]))
     story.append(_p(
         f"GPU utilization is not one of these questions. In fallback its mean ranks "
         f"{int(fall.impurity.rank(ascending=False)[fall.feature == 'gpu_utilization_pct_mean'].iloc[0])}, "
@@ -1014,26 +1014,119 @@ def build_pdf(stage, fall, sm, fm, paths, pdf_path: Path):
         st["body"]))
 
     story.append(KeepTogether([
-        _p("What this note is not", st["h2"]),
+        _p("Cells these cuts have not seen", st["h2"]),
         _p(
-            "A question on memory spread means the saved trees separate the two classes there. "
-            "It does not mean that changing the spread would turn a window into training. "
-            "We did not run that experiment.",
+            "Designs, not scores. None of these jobs has been captured. They are not a reason "
+            "to move the 0.5 cutoff or to refit either forest. Do not add them to a training "
+            "set and then score them: a tree that has seen the cell can memorize it. "
+            "The point of running each one once, against this freeze, is to see which cut decides.",
             st["body"]),
     ]))
     story.append(_p(
-        "Spread, range, and the interquartile range are one measurement stored three times. "
-        "Figure 2 adds them, with the startup jump, into the memory bar. Tables 1 and 2 list "
-        "the questions one by one. That is where stage 2's memory questions turn out to be "
-        "about utilization moving, and fallback's turn out to be about the jump at startup.",
+        "The startup feature reads the first 30 samples of the capture, about 30 seconds, and "
+        "every later window reuses that same prefix. A jump after sample 30 never enters the "
+        "feature. Sleeping 40 seconds and then allocating does hide the jump. It also sets "
+        "time-to-plateau near 40 samples. Fallback cuts that column at 16 samples, and the "
+        "slow side is training (7 of 200 trees ask it first; the training share above the cut "
+        "is 0.38 higher than below it). That is a weaker question than the jump, and it points "
+        "the same way. A sampler that starts only after memory is already flat hides both: "
+        "there is no jump, and time-to-plateau is 0 because the memory is already at its plateau. "
+        "Those are different cells.",
         st["body"]))
     story.append(_p(
-        "Nothing here trains a new forest, adds the October campaigns, or moves the 0.5 cutoff. "
-        "Shuffling a column on held-out jobs was not done either; that would need the training "
-        "table. The questions and the probabilities are the freeze from 12 October 2026. "
-        "The script is classifier_analysis/frozen_interp.py. Run it with scikit-learn 1.8 so "
-        "the saved trees load unchanged.",
+        "One more fallback question still points at a real training step even when both of "
+        "those are hidden. Memory utilization minus GPU utilization is cut at about -23 points. "
+        "The high side is not training. A step that pins the processors and barely touches "
+        "the memory bus sits on the training side. A model that fills the GPU does not: "
+        "memory utilization is high too, so the difference is the other side of -23. "
+        "The 68 GB footprint cut is the same shape. Above it, fallback votes not-training. "
+        "A small model is on the training side of that cut. A held buffer between 68 and 78 GB "
+        "is the single change that crosses it.",
         st["body"]))
+
+    design_header = ["Cell", "Asked", "Do this", "Called training", "Called not training"]
+    design_rows = [
+        ["Warm attach, large",
+         "fallback",
+         "InfiniBand off. Start the sampler only after memory has been flat for a minute. "
+         "Hold one extra buffer so memory stays between 68 and 78 GB.",
+         "The jump was not what caught the orange rows. Name the column that still votes training.",
+         "Once the jump is gone, the full-GPU cut is enough. This is the sharpest miss the cuts allow."],
+        ["Warm attach, small",
+         "fallback",
+         "Same late sampler, same quiet wire. Plateau under 10 GB. No held buffer. Compare only to the large row.",
+         "A small footprint is still enough for fallback, or the processors-versus-memory question is.",
+         "Hiding the jump is enough even under 10 GB. The 68 GB cut was not required."],
+        ["Sleep, then allocate",
+         "fallback",
+         "Sampler already running. Sleep 40 seconds, then allocate the same small model. InfiniBand off.",
+         "The slow plateau replaced the jump. This row is not a clean removal of the startup tell.",
+         "Hiding the jump is enough even when time-to-plateau is on the training side."],
+        ["Flat counters, real all-reduce",
+         "stage 2",
+         "A real small step. Send+receive at least 1 MiB/s, symmetry at least 0.8. "
+         "Memory under 10 GB, utilization range under 4.2 points (about 3.4 GB on an 80 GB GPU), "
+         "power spread under 9 W, plateau inside 16 samples. Fixed clocks, no checkpoint, no sleep.",
+         "Either a Table 1 cut was actually crossed, or some other column is carrying the vote. The trace has to say which.",
+         "The first stage 2 veto in this score. The 1,032 rule-on windows never went below 0.62."],
+        ["Ordinary small step",
+         "stage 2",
+         "Same all-reduce and the same small model. Ordinary clocks, ordinary allocator. Do not hold the counters flat.",
+         "A real step does not live on the not-training side of Table 1. Record which cut it crossed.",
+         "Small training already evades, with no costume."],
+        ["Empty wobble",
+         "stage 2",
+         "No model. Hold about 12 GB. In every window, move memory utilization by more than 4.2 points, about 3.4 GB on an 80 GB GPU. "
+         "Balanced all-reduce of a few MiB/s for the whole capture, not one burst.",
+         "The rule, the 10 GB footprint, and the wobble are sufficient. The blue rows in Table 3 are this shape.",
+         "Those jobs are tripping a column that is not in Table 1."],
+        ["Weight load, quiet wire",
+         "fallback",
+         "Capture from process start. Load weights in the first 30 seconds. Stay under 68 GB. No cross-node traffic.",
+         "A weight load and the optimizer jump look the same to fallback.",
+         "Fallback already separates them. The 93 jobs do not show it: their inference false alarms all have the rule on, and fallback was ignored."],
+        ["Weight load past 68 GB",
+         "fallback",
+         "Same weight load, same quiet wire. Plateau between 68 and 78 GB, and nothing else changes.",
+         "The jump wins over the footprint cut.",
+         "The footprint cut wins. The two questions in Table 2 that point opposite ways have been put on one job."],
+    ]
+    design = [[_p(h, st["cellh"]) for h in design_header]]
+    for r in design_rows:
+        design.append([_p(c, st["cell"]) for c in r])
+    design_w = [1.15 * inch, 0.62 * inch, 2.15 * inch, 1.64 * inch, 1.64 * inch]
+    design_tbl = Table(design, colWidths=design_w, repeatRows=1)
+    design_tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), HexColor(PALE)),
+        ("BACKGROUND", (0, 1), (-1, 5), HexColor("#F8EFEA")),
+        ("BACKGROUND", (0, 6), (-1, 8), HexColor("#E7F0F7")),
+        ("GRID", (0, 0), (-1, -1), 0.3, HexColor(LINE)),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("LEFTPADDING", (0, 0), (-1, -1), 3),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 3),
+        ("TOPPADDING", (0, 0), (-1, -1), 2),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+    ]))
+    story.append(design_tbl)
+    story.append(_p(
+        "Table 4. Orange rows are training. Blue rows are not. "
+        "\"Asked\" is the forest that speaks if the wire does what the row says. "
+        "The last two columns are how to read the call. They are not predictions.",
+        st["cap"]))
+    story.append(KeepTogether([
+        _p(
+            "Asymmetric traffic with the jump left in the first 30 samples is a control, not another "
+            "evasion. Symmetry under 0.8 keeps the rule silent, and fallback should still call the "
+            "job training, the way it called iboff_flat. If it does not, the jump was not the reason "
+            "those orange rows were caught.",
+            st["body"]),
+        _p(
+            "qwen_fake_ar, olmoe_ep_mixed, and disagg_echo are already the blue rows of Table 3. "
+            "qwen_one_spike is already a single burst, and only about a tenth of its windows were "
+            "called training. iboff_flat, nosync_flat, and lora_1n8_iboff are already a visible jump "
+            "on a quiet wire. None of the rows above is a rerun of those.",
+            st["body"]),
+    ]))
 
     def _page(canvas, doc_):
         canvas.saveState()
